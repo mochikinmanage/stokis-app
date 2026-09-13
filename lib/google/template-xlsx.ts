@@ -307,6 +307,15 @@ export async function generateXlsxFromTemplate(
     ws.getRow(5).getCell(c).font = { name: XLSX_FONT.family, bold: true, size: XLSX_FONT.colHeader.size, color: { argb: 'FF000000' } } as any;
   }
 
+  // ── 5b. Freeze panes: rows 1-5 & columns A-D ─────────────────────
+  ws.views = [
+    {
+      state: 'frozen',
+      xSplit: 4, // freeze kolom A-D
+      ySplit: 5, // freeze row 1-5
+    },
+  ];
+
   // ── 6. Remove template tables + truncate rows 6+ ─────────────────
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tablesObj: any = (ws as any).tables || {};
@@ -608,7 +617,7 @@ export async function generateXlsxFromTemplate(
     }
   });
 
-  // ── 9. Write buffer ──────────────────────────────────────────────
+  // ── 10. Write buffer ──────────────────────────────────────────────
   const buffer = (await wb.xlsx.writeBuffer()) as unknown as Buffer;
   return { buffer, fileName };
 }
