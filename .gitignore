@@ -49,6 +49,7 @@ opencode.json*
 
 # data
 *.xlsx
+!Templates/PREVIEW*.xlsx
 
 # Md Files
 /AGENTS.md
