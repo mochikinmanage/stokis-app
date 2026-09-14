@@ -23,7 +23,9 @@
 
 SHA-256 without per-user salt. 6-digit PIN = 1M possibilities, trivially rainbow-tabled.
 
-**Fix:** Use bcrypt/scrypt/Argon2 with per-user random salt.
+**Status:** RESOLVED (2026-09-14) -- PIN hashing feature was removed entirely by product decision; PINs are now stored and compared as plaintext. Session remains HMAC-signed. Brute-force exposure is addressed by **C3**.
+
+**Fix (was):** Use bcrypt/scrypt/Argon2 with per-user random salt.
 
 ### C2. `.env.local` Contains Live Service Account Private Key
 **File:** `.env.local:5,9`
@@ -86,11 +88,13 @@ Zero CORS headers anywhere. No CSRF protection on state-changing endpoints.
 **Fix:** Add explicit CORS headers for same-origin only.
 
 ### H3. Plaintext PIN Migration Path
-**File:** `lib/domain/users-service.ts:70-74`
+**File:** `lib/domain/users-service.ts`
 
 Login flow compares raw plaintext PIN as migration path. Unmigrated users have PIN stored in plaintext in Google Sheet.
 
-**Fix:** Run migration script to hash all plaintext PINs. Remove migration code.
+**Status:** RESOLVED (2026-09-14) -- hashing removed by product decision; plaintext storage/comparison is now the intended behavior. `hashPin`/`secureKeyEqual`/`rehashPin` deleted.
+
+**Fix (was):** Run migration script to hash all plaintext PINs. Remove migration code.
 
 ### H4. Debug Routes Exposed Without Production Guard
 **Files:** `app/api/debug/route.ts`, `app/api/debug/test-drive/route.ts`, `app/api/debug/ping/route.ts`
@@ -199,11 +203,11 @@ No max length on username, PIN, branch name, etc.
 
 1. **C3** -- Rate limiting on login (immediate)
 2. **C4** -- Auth on `/xlsx-file` route (immediate)
-3. **C1** -- Migrate to bcrypt for PIN hashing
+3. **C1** -- ~~Migrate to bcrypt for PIN hashing~~ RESOLVED: hashing removed
 4. **C5** -- Fix assertCabangAccess empty cabangId bypass
 5. **H5** -- Switch from USER_ENTERED to RAW
 6. **H1** -- Remove unsafe-inline/eval from CSP
-7. **H3** -- Complete plaintext PIN migration
+7. **H3** -- ~~Complete plaintext PIN migration~~ RESOLVED: hashing removed
 8. **H4** -- Delete debug routes
 9. **M7** -- Use session cabangId for petugas
 10. **M8** -- Admin-only restriction on users GET

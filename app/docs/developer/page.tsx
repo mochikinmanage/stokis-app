@@ -82,7 +82,7 @@ export default function DeveloperPage() {
             { title: "Charts", desc: "Recharts" },
             { title: "Database", desc: "Google Sheets API" },
             { title: "Storage", desc: "Google Drive API" },
-            { title: "Auth", desc: "SHA-256 + HMAC-SHA256" },
+            { title: "Auth", desc: "PIN + HMAC-SHA256" },
             { title: "Runtime", desc: "Vercel (Serverless)" },
           ].map((item) => (
             <div
@@ -401,8 +401,8 @@ export default function DeveloperPage() {
         <div className="text-xs text-base-content/70 space-y-3">
           <p>
             {t(
-              "Stokis menggunakan PIN-based authentication dengan SHA-256 hashing dan HMAC-SHA256 signed session tokens.",
-              "Stokis uses PIN-based authentication with SHA-256 hashing and HMAC-SHA256 signed session tokens."
+              "Stokis menggunakan PIN-based authentication dengan session token ber-tanda HMAC-SHA256.",
+              "Stokis uses PIN-based authentication with HMAC-SHA256 signed session tokens."
             )}
           </p>
 
@@ -412,9 +412,8 @@ export default function DeveloperPage() {
             </p>
             <ol className="text-[11px] text-base-content/60 space-y-1 list-decimal list-inside">
               <li>{t("User mengirim username + PIN", "User sends username + PIN")}</li>
-              <li>{t("PIN di-hash dengan SHA-256", "PIN is hashed with SHA-256")}</li>
               <li>{t("Server mencari user di Google Sheets", "Server finds user in Google Sheets")}</li>
-              <li>{t("Membandingkan hash PIN", "Compares PIN hash")}</li>
+              <li>{t("Membandingkan PIN langsung (plaintext)", "Compares PIN directly (plaintext)")}</li>
               <li>{t("Jika cocok, buat session token", "If match, create session token")}</li>
               <li>{t("Sign token dengan HMAC-SHA256 menggunakan STOKIS_API_KEY", "Sign token with HMAC-SHA256 using STOKIS_API_KEY")}</li>
               <li>{t("Token disimpan di httpOnly cookie (stokis_session)", "Token stored in httpOnly cookie (stokis_session)")}</li>
@@ -480,7 +479,7 @@ Max-Age: 7 days (604800 seconds)`}
                   </tr>
                   <tr>
                     <td className="font-bold">Users</td>
-                    <td>User_ID, Username, PIN_Hash, Nama, Role, Cabang_ID</td>
+                    <td>User_ID, Username, PIN, Nama, Role, Cabang_ID</td>
                   </tr>
                   <tr>
                     <td className="font-bold">Settings_Global</td>

@@ -2,7 +2,7 @@
 // Generator ID + validasi murni (tanpa dependensi eksternal).
 // Port dari SOValidation.js / Utils.js di Apps Script.
 
-import { createHash, randomUUID } from 'crypto';
+import { randomUUID } from 'crypto';
 
 export const SHIFT_VALUES = ['Opening', 'Closing'];
 export const MAX_ITEMS_PER_SESI = 500;
@@ -60,22 +60,6 @@ export function buildItemId(token: string): string {
 
 export function buildPetugasId(token: string): string {
   return 'PTG' + String(token || '');
-}
-
-export function hashPin(pin: string): string {
-  return createHash('sha256').update(String(pin)).digest('hex');
-}
-
-/** Constant-time string comparison. */
-export function secureKeyEqual(a: string, b: string): boolean {
-  const ha = createHash('sha256').update(String(a || '')).digest();
-  const hb = createHash('sha256').update(String(b || '')).digest();
-  if (ha.length !== hb.length) return false;
-  let diff = 0;
-  for (let i = 0; i < ha.length; i++) {
-    diff |= ha[i] ^ hb[i];
-  }
-  return diff === 0;
 }
 
 /** format YYYY-MM-DD dari Date, string tanggal, atau serial number Google Sheets. */

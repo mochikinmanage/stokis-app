@@ -184,8 +184,8 @@ export default function TroubleshootingPage() {
 
           <Callout type="note">
             {t(
-              "PIN di-hash dengan SHA-256. Pastikan tidak ada karakter tersembunyi (emoji, zero-width space) di field PIN.",
-              "PIN is hashed with SHA-256. Make sure there are no hidden characters (emoji, zero-width space) in the PIN field."
+              "PIN dibandingkan langsung dengan yang tersimpan (plaintext). Pastikan tidak ada karakter tersembunyi (emoji, zero-width space) atau spasi ekstra di field PIN.",
+              "PIN is compared directly against the stored value (plaintext). Make sure there are no hidden characters (emoji, zero-width space) or extra spaces in the PIN field."
             )}
           </Callout>
         </div>

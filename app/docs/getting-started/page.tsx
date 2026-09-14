@@ -121,8 +121,8 @@ export default function GettingStartedPage() {
               id: "step-2",
               title: t("Login dengan PIN", "Login with PIN"),
               desc: t(
-                "Masukkan username dan PIN Anda. PIN di-hash dengan SHA-256 sebelum dikirim ke server — tidak ada yang melihat PIN Anda dalam teks plain.",
-                "Enter your username and PIN. PIN is hashed with SHA-256 before sending to server — no one sees your PIN in plain text."
+                "Masukkan username dan PIN Anda. PIN dikirim ke server dan dicocokkan dengan yang tersimpan di spreadsheet.",
+                "Enter your username and PIN. The PIN is sent to the server and matched against the stored value."
               ),
             },
             {

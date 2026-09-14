@@ -88,13 +88,11 @@ sequenceDiagram
     actor User as User
     participant Login as Login Page
     participant API as /api/auth/login
-    participant Hash as SHA-256 Hash
     participant HMAC as HMAC Session
     participant Cookie as Session Cookie
 
     User->>Login: Enter username + PIN
-    Login->>Hash: SHA-256(PIN)
-    Hash->>API: { username, pinHash }
+    Login->>API: { username, pin }
     API->>API: Verify against Users sheet
     API->>HMAC: Sign session payload
     HMAC->>Cookie: Set HttpOnly cookie
@@ -141,7 +139,7 @@ erDiagram
     USERS_SHEET {
         string User_ID PK
         string Username
-        string PIN_Hash
+        string PIN
         string Nama
         string Role
         string Cabang_ID FK

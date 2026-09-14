@@ -76,7 +76,6 @@ const versions = [
     title: "Initial Release",
     titleId: "Rilis Awal",
     changes: [
-      { type: "added", en: "PIN-based authentication with SHA-256 hashing", id: "Autentikasi berbasis PIN dengan SHA-256 hashing" },
       { type: "added", en: "HMAC-SHA256 signed session tokens", id: "Session token signed dengan HMAC-SHA256" },
       { type: "added", en: "Multi-branch stock opname system", id: "Sistem stock opname multi-cabang" },
       { type: "added", en: "SO form with auto-save draft", id: "Form SO dengan auto-save draft" },

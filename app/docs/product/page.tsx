@@ -125,8 +125,8 @@ export default function ProductPage() {
             },
             {
               icon: Shield,
-              title: "SHA-256 + HMAC-SHA256",
-              desc: "PIN hashing & session signing",
+              title: "PIN + HMAC-SHA256",
+              desc: "PIN-based auth & session signing",
             },
           ].map((item) => (
             <div
@@ -392,7 +392,7 @@ export default function ProductPage() {
                   <code className="bg-base-200 px-1 py-0.5 rounded">
                     Users
                   </code>{" "}
-                  — {t("ID user, username, PIN hash, nama, role, cabang ID", "User ID, username, PIN hash, name, role, branch ID")}
+                  — {t("ID user, username, PIN, nama, role, cabang ID", "User ID, username, PIN, name, role, branch ID")}
                 </li>
                 <li>
                   <code className="bg-base-200 px-1 py-0.5 rounded">

@@ -228,7 +228,7 @@ function MarketingLanding() {
               "Laporan XLSX",
               "Multi Cabang",
               "Dashboard Analitik",
-              "Keamanan SHA-256",
+              "Keamanan Sesama",
               "Mobile Friendly",
               "WhatsApp Integration",
               "Draft Autosave",
@@ -238,7 +238,7 @@ function MarketingLanding() {
               "Laporan XLSX",
               "Multi Cabang",
               "Dashboard Analitik",
-              "Keamanan SHA-256",
+              "Keamanan Sesama",
               "Mobile Friendly",
               "WhatsApp Integration",
               "Draft Autosave",
@@ -342,7 +342,7 @@ function MarketingLanding() {
               Keamanan Berlapis
             </h3>
             <p className="text-sm text-base-content/60 mt-2">
-              PIN hash SHA-256, sesi HMAC, otorisasi per-cabang.
+              PIN sederhana, sesi HMAC, otorisasi per-cabang.
             </p>
           </div>
 

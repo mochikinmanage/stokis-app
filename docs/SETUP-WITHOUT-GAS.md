@@ -188,7 +188,7 @@ Registry spreadsheet adalah **source of truth** untuk mapping cabang ke spreadsh
 |-------|-----------|------------------------------|
 | A     | User_ID   | Format: USR + token          |
 | B     | Username  | Unique, case-insensitive     |
-| C     | PIN       | SHA-256 hash                 |
+| C     | PIN       | Teks biasa (plaintext)          |
 | D     | Nama      | Nama lengkap                 |
 | E     | Role      | admin / petugas              |
 | F     | Cabang_ID | ID cabang terkait            |
@@ -328,7 +328,7 @@ https://drive.google.com/drive/folders/FOLDER_ID
 1. User membuka `/login`
 2. Memasukkan Username + PIN
 3. Backend memanggil `lib/domain/users-service.ts` -> `login()`
-4. PIN di-hash SHA-256 dan dibandingkan dengan yang tersimpan di sheet `Users`
+4. PIN dibandingkan langsung (plaintext) dengan yang tersimpan di sheet `Users`
 5. Jika cocok, session token dibuat dan diset sebagai cookie
 
 ### 7.2 Submit Stock Opname

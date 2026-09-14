@@ -35,7 +35,7 @@ Create a Google Sheet with these sheets:
 | Sheet Name | Columns |
 |------------|---------|
 | `Daftar_Cabang` | Cabang_ID, Nama_Cabang, Alamat, Spreadsheet_ID, Folder_Drive_ID, PIC_Nama, Nomor_WA_Cabang, Aktif, Created_At |
-| `Users` | User_ID, Username, PIN (SHA-256), Nama, Role, Cabang_ID, Aktif, Created_At |
+| `Users` | User_ID, Username, PIN, Nama, Role, Cabang_ID, Aktif, Created_At |
 | `Settings_Global` | Key, Value |
 | `Template_Referensi` | Kolom A baris 2: Template_Spreadsheet_ID |
 

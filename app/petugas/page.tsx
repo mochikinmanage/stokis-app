@@ -399,7 +399,7 @@ export default function PetugasPage() {
                     className="input input-bordered w-full text-sm font-mono"
                   />
                   <p className="text-xs text-base-content/50 flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> PIN disimpan ter-hash; kali ini tidak akan ditampilkan siapa pun.
+                    <Lock className="w-3 h-3" /> Jangan gunakan PIN yang mudah ditebak; PIN disimpan apa adanya di spreadsheet.
                   </p>
                 </div>
 

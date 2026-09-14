@@ -1,11 +1,11 @@
 // lib/domain/users-service.ts
 // Autentikasi & manajemen pengguna via spreadsheet Registry — port dari Users.js.
 //
-// CATATAN KEAMANAN: PIN di-hash SHA-256. Login mendukung migrasi plaintext→hash.
+// CATATAN KEAMANAN: PIN disimpan sebagai teks biasa (plaintext) apa adanya.
 
 import { readSheetData, sheetToObjects, findRowIndex, appendRows, writeRow, deleteRow } from '@/lib/google/sheets';
 import { ApiError } from './errors';
-import { hashPin, secureKeyEqual, randomToken } from './ids';
+import { randomToken } from './ids';
 
 const USERS_SHEET = 'Users';
 
@@ -30,16 +30,6 @@ async function readUsers(): Promise<UserRow[]> {
   return sheetToObjects(headers, rows) as unknown as UserRow[];
 }
 
-async function rehashPin(userId: string, plaintextPin: string): Promise<void> {
-  const { rows } = await readSheetData(registryId(), USERS_SHEET);
-  const found = findRowIndex(rows, 0, userId);
-  if (found.index === -1) return;
-  const updated = (found.row as unknown[]).slice();
-  updated[2] = hashPin(plaintextPin);
-  const rowNumber = found.index + 2;
-  await writeRow(registryId(), `Users!A${rowNumber}`, updated);
-}
-
 export interface LoginResult {
   username: string;
   nama: string;
@@ -55,20 +45,12 @@ export async function login(payload: { username?: string; pin?: string }): Promi
   }
 
   const rows = await readUsers();
-  const hashedPin = hashPin(pin);
 
   let user: UserRow | null = null;
   for (const r of rows) {
     if (String(r['Username']).toLowerCase() !== username) continue;
     if (r['Aktif'] === false) continue;
-    const storedPin = String(r['PIN']);
-    if (secureKeyEqual(storedPin, hashedPin)) {
-      user = r;
-      break;
-    }
-    // Migrasi plaintext → hash.
-    if (secureKeyEqual(storedPin, pin)) {
-      await rehashPin(r['User_ID'], pin);
+    if (String(r['PIN']) === pin) {
       user = r;
       break;
     }
@@ -104,7 +86,7 @@ export async function addUser(payload: {
   await appendRows(registryId(), USERS_SHEET, [[
     userId,
     String(payload.username).trim(),
-    hashPin(String(payload.pin)),
+    String(payload.pin),
     payload.nama || '',
     payload.role || 'petugas',
     payload.cabangId || '',
@@ -129,7 +111,7 @@ export async function updateUser(
   if (found.index === -1) throw new ApiError('not_found', 'User ' + userId + ' tidak ditemukan');
   const updated = (found.row as unknown[]).slice();
   if (payload.username !== undefined) updated[1] = String(payload.username).trim();
-  if (payload.pin !== undefined) updated[2] = hashPin(String(payload.pin));
+  if (payload.pin !== undefined) updated[2] = String(payload.pin);
   if (payload.nama !== undefined) updated[3] = payload.nama;
   if (payload.role !== undefined) updated[4] = payload.role;
   if (payload.cabangId !== undefined) updated[5] = payload.cabangId;

@@ -197,8 +197,8 @@ export default function PetugasGuidePage() {
             </div>
             <p className="text-[11px] text-base-content/60">
               {t(
-                "PIN di-hash menggunakan SHA-256 sebelum dikirim ke server. Tidak ada yang melihat PIN dalam teks plain.",
-                "PIN is hashed with SHA-256 before sending to the server. No one sees PIN in plain text."
+                "PIN dikirim ke server dan dibandingkan dengan yang tersimpan di spreadsheet.",
+                "PIN is sent to the server and matched against the stored value."
               )}
             </p>
           </div>

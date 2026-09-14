@@ -136,7 +136,7 @@ Each branch has its own spreadsheet with these sheets:
 | Sheet | Purpose |
 |-------|---------|
 | `Daftar_Cabang` | Branch list + spreadsheet/folder IDs |
-| `Users` | User accounts + PIN hashes |
+| `Users` | User accounts + PIN |
 | `Settings_Global` | Global configuration |
 | `Template_Referensi` | Template spreadsheet ID for cloning |
 
