@@ -20,6 +20,7 @@ import {
   RefreshCw,
   Loader2,
   ListOrdered,
+  Pencil,
 } from 'lucide-react';
 import { WATemplateModal } from '@/components/WATemplateModal';
 import { QuantumLoaderFull } from '@/components/ui/QuantumLoader';
@@ -418,6 +419,13 @@ export default function LaporanPage() {
                             <Table className="w-4 h-4" />
                           </a>
                         )}
+                        <Link
+                          href={`/laporan/${row.Laporan_ID}/edit`}
+                          title="Edit Laporan"
+                          className="btn btn-ghost btn-xs text-base-content/60 hover:text-primary"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Link>
                         <button
                           onClick={() => handleRegenerate(row)}
                           disabled={regeneratingId === row.Laporan_ID}

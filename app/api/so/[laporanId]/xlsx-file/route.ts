@@ -118,6 +118,7 @@ export async function GET(
       statusIsi: (['Penuh', 'Dipakai', 'Habis'].includes(String(r['Status_Isi']))) ? r['Status_Isi'] as 'Penuh' | 'Dipakai' | 'Habis' : (fb.statusIsi || ''),
       tglRefill: String(r['Tgl_Refill'] || fb.tglRefill || ''),
       tglPakai: String(r['Tgl_Pakai'] || fb.tglPakai || ''),
+      tglKedaluwarsa: String(r['Tgl_Kedaluwarsa'] || ''),
     };
   });
 

@@ -19,6 +19,7 @@ import {
   CircleDot,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { parseThreshold, sanitizeDecimalInput } from '@/lib/domain/so';
 
 interface MasterItem {
   Item_ID: string;
@@ -48,6 +49,8 @@ const TIPE_OPTIONS = [
   { value: 'single', label: 'Single (S1)' },
   { value: 'boolean', label: 'Boolean' },
   { value: 'date', label: 'Date' },
+  { value: 'text', label: 'Text' },
+  { value: 'expiry', label: 'Expiry' },
   { value: 'boolean,date', label: 'Boolean+Date' },
 ];
 
@@ -56,6 +59,8 @@ function tipeBadgeColor(t?: string) {
   if (t.includes('boolean') && t.includes('date')) return 'bg-warning/15 text-warning-content border border-warning/20';
   if (t.includes('boolean')) return 'bg-info/15 text-info-content border border-info/20';
   if (t.includes('date')) return 'bg-secondary/15 text-secondary-content border border-secondary/20';
+  if (t.includes('expiry')) return 'bg-error/15 text-error border border-error/20';
+  if (t.includes('text')) return 'bg-accent/15 text-accent-content border border-accent/20';
   return 'bg-base-200 text-base-content/60 border border-base-300';
 }
 
@@ -73,7 +78,7 @@ export default function MasterItemPage() {
     Satuan: 'pcs',
     Konversi_Isi: '',
     Konversi_Keterangan: '',
-    Threshold: 0,
+    Threshold: '0',
     Tipe_Input: 'dual',
     Keterangan: '',
   });
@@ -81,7 +86,7 @@ export default function MasterItemPage() {
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   const [editingThreshold, setEditingThreshold] = useState<string | null>(null);
-  const [tempThreshold, setTempThreshold] = useState<number>(0);
+  const [tempThreshold, setTempThreshold] = useState<string>('0');
 
   const [editingTipeInput, setEditingTipeInput] = useState<string | null>(null);
   const [tempTipeInput, setTempTipeInput] = useState<string>('dual');
@@ -125,6 +130,7 @@ export default function MasterItemPage() {
         body: JSON.stringify({
           cabangId: selectedCabang.Cabang_ID,
           ...newItem,
+          Threshold: parseThreshold(newItem.Threshold) ?? 0,
         }),
       });
 
@@ -137,7 +143,7 @@ export default function MasterItemPage() {
           Satuan: 'pcs',
           Konversi_Isi: '',
           Konversi_Keterangan: '',
-          Threshold: 0,
+          Threshold: '0',
           Tipe_Input: 'dual',
           Keterangan: '',
         });
@@ -160,7 +166,7 @@ export default function MasterItemPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cabangId: selectedCabang.Cabang_ID,
-          threshold: tempThreshold,
+          threshold: parseThreshold(tempThreshold) ?? 0,
         }),
       });
       const json = await res.json();
@@ -534,9 +540,10 @@ export default function MasterItemPage() {
                           {editingThreshold === item.Item_ID ? (
                             <div className="flex items-center justify-center gap-1">
                               <input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 value={tempThreshold}
-                                onChange={(e) => setTempThreshold(Number(e.target.value))}
+                                onChange={(e) => setTempThreshold(sanitizeDecimalInput(e.target.value))}
                                 className="input input-bordered input-xs w-20 text-center tabular-nums font-semibold text-sm min-h-0 h-7"
                                 autoFocus
                               />
@@ -557,7 +564,7 @@ export default function MasterItemPage() {
                             <button
                               onClick={() => {
                                 setEditingThreshold(item.Item_ID);
-                                setTempThreshold(item.Threshold);
+                                setTempThreshold(String(item.Threshold));
                               }}
                               className="inline-flex items-center justify-center gap-1.5 min-w-[2.5rem] px-2 py-0.5 rounded-md bg-warning/10 border border-warning/20 text-sm font-bold tabular-nums text-warning-content cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
@@ -733,11 +740,10 @@ export default function MasterItemPage() {
                       Threshold (Batas Minimum)
                     </label>
                     <input
-                      type="number"
-                      min="0"
-                      step="any"
+                      type="text"
+                      inputMode="decimal"
                       value={newItem.Threshold}
-                      onChange={(e) => setNewItem({ ...newItem, Threshold: Number(e.target.value) })}
+                      onChange={(e) => setNewItem({ ...newItem, Threshold: sanitizeDecimalInput(e.target.value) })}
                       className="input input-bordered w-full text-sm font-semibold tabular-nums"
                     />
                     <p className="text-[11px] text-base-content/40">Threshold = 0 berarti tidak dipantau</p>

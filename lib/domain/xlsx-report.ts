@@ -29,6 +29,8 @@ export interface XlsxItem {
   statusIsi?: 'Penuh' | 'Dipakai' | 'Habis' | '';
   tglRefill?: string;
   tglPakai?: string;
+  /** Tanggal kedaluwarsa untuk tipe expiry (field baru, terpisah dari tglRefill/tglPakai). */
+  tglKedaluwarsa?: string;
   tipeInput?: string;
 }
 

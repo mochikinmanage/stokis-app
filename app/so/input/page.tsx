@@ -30,7 +30,7 @@ import {
 import { QuantumLoaderFull, QuantumLoaderMini } from '@/components/ui/QuantumLoader';
 import { SOGeneratingOverlay, type SOGerStep } from '@/components/SOGeneratingOverlay';
 import { staggerContainer, staggerItem } from '@/components/PageTransition';
-import { parseTipeInput, hasTipe } from '@/lib/domain/so';
+import { parseTipeInput, hasTipe, sanitizeDecimalInput } from '@/lib/domain/so';
 import type { InputTipe } from '@/lib/domain/so';
 
 interface MasterItem {
@@ -458,11 +458,15 @@ export default function InputSOPage() {
   }, {} as Record<string, MasterItem[]>);
 
   const handleCountChange = (itemId: string, field: 'step1' | 'step2' | 'keterangan' | 'statusIsi' | 'tglRefill' | 'tglPakai', value: string | undefined) => {
+    const nextValue =
+      field === 'step1' || field === 'step2'
+        ? sanitizeDecimalInput(String(value ?? ''))
+        : value;
     setCounts((prev) => ({
       ...prev,
       [itemId]: {
         ...prev[itemId],
-        [field]: value,
+        [field]: nextValue,
       },
     }));
     if (field !== 'keterangan') {
@@ -545,11 +549,13 @@ export default function InputSOPage() {
     return items.map((it) => {
       const c = counts[it.Item_ID] || { step1: '', step2: '', keterangan: '', statusIsi: undefined, tglRefill: '', tglPakai: '' };
       const prev = previousSO[it.Item_ID] || previousSO[it.Nama_Barang] || previousSO[it.Nama_Barang.trim()];
-      // Jika step kosong, ambil nilai dari SO sebelumnya yang dipilih.
+      // Jika step kosong / belum valid (mis. "." saat mengetik), ambil nilai SO sebelumnya.
       const step1Str = String(c.step1).trim();
       const step2Str = String(c.step2).trim();
-      const step1 = step1Str === '' ? (prev?.step1 ?? 0) : Number(step1Str);
-      const step2 = step2Str === '' ? (prev?.step2 ?? 0) : Number(step2Str);
+      const step1Num = Number(step1Str);
+      const step2Num = Number(step2Str);
+      const step1 = step1Str === '' || !Number.isFinite(step1Num) ? (prev?.step1 ?? 0) : step1Num;
+      const step2 = step2Str === '' || !Number.isFinite(step2Num) ? (prev?.step2 ?? 0) : step2Num;
       const total = step1 + step2;
       const prevKeterangan = prev?.keterangan || '';
       const keterangan = c.keterangan.trim() || prevKeterangan;
@@ -1255,9 +1261,8 @@ export default function InputSOPage() {
                                 S1
                               </span>
                               <input
-                                type="number"
-                                step="any"
-                                min="0"
+                                type="text"
+                                inputMode="decimal"
                                 placeholder="0"
                                 value={step1Val}
                                 onChange={(e) => handleCountChange(item.Item_ID, 'step1', e.target.value)}
@@ -1271,9 +1276,8 @@ export default function InputSOPage() {
                                   S2
                                 </span>
                                 <input
-                                  type="number"
-                                  step="any"
-                                  min="0"
+                                  type="text"
+                                  inputMode="decimal"
                                   placeholder="0"
                                   value={step2Val}
                                   onChange={(e) => handleCountChange(item.Item_ID, 'step2', e.target.value)}

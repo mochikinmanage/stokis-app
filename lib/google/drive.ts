@@ -47,3 +47,50 @@ export async function uploadXlsxToDrive(
 
   return { fileId, webViewLink, downloadUrl };
 }
+
+/**
+ * Update existing XLSX file in Drive with new content.
+ * Keeps the same fileId and link — overwrites the file content only.
+ */
+export async function updateXlsxInDrive(
+  fileId: string,
+  buffer: Buffer
+): Promise<{ fileId: string; webViewLink: string; downloadUrl: string }> {
+  const drive = getDriveClient();
+  const bodyStream = new PassThrough();
+  bodyStream.end(buffer);
+
+  // First, get the current file to preserve its name/parents
+  const existing = await drive.files.get({
+    fileId,
+    fields: 'name, parents',
+    supportsAllDrives: true,
+  });
+
+  const fileName = existing.data.name || 'laporan.xlsx';
+
+  await drive.files.update({
+    fileId,
+    requestBody: {
+      name: fileName,
+      // Note: we don't change parents — keep existing location
+    },
+    media: {
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      body: bodyStream,
+    },
+    supportsAllDrives: true,
+  });
+
+  // Re-fetch to get the updated webViewLink
+  const updated = await drive.files.get({
+    fileId,
+    fields: 'id,webViewLink,name',
+    supportsAllDrives: true,
+  });
+
+  const webViewLink = updated.data.webViewLink || '';
+  const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+  return { fileId, webViewLink, downloadUrl };
+}

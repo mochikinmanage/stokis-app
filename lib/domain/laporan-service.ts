@@ -2,7 +2,7 @@
 // Operasi laporan — port dari Laporan.js. Menggunakan Google Sheets API.
 
 import { resolveCabang } from '@/lib/google/registry';
-import { readSheetData, sheetToObjects, findRowIndex, appendRows, writeRow, setCellValue, ensureSheet, columnIndexToLetter } from '@/lib/google/sheets';
+import { readSheetData, readSheetDataRaw, sheetToObjects, findRowIndex, appendRows, writeRow, setCellValue, ensureSheet, columnIndexToLetter } from '@/lib/google/sheets';
 import { calculateStatus, parseThreshold } from './so';
 import { ApiError } from './errors';
 import { randomToken, buildLaporanId, formatDate } from './ids';
@@ -15,6 +15,7 @@ interface LaporanRow {
   Petugas: string;
   Link_PDF?: string;
   Link_XLSX?: string;
+  Link_XLSX_FileId?: string;
   Status?: string;
 }
 
@@ -26,6 +27,7 @@ interface SaveLaporanPayload {
   items?: SaveLaporanItem[];
   linkPdf?: string;
   linkXlsx?: string;
+  linkXlsxFileId?: string;
   note?: string;
   previousSOInfo?: { tanggal?: string; shift?: string } | null;
 }
@@ -48,6 +50,7 @@ interface SaveLaporanItem {
   statusIsi?: 'Penuh' | 'Dipakai' | 'Habis' | '';
   tglRefill?: string;
   tglPakai?: string;
+  tglKedaluwarsa?: string;
 }
 
 /**
@@ -126,7 +129,28 @@ const LAPORAN_DETAIL_HEADERS = [
   'Penggunaan', 'Keterangan', 'Status',
   'Status_Isi', 'Tgl_Refill', 'Tgl_Pakai',
   'Note',
+  'Tgl_Kedaluwarsa',
 ];
+
+/**
+ * Peta header Laporan_SO → kolom (1-based). Dipakai untuk memastikan penulisan
+ * sel di Laporan_SO selalu memakai layout yang benar (LAPORAN_DETAIL_HEADERS),
+ * BUKAN SO_COL (layout SO_Transaksi). Mengembalikan null bila field tak dikenal.
+ */
+export function laporanDetailCol(field: string): number | null {
+  const idx = LAPORAN_DETAIL_HEADERS.indexOf(field);
+  return idx === -1 ? null : idx + 1;
+}
+
+/**
+ * Pastikan header Laporan_SO lengkap (self-healing). Dipakai sebelum menulis
+ * sel di fitur edit supaya kolom baru (mis. Tgl_Kedaluwarsa) tersedia meski
+ * laporan lama belum punya kolom tersebut.
+ */
+export async function ensureLaporanDetailSheet(cabangId: string): Promise<void> {
+  const { spreadsheetId } = await resolveCabang(cabangId);
+  await ensureSheet(spreadsheetId, LAPORAN_DETAIL_SHEET, LAPORAN_DETAIL_HEADERS);
+}
 
 async function saveLaporanDetail(
   cabangId: string,
@@ -181,6 +205,7 @@ async function saveLaporanDetail(
       it.tglRefill || '',
       it.tglPakai || '',
       note,
+      it.tglKedaluwarsa || '',
     ];
   });
 
@@ -260,6 +285,48 @@ export async function updateLaporanXlsxLink(
   return { updated: true };
 }
 
+/**
+ * Simpan link XLSX DAN fileId ke baris Laporan_PDF.
+ * Kolom K = Link_XLSX (index 10), Kolom L = Link_XLSX_FileId (index 11).
+ *
+ * Digunakan untuk fitur edit laporan: dengan fileId, kita bisa update file
+ * yang sama di Drive tanpa membuat file baru.
+ */
+export async function updateLaporanXlsxLinkWithId(
+  cabangId: string,
+  sesiId: string,
+  laporanId: string,
+  linkXlsx: string,
+  fileId: string
+): Promise<{ updated: boolean }> {
+  const { spreadsheetId } = await resolveCabang(cabangId);
+  const { headers, rows } = await readSheetData(spreadsheetId, 'Laporan_PDF');
+  const bySesi = findRowIndex(rows, 1, sesiId);
+  const targetIndex = bySesi.index !== -1 ? bySesi.index : findRowIndex(rows, 0, laporanId).index;
+  if (targetIndex === -1) return { updated: false };
+
+  // Kolom Link_XLSX (K, index 10)
+  let colIndex = headers.findIndex((h) => h === 'Link_XLSX');
+  if (colIndex === -1) {
+    colIndex = 10;
+    await setCellValue(spreadsheetId, 'Laporan_PDF!K1', 'Link_XLSX');
+  }
+  const rowNumber = targetIndex + 2;
+  const colLetterK = columnIndexToLetter(colIndex);
+  await writeRow(spreadsheetId, `Laporan_PDF!${colLetterK}${rowNumber}`, [linkXlsx]);
+
+  // Kolom Link_XLSX_FileId (L, index 11)
+  let colIdIndex = headers.findIndex((h) => h === 'Link_XLSX_FileId');
+  if (colIdIndex === -1) {
+    colIdIndex = 11;
+    await setCellValue(spreadsheetId, 'Laporan_PDF!L1', 'Link_XLSX_FileId');
+  }
+  const colLetterL = columnIndexToLetter(colIdIndex);
+  await writeRow(spreadsheetId, `Laporan_PDF!${colLetterL}${rowNumber}`, [fileId]);
+
+  return { updated: true };
+}
+
 async function readAllRows(spreadsheetId: string, sheetName: string): Promise<Record<string, unknown>[]> {
   const { headers, rows } = await readSheetData(spreadsheetId, sheetName);
   return sheetToObjects(headers, rows);
@@ -288,6 +355,70 @@ export async function getLaporanDetail(
   const { headers, rows } = await readSheetData(spreadsheetId, LAPORAN_DETAIL_SHEET);
   const all = sheetToObjects(headers, rows);
   return all.filter((r) => String(r['Laporan_ID']) === laporanId);
+}
+
+/**
+ * Ambil detail item laporan beserta nomor baris FISIK di sheet Laporan_SO.
+ *
+ * PENTING: Laporan_SO menyimpan banyak laporan (idempoten per sesi) dalam satu
+ * sheet, jadi index di array hasil filter (`getLaporanDetail`) TIDAK sama dengan
+ * nomor baris sebenarnya. Fungsi ini membaca baris mentah dan menghitung
+ * `rowNumber` (1-based, baris header = 1) supaya penulisan sel di fitur edit
+ * selalu tepat sasaran dan tidak menimpa baris laporan lain.
+ */
+export async function getLaporanDetailRows(
+  cabangId: string,
+  laporanId: string
+): Promise<Array<{ rowNumber: number; data: Record<string, unknown> }>> {
+  const { spreadsheetId } = await resolveCabang(cabangId);
+  // readSheetDataRaw mempertahankan posisi fisik baris (tidak membuang baris
+  // kosong) sehingga rowNumber = index rows + 2 selalu tepat.
+  const { headers, rows } = await readSheetDataRaw(spreadsheetId, LAPORAN_DETAIL_SHEET);
+  const result: Array<{ rowNumber: number; data: Record<string, unknown> }> = [];
+  rows.forEach((row, i) => {
+    const obj = sheetToObjects(headers, [row])[0] || {};
+    if (String(obj['Laporan_ID']) === laporanId) {
+      result.push({ rowNumber: i + 2, data: obj });
+    }
+  });
+  return result;
+}
+
+/**
+ * Catat detail perubahan 1 item ke sheet audit Laporan_Edit_Log.
+ * Satu baris per field yang berubah (value lama → value baru).
+ */
+export async function logLaporanEdit(
+  cabangId: string,
+  entry: {
+    laporanId: string;
+    itemId?: string;
+    field: string;
+    oldValue: string;
+    newValue: string;
+    username?: string;
+    nama?: string;
+    role?: string;
+  }
+): Promise<void> {
+  const { spreadsheetId } = await resolveCabang(cabangId);
+  const headers = [
+    'Timestamp', 'Laporan_ID', 'Item_ID',
+    'Field', 'Old_Value', 'New_Value',
+    'Username', 'Nama', 'Role',
+  ];
+  await ensureSheet(spreadsheetId, 'Laporan_Edit_Log', headers);
+  await appendRows(spreadsheetId, 'Laporan_Edit_Log', [[
+    new Date().toISOString(),
+    entry.laporanId,
+    entry.itemId || '',
+    entry.field,
+    entry.oldValue,
+    entry.newValue,
+    entry.username || '',
+    entry.nama || '',
+    entry.role || '',
+  ]]);
 }
 
 export interface SesiLiveExtra {

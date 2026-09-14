@@ -10,6 +10,27 @@ export interface SheetData {
 }
 
 /**
+ * Baca seluruh data sebuah sheet TANPA membuang baris kosong. Nomor baris
+ * fisik (1-based, baris header = 1) dapat dihitung dari index di rows:
+ * `rowNumber = i + 2`. Dipakai ketika posisi baris harus dipertahankan
+ * (mis. update sel in-place di sheet yang menampung banyak laporan).
+ */
+export async function readSheetDataRaw(
+  spreadsheetId: string,
+  range: string
+): Promise<SheetData> {
+  const sheets = getSheetsClient();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range,
+  });
+  const values = res.data.values || [];
+  if (values.length === 0) return { headers: [], rows: [] };
+  const headers = (values[0] || []).map((h) => String(h).trim());
+  return { headers, rows: values.slice(1) };
+}
+
+/**
  * Baca seluruh data sebuah sheet dan kembalikan sebagai { headers, rows }.
  * Baris kosong (tanpa nilai di semua sel) dihilangkan agar konsisten dengan
  * sheetToObjects_ yang mengabaikan baris kosong.

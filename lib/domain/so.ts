@@ -20,6 +20,7 @@ export const SO_COL = {
   Tgl_Refill: 15,
   Tgl_Pakai: 16,
   Note: 17,
+  Tgl_Kedaluwarsa: 18,
 } as const;
 
 export function calculateStatus(total: number, threshold: number | null | undefined): string {
@@ -39,15 +40,37 @@ export function parseThreshold(v: unknown): number | null {
   return isNaN(n) ? null : n;
 }
 
-export type InputTipe = 'single' | 'dual' | 'boolean' | 'date';
+/**
+ * Filter free-form decimal text for controlled inputs.
+ * Avoids mobile keyboard digit-duplication bugs from controlled <input type="number">.
+ * Allows digits and a single decimal separator (`.` or `,`, normalized to `.`).
+ */
+export function sanitizeDecimalInput(raw: string): string {
+  const normalized = raw.replace(/,/g, '.');
+  let out = '';
+  let seenDot = false;
+  for (const ch of normalized) {
+    if (ch >= '0' && ch <= '9') {
+      out += ch;
+    } else if (ch === '.' && !seenDot) {
+      out += '.';
+      seenDot = true;
+    }
+  }
+  return out;
+}
+
+export type InputTipe = 'single' | 'dual' | 'boolean' | 'date' | 'text' | 'expiry';
 
 export function parseTipeInput(raw: unknown): InputTipe[] {
   const s = String(raw || '').trim().toLowerCase();
   if (!s) return ['dual'];
-  return s
+  const allowed = new Set<InputTipe>(['single', 'dual', 'boolean', 'date', 'text', 'expiry']);
+  const parsed = s
     .split(',')
     .map((t) => t.trim())
-    .filter(Boolean) as InputTipe[];
+    .filter((t): t is InputTipe => allowed.has(t as InputTipe));
+  return parsed.length > 0 ? parsed : ['dual'];
 }
 
 export function hasTipe(tipeInput: InputTipe[], tipe: InputTipe): boolean {
@@ -63,6 +86,7 @@ export interface SOItem {
   statusIsi?: 'Penuh' | 'Dipakai' | 'Habis' | '';
   tglRefill?: string;
   tglPakai?: string;
+  tglKedaluwarsa?: string;
 }
 
 export interface ValidatedSOPayload {

@@ -85,7 +85,7 @@ export async function updateTipeInput(
   itemId: string,
   tipeInput: unknown
 ): Promise<{ itemId: string; tipeInput: string }> {
-  const allowed = ['dual', 'single', 'boolean', 'date', 'boolean,date'];
+  const allowed = ['dual', 'single', 'boolean', 'date', 'text', 'expiry', 'boolean,date'];
   const val = String(tipeInput || 'dual');
   const normalized = allowed.includes(val) ? val : 'dual';
   const { spreadsheetId } = await resolveCabang(cabangId);
