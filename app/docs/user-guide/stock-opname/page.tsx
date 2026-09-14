@@ -28,6 +28,7 @@ import {
 
 const toc = [
   { id: "overview", label: "Stock Opname (SO)", level: 1 },
+  { id: "gate", label: "Konfirmasi Cabang & Shift", level: 2 },
   { id: "session-header", label: "Header Sesi", level: 2 },
   { id: "counting", label: "Menghitung Stok", level: 2 },
   { id: "s1-s2", label: "Lokasi S1 & S2", level: 2 },
@@ -66,6 +67,68 @@ export default function StockOpnameGuidePage() {
           "This feature is accessible to both admin and staff. Select an active branch first via the navbar switcher."
         )}
       </Callout>
+
+      {/* Konfirmasi Cabang & Shift */}
+      <section id="gate" className="scroll-mt-32 space-y-4">
+        <h2 className="text-lg font-bold text-base-content flex items-center gap-2">
+          <Layers className="w-5 h-5 text-primary" />
+          {t("Konfirmasi Cabang & Shift", "Branch & Shift Confirmation")}
+        </h2>
+
+        <p className="text-sm text-base-content/70 leading-relaxed">
+          {t(
+            "Setiap kali membuka halaman Input SO, muncul popup 2 langkah untuk mengonfirmasi cabang dan shift sebelum mulai mengisi. Popup ini muncul setiap masuk (termasuk refresh), untuk mencegah laporan tersubmit ke cabang atau shift yang salah.",
+            "Every time the SO Input page is opened, a 2-step popup appears to confirm the branch and shift before counting. The popup shows on every entry (including refresh), to prevent reports from being submitted to the wrong branch or shift."
+          )}
+        </p>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-xl border border-base-300 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Layers className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-base-content">{t("Langkah 1 — Pilih Cabang", "Step 1 — Select Branch")}</h3>
+              <p className="text-[11px] text-base-content/60 mt-0.5">
+                {t(
+                  "Cabang yang dipilih terakhir otomatis tampil sebagai pilihan awal. Tinggal konfirmasi, atau ganti ke cabang lain.",
+                  "The last selected branch is pre-filled. Just confirm it, or switch to another branch."
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl border border-base-300 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Clock className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-base-content">{t("Langkah 2 — Pilih Shift", "Step 2 — Select Shift")}</h3>
+              <p className="text-[11px] text-base-content/60 mt-0.5">
+                {t(
+                  "Pilih Opening atau Closing. Tombol untuk melanjutkan baru aktif setelah shift dipilih.",
+                  "Choose Opening or Closing. The button to continue only activates after a shift is selected."
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl border border-base-300 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <AlertTriangle className="w-4 h-4 text-warning" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-base-content">{t("Interaksi dengan Draft", "Interaction with Drafts")}</h3>
+              <p className="text-[11px] text-base-content/60 mt-0.5">
+                {t(
+                  "Jika ada draft tersimpan untuk kombinasi cabang+shift lain, muncul peringatan bahwa draft tersebut akan diabaikan.",
+                  "If a saved draft exists for a different branch+shift combination, a warning appears that the draft will be ignored."
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Session Header */}
       <section id="session-header" className="scroll-mt-32 space-y-4">

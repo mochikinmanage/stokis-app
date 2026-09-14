@@ -17,9 +17,14 @@ import {
   Settings,
   ChevronDown,
   CircleDot,
+  Tags,
+  Plus,
+  Power,
+  HelpCircle,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { parseThreshold, sanitizeDecimalInput } from '@/lib/domain/so';
+import type { KategoriItem } from '@/lib/domain/kategori-service';
 
 interface MasterItem {
   Item_ID: string;
@@ -66,10 +71,13 @@ function tipeBadgeColor(t?: string) {
 
 export default function MasterItemPage() {
   const { selectedCabang } = useCabang();
-  const { hasAnyRole } = useAuth();
+  const { hasAnyRole, isAdmin } = useAuth();
 
   const [items, setItems] = useState<MasterItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const [kategoriList, setKategoriList] = useState<KategoriItem[]>([]);
+  const [kategoriLoading, setKategoriLoading] = useState<boolean>(false);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [newItem, setNewItem] = useState({
@@ -114,8 +122,26 @@ export default function MasterItemPage() {
     }
   };
 
+  const fetchKategori = async () => {
+    if (!selectedCabang) return;
+    try {
+      setKategoriLoading(true);
+      const res = await fetch(`/api/master-item/kategori?cabang=${selectedCabang.Cabang_ID}&includeNonaktif=true`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setKategoriList(json.data);
+      }
+    } catch (e) {
+      console.error('Error fetching kategori:', e);
+    } finally {
+      setKategoriLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchItems();
+    fetchKategori();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCabang]);
 
   const handleAddItem = async (e: React.FormEvent) => {
@@ -241,11 +267,111 @@ export default function MasterItemPage() {
     }
   };
 
+  // ─── Kelola Kategori (admin only) ───
+  const [showKategoriModal, setShowKategoriModal] = useState<boolean>(false);
+  const [kategoriError, setKategoriError] = useState<string>('');
+  const [kategoriSaving, setKategoriSaving] = useState<boolean>(false);
+  const [newKategoriName, setNewKategoriName] = useState<string>('');
+  const [editingKategoriId, setEditingKategoriId] = useState<string | null>(null);
+  const [tempKategoriName, setTempKategoriName] = useState<string>('');
+  const [tempKategoriUrutan, setTempKategoriUrutan] = useState<string>('');
+
+  const activeKategoriNames = useMemo(
+    () => kategoriList.filter((k) => k.Aktif).map((k) => k.Nama_Kategori),
+    [kategoriList]
+  );
+
+  const handleAddKategori = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCabang) return;
+    const nama = newKategoriName.trim();
+    if (!nama) return;
+    try {
+      setKategoriSaving(true);
+      setKategoriError('');
+      const res = await fetch('/api/master-item/kategori', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cabangId: selectedCabang.Cabang_ID, Nama_Kategori: nama }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setNewKategoriName('');
+        await fetchKategori();
+      } else {
+        setKategoriError(json.error?.message || 'Gagal menambah kategori');
+      }
+    } catch (err: any) {
+      setKategoriError('Error: ' + err.message);
+    } finally {
+      setKategoriSaving(false);
+    }
+  };
+
+  const handleSaveKategori = async (k: KategoriItem) => {
+    if (!selectedCabang) return;
+    const nama = tempKategoriName.trim();
+    const urutan = Number(tempKategoriUrutan);
+    if (!nama) return;
+    try {
+      setKategoriSaving(true);
+      setKategoriError('');
+      const res = await fetch(`/api/master-item/kategori/${k.Kategori_ID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cabangId: selectedCabang.Cabang_ID,
+          Nama_Kategori: nama,
+          Urutan: Number.isFinite(urutan) ? urutan : undefined,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setEditingKategoriId(null);
+        await fetchKategori();
+        if (json.data?.updatedAreas > 0) await fetchItems();
+      } else {
+        setKategoriError(json.error?.message || 'Gagal menyimpan kategori');
+      }
+    } catch (err: any) {
+      setKategoriError('Error: ' + err.message);
+    } finally {
+      setKategoriSaving(false);
+    }
+  };
+
+  const handleToggleKategoriActive = async (k: KategoriItem) => {
+    if (!selectedCabang) return;
+    try {
+      setKategoriError('');
+      const res = await fetch(`/api/master-item/kategori/${k.Kategori_ID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cabangId: selectedCabang.Cabang_ID,
+          Aktif: !k.Aktif,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        await fetchKategori();
+      } else {
+        setKategoriError(json.error?.message || 'Gagal mengubah status kategori');
+      }
+    } catch (err: any) {
+      setKategoriError('Error: ' + err.message);
+    }
+  };
+
   const areas = useMemo(() => {
     const areaSet = new Set(items.map(i => i.Area || 'Area Umum'));
-    if (areaSet.size === 0) DEFAULT_AREAS.forEach(a => areaSet.add(a));
+    if (activeKategoriNames.length > 0) {
+      activeKategoriNames.forEach(a => areaSet.add(a));
+    } else if (areaSet.size === 0) {
+      DEFAULT_AREAS.forEach(a => areaSet.add(a));
+    }
     return Array.from(areaSet).sort();
-  }, [items]);
+  }, [activeKategoriNames, items]);
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -306,13 +432,31 @@ export default function MasterItemPage() {
             </div>
           </div>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn btn-primary btn-sm gap-1.5 shadow-sm"
-        >
-          <PlusCircle className="w-4 h-4" />
-          Tambah Item
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="/docs/user-guide/master-item"
+            className="btn btn-ghost btn-sm btn-circle text-base-content/50 hover:text-primary"
+            title="Buka panduan Master Item"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </a>
+          {isAdmin && (
+            <button
+              onClick={() => setShowKategoriModal(true)}
+              className="btn btn-secondary btn-sm gap-1.5 shadow-sm"
+            >
+              <Tags className="w-4 h-4" />
+              Kelola Kategori
+            </button>
+          )}
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn btn-primary btn-sm gap-1.5 shadow-sm"
+          >
+            <PlusCircle className="w-4 h-4" />
+            Tambah Item
+          </button>
+        </div>
       </div>
 
       {/* ─── INFO BANNER ─── */}
@@ -793,6 +937,168 @@ export default function MasterItemPage() {
             </motion.div>
             <form method="dialog" className="modal-backdrop">
               <button onClick={() => setShowModal(false)}>close</button>
+            </form>
+          </dialog>
+        )}
+      </AnimatePresence>
+
+      {/* ─── KELOLA KATEGORI MODAL (admin only) ─── */}
+      <AnimatePresence>
+        {showKategoriModal && (
+          <dialog className="modal modal-open">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="modal-box max-w-lg p-0"
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-base-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center">
+                    <Tags className="w-5 h-5 text-secondary" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-base-content">Kelola Kategori</h3>
+                    <p className="text-xs text-base-content/50">
+                      {selectedCabang.Nama_Cabang} &middot; Kategori untuk grouping item
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setShowKategoriModal(false); setEditingKategoriId(null); }}
+                  className="btn btn-ghost btn-sm btn-circle"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddKategori} className="px-6 pt-4 pb-3 border-b border-base-300 flex gap-2">
+                <input
+                  type="text"
+                  required
+                  placeholder="Nama kategori baru..."
+                  value={newKategoriName}
+                  onChange={(e) => setNewKategoriName(e.target.value)}
+                  className="input input-bordered flex-1 text-sm"
+                />
+                <button type="submit" disabled={kategoriSaving} className="btn btn-secondary btn-sm gap-1.5">
+                  {kategoriSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+                  Tambah
+                </button>
+              </form>
+
+              <div className="px-6 py-4 max-h-[50vh] overflow-y-auto">
+                {kategoriError && (
+                  <div className="alert alert-error text-xs rounded-lg mb-3" role="alert">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span className="flex-1">{kategoriError}</span>
+                    <button onClick={() => setKategoriError('')} className="btn btn-ghost btn-xs">Tutup</button>
+                  </div>
+                )}
+
+                {kategoriLoading ? (
+                  <div className="flex flex-col items-center justify-center py-10 gap-2">
+                    <Loader2 className="w-6 h-6 animate-spin text-secondary" />
+                    <p className="text-xs text-base-content/50">Memuat kategori...</p>
+                  </div>
+                ) : kategoriList.length === 0 ? (
+                  <p className="text-sm text-base-content/50 text-center py-8">
+                    Belum ada kategori. Tambahkan kategori pertama di atas.
+                  </p>
+                ) : (
+                  <ul className="space-y-2">
+                    {kategoriList.map((k) => (
+                      <li
+                        key={k.Kategori_ID}
+                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border ${
+                          k.Aktif ? 'border-base-300 bg-base-100' : 'border-base-300 bg-base-200/40 opacity-70'
+                        }`}
+                      >
+                        {editingKategoriId === k.Kategori_ID ? (
+                          <>
+                            <input
+                              type="text"
+                              value={tempKategoriName}
+                              onChange={(e) => setTempKategoriName(e.target.value)}
+                              className="input input-bordered input-xs flex-1 min-w-0 text-sm"
+                              autoFocus
+                            />
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={tempKategoriUrutan}
+                              onChange={(e) => setTempKategoriUrutan(e.target.value.replace(/[^\d]/g, ''))}
+                              placeholder="Urutan"
+                              className="input input-bordered input-xs w-16 text-center text-xs tabular-nums"
+                            />
+                            <button
+                              onClick={() => handleSaveKategori(k)}
+                              disabled={kategoriSaving}
+                              className="btn btn-success btn-xs min-h-0 h-7 px-2"
+                              title="Simpan"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setEditingKategoriId(null)}
+                              className="btn btn-ghost btn-xs min-h-0 h-7 px-2"
+                              title="Batal"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-base-content truncate">{k.Nama_Kategori}</p>
+                              <p className="text-[10px] text-base-content/40">{k.Kategori_ID}</p>
+                            </div>
+                            {!k.Aktif && (
+                              <span className="badge badge-ghost badge-xs text-base-content/50">Nonaktif</span>
+                            )}
+                            <button
+                              onClick={() => {
+                                setEditingKategoriId(k.Kategori_ID);
+                                setTempKategoriName(k.Nama_Kategori);
+                                setTempKategoriUrutan(String(k.Urutan));
+                              }}
+                              className="btn btn-ghost btn-xs min-h-0 h-7 px-2 text-base-content/60"
+                              title="Ubah nama / urutan"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleToggleKategoriActive(k)}
+                              disabled={kategoriSaving}
+                              className={`btn btn-xs min-h-0 h-7 px-2 ${
+                                k.Aktif
+                                  ? 'btn-ghost text-error/70 hover:text-error hover:bg-error/10'
+                                  : 'btn-ghost text-success/70 hover:text-success hover:bg-success/10'
+                              }`}
+                              title={k.Aktif ? 'Nonaktifkan kategori' : 'Aktifkan kategori'}
+                            >
+                              <Power className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="px-6 py-3 border-t border-base-300 flex justify-end">
+                <button
+                  onClick={() => { setShowKategoriModal(false); setEditingKategoriId(null); }}
+                  className="btn btn-ghost btn-sm"
+                >
+                  Tutup
+                </button>
+              </div>
+            </motion.div>
+            <form method="dialog" className="modal-backdrop">
+              <button onClick={() => { setShowKategoriModal(false); setEditingKategoriId(null); }}>close</button>
             </form>
           </dialog>
         )}

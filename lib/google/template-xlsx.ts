@@ -563,8 +563,8 @@ export async function generateXlsxFromTemplate(
         const s1 = Number(dr.s1) || 0;
         const s2 = Number(dr.s2) || 0;
         const total = s1 + s2;
-        const pTotal = (dr.prevTotal != null && dr.prevTotal !== '') ? Number(dr.prevTotal) : null;
-        const pemakaian = (pTotal != null && pTotal !== 0) ? pTotal - total : '';
+        const hasPrev = dr.prevTotal != null && dr.prevTotal !== '';
+        const pemakaian = hasPrev ? (Number(dr.prevTotal) - total) : 0;
         const statusStr = regularStatus(s1, s2, th);
 
         row.getCell(1).value = dr.no;
@@ -608,7 +608,7 @@ export async function generateXlsxFromTemplate(
           row.getCell(c).font = { name: XLSX_FONT.family, size: XLSX_FONT.data.size, color: { argb: 'FF000000' } } as ExcelJS.Font;
         }
         row.getCell(10).font = { name: XLSX_FONT.family, bold: true, size: XLSX_FONT.data.size, color: { argb: 'FF000000' } } as ExcelJS.Font;
-        row.getCell(10).numFmt = '+0;-0;0';
+        row.getCell(11).numFmt = '+0;-0;0';
         row.getCell(12).font = { name: XLSX_FONT.family, bold: true, size: XLSX_FONT.data.size, color: { argb: textColor } } as ExcelJS.Font;
         row.height = 18;
 
@@ -866,8 +866,8 @@ export async function generateXlsxFromTemplate(
         const s1 = Number(dr.s1) || 0;
         const s2 = Number(dr.s2) || 0;
         const total = s1 + s2;
-        const pTotal = (dr.prevTotal != null && dr.prevTotal !== '') ? Number(dr.prevTotal) : null;
-        const pemakaian = (pTotal != null && pTotal !== 0) ? pTotal - total : null;
+        const hasPrev = dr.prevTotal != null && dr.prevTotal !== '';
+        const pemakaian = hasPrev ? (Number(dr.prevTotal) - total) : 0;
         const statusStr = regularStatus(s1, s2, th);
         if (dr.isSingle) {
           return [

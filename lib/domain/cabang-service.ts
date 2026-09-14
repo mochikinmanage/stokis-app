@@ -11,6 +11,7 @@ import {
 import { readSheetData, appendRows, findRowIndex, writeRow } from '@/lib/google/sheets';
 import { ApiError } from './errors';
 import { randomToken, buildCabangId } from './ids';
+import { initKategoriSheetForNewCabang } from './kategori-service';
 
 export interface CreateCabangPayload {
   Nama_Cabang: string;
@@ -63,6 +64,9 @@ export async function createCabang(payload: CreateCabangPayload): Promise<{
     fields: 'id',
   });
   const pdfFolderId = String(folderRes.data.id || '');
+
+  // 4b. Inisialisasi sheet Kategori_Item (seed default) di spreadsheet cabang baru.
+  await initKategoriSheetForNewCabang(newSpreadsheetId);
 
   // 5. Cabang_ID unik.
   const cabangId = buildCabangId(randomToken(6));

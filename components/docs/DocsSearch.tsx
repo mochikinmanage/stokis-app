@@ -30,13 +30,13 @@ const searchEntries: SearchEntry[] = [
   {
     title: "Stock Opname (SO)",
     href: "/docs/user-guide/stock-opname",
-    keywords: ["so", "stock opname", "input", "hitung", "s1", "s2", "form", "step"],
+    keywords: ["so", "stock opname", "input", "hitung", "s1", "s2", "form", "step", "cabang", "shift", "popup", "gate"],
     description: "Cara mengisi form Stock Opname",
   },
   {
     title: "Laporan",
     href: "/docs/user-guide/laporan",
-    keywords: ["laporan", "report", "xlsx", "excel", "whatsapp", "share", "bagikan"],
+    keywords: ["laporan", "report", "viewer", "lihat", "read-only", "xlsx", "pdf", "excel", "whatsapp", "share", "bagikan"],
     description: "Melihat dan membagikan laporan",
   },
   {
@@ -48,7 +48,7 @@ const searchEntries: SearchEntry[] = [
   {
     title: "Master Item",
     href: "/docs/user-guide/master-item",
-    keywords: ["master item", "barang", "threshold", "item", "stok minimum"],
+    keywords: ["master item", "barang", "threshold", "item", "stok minimum", "kategori", "area", "desimal", "0,5"],
     description: "Mengelola daftar barang dan threshold",
   },
   {

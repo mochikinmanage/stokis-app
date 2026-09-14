@@ -19,6 +19,9 @@ import {
   Loader2,
   ListOrdered,
   Pencil,
+  Eye,
+  FileDown,
+  HelpCircle,
 } from 'lucide-react';
 import { WATemplateModal } from '@/components/WATemplateModal';
 import { QuantumLoaderFull } from '@/components/ui/QuantumLoader';
@@ -37,7 +40,7 @@ interface LaporanItem {
   Status_Kirim_WA: string;
 }
 
-type SquareActionColor = 'primary' | 'info' | 'warning' | 'success';
+type SquareActionColor = 'primary' | 'info' | 'warning' | 'success' | 'neutral' | 'ghost';
 
 interface SquareActionProps {
   href?: string;
@@ -56,6 +59,8 @@ const SQUARE_ACTION_STYLES: Record<SquareActionColor, string> = {
   info: 'border-info/40 bg-info/10 text-info hover:bg-info/20 active:bg-info/30',
   warning: 'border-warning/40 bg-warning/10 text-warning hover:bg-warning/20 active:bg-warning/30',
   success: 'border-success/40 bg-success/10 text-success hover:bg-success/20 active:bg-success/30',
+  neutral: 'border-base-content/25 bg-base-200/50 text-base-content/70 hover:bg-base-200 active:bg-base-300',
+  ghost: 'border-base-300/60 bg-transparent text-base-content/50 hover:bg-base-200 active:bg-base-300',
 };
 
 function SquareAction({ href, target, onClick, disabled, loading, title, label, icon, color = 'primary' }: SquareActionProps) {
@@ -274,6 +279,13 @@ export default function LaporanPage() {
               Cabang Operasional: <span className="font-semibold text-base-content">{selectedCabang.Nama_Cabang}</span>
             </p>
           </div>
+          <a
+            href="/docs/user-guide/laporan"
+            className="btn btn-ghost btn-sm btn-circle text-base-content/50 hover:text-primary"
+            title="Buka panduan Laporan"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </a>
         </motion.div>
 
         {errorMsg && (
@@ -452,21 +464,38 @@ export default function LaporanPage() {
                       </td>
                       <td className="px-5 py-4 text-right" data-label="Aksi">
                         <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          <SquareAction
+                            href={`/laporan/${row.Laporan_ID}`}
+                            title="Lihat isi laporan langsung di aplikasi"
+                            label="Lihat"
+                            color="primary"
+                            icon={<Eye className="w-4 h-4" />}
+                          />
                           {row.Link_XLSX && (
                             <SquareAction
                               href={row.Link_XLSX}
                               target="_blank"
-                              title="Buka Berkas XLSX di Google Drive"
+                              title="Unduh Berkas XLSX dari Google Drive"
                               label="XLSX"
                               color="info"
                               icon={<Table className="w-4 h-4" />}
+                            />
+                          )}
+                          {row.Link_PDF && (
+                            <SquareAction
+                              href={row.Link_PDF}
+                              target="_blank"
+                              title="Unduh Berkas PDF"
+                              label="PDF"
+                              color="neutral"
+                              icon={<FileDown className="w-4 h-4" />}
                             />
                           )}
                           <SquareAction
                             href={`/laporan/${row.Laporan_ID}/edit`}
                             title="Edit Laporan"
                             label="Edit"
-                            color="primary"
+                            color="warning"
                             icon={<Pencil className="w-4 h-4" />}
                           />
                           <SquareAction
@@ -475,7 +504,7 @@ export default function LaporanPage() {
                             loading={regeneratingId === row.Laporan_ID}
                             title="Buat Ulang File"
                             label="Ulang"
-                            color="warning"
+                            color="ghost"
                             icon={<RefreshCw className="w-4 h-4" />}
                           />
                           <SquareAction

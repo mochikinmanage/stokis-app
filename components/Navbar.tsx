@@ -22,6 +22,7 @@ import {
   Globe,
   Menu,
   X,
+  BookOpen,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -40,6 +41,7 @@ const bottomNavItems: NavItem[] = [
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
   { name: "Item", nameEn: "Items", href: "/master-item", icon: Package, roles: ["admin"] },
+  { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
   { name: "Lainnya", nameEn: "More", href: "/cabang", icon: Building2, roles: ["admin"] },
   { name: "Tutor", nameEn: "Tutor", href: "/tutorial", icon: HelpCircle },
   { name: "Keluar", nameEn: "Logout", href: "/logout", icon: LogOut },
@@ -49,6 +51,7 @@ const desktopCoreItems: NavItem[] = [
   { name: "Dashboard", nameEn: "Dashboard", href: "/dashboard/harian", icon: BarChart3, roles: ["admin"] },
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
+  { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
 ];
 
 const adminMenuItems: NavItem[] = [

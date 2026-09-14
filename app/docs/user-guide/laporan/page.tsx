@@ -23,6 +23,7 @@ const toc = [
   { id: "overview", label: "Laporan", level: 1 },
   { id: "report-list", label: "Daftar Laporan", level: 2 },
   { id: "filters", label: "Filter & Pencarian", level: 2 },
+  { id: "viewer", label: "Lihat di Aplikasi", level: 2 },
   { id: "xlsx", label: "File XLSX", level: 2 },
   { id: "regenerate", label: "Regenerate", level: 2 },
   { id: "whatsapp", label: "WhatsApp Sharing", level: 2 },
@@ -82,7 +83,7 @@ export default function LaporanGuidePage() {
                 { col: t("Kritis", "Critical"), desc: t("Jumlah item dengan status Kritis (badge merah)", "Number of items with Critical status (red badge)") },
                 { col: t("Hampir Habis", "Low Stock"), desc: t("Jumlah item dengan status Hampir Habis (badge kuning)", "Number of items with Low Stock status (yellow badge)") },
                 { col: t("Status WhatsApp", "WhatsApp Status"), desc: t("Sudah Dikirim atau Belum", "Sent or Not Yet") },
-                { col: t("Aksi", "Actions"), desc: t("Buka XLSX, regenerate, atau bagikan ke WhatsApp", "Open XLSX, regenerate, or share to WhatsApp") },
+                { col: t("Aksi", "Actions"), desc: t("Lihat laporan di aplikasi, unduh XLSX/PDF, edit, regenerate, atau bagikan ke WhatsApp", "View reports in-app, download XLSX/PDF, edit, regenerate, or share to WhatsApp") },
               ].map((row) => (
                 <tr key={row.col} className="border-b border-base-300">
                   <td className="px-4 py-3 font-semibold text-xs">{row.col}</td>
@@ -154,6 +155,60 @@ export default function LaporanGuidePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Lihat di Aplikasi */}
+      <section id="viewer" className="scroll-mt-32 space-y-4">
+        <h2 className="text-lg font-bold text-base-content flex items-center gap-2">
+          <FileText className="w-5 h-5 text-primary" />
+          {t("Lihat Laporan di Aplikasi", "View Reports In-App")}
+        </h2>
+
+        <p className="text-sm text-base-content/70 leading-relaxed">
+          {t(
+            "Setiap laporan dapat dilihat langsung di aplikasi tanpa mengunduh file, dengan klik tombol 'Lihat' (ikon mata) pada baris laporan. Halaman ini menampilkan representasi read-only isi laporan, dikelompokkan per area, dengan warna status yang sama seperti file XLSX.",
+            "Each report can be viewed directly in the app without downloading a file, by clicking the 'View' (eye icon) button on the report row. This page shows a read-only representation of the report, grouped by area, with the same status colors as the XLSX file."
+          )}
+        </p>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-xl border border-base-300 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <FileText className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-base-content">{t("Isi Tampilan", "What Is Shown")}</h3>
+              <p className="text-[11px] text-base-content/60 mt-0.5">
+                {t(
+                  "Item per area, nilai stok sesuai tipe (S1/S2, status isi, tanggal, atau keterangan), status threshold (Kritis / Hampir Habis / Aman), dan ringkasan jumlah kritis di header.",
+                  "Items per area, stock values per type (S1/S2, fill status, dates, or notes), threshold status (Critical / Low Stock / Safe), and a critical-count summary in the header."
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl border border-base-300 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <ExternalLink className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-base-content">{t("Bukan Pengganti File", "Not a File Replacement")}</h3>
+              <p className="text-[11px] text-base-content/60 mt-0.5">
+                {t(
+                  "Viewer hanya untuk cek cepat. Tombol 'Unduh XLSX' dan 'Unduh PDF' tetap tersedia di halaman viewer untuk export, print, atau berbagi.",
+                  "The viewer is for quick checks only. The 'Unduh XLSX' and 'Unduh PDF' buttons remain available on the viewer page for export, printing, or sharing."
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <Callout type="tip">
+          {t(
+            "Perubahan data laporan tetap dilakukan lewat tombol 'Edit' yang mengarah ke halaman edit — viewer bersifat read-only.",
+            "Report data changes are still made via the 'Edit' button which goes to the edit page — the viewer is read-only."
+          )}
+        </Callout>
       </section>
 
       {/* XLSX */}

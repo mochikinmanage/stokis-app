@@ -25,6 +25,7 @@ const toc = [
   { id: "threshold", label: "Threshold Minimum", level: 2 },
   { id: "toggle-active", label: "Aktif/Nonaktif", level: 2 },
   { id: "search-filter", label: "Pencarian & Filter", level: 2 },
+  { id: "categories", label: "Kelola Kategori", level: 2 },
   { id: "admin-only", label: "Akses Admin", level: 2 },
 ];
 
@@ -178,6 +179,19 @@ export default function MasterItemGuidePage() {
               )}
             </p>
           </div>
+
+          <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-2">
+            <div className="flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold text-primary">{t("Angka Desimal Koma", "Decimal Comma Values")}</span>
+            </div>
+            <p className="text-[11px] text-base-content/60">
+              {t(
+                "Penulisan desimal ala Indonesia (misal 0,5) dikenali otomatis oleh sistem dan dikonversi menjadi 0.5 tanpa menjadi nol. Ini berlaku untuk nilai threshold desimal.",
+                "Indonesian-style decimal comma (e.g., 0,5) is automatically recognized by the system and converted to 0.5 without turning it into zero. This applies to decimal threshold values."
+              )}
+            </p>
+          </div>
         </div>
 
         <Callout type="warning">
@@ -270,6 +284,75 @@ export default function MasterItemGuidePage() {
         </div>
       </section>
 
+      {/* Kelola Kategori */}
+      <section id="categories" className="scroll-mt-32 space-y-4">
+        <h2 className="text-lg font-bold text-base-content flex items-center gap-2">
+          <Filter className="w-5 h-5 text-primary" />
+          {t("Kelola Kategori (Area)", "Manage Categories (Areas)")}
+        </h2>
+
+        <p className="text-sm text-base-content/70 leading-relaxed">
+          {t(
+            "Kategori (Area) adalah pengelompokan item, misalnya display depan, chiller, atau freezer. Kategori dikelola per cabang oleh admin melalui tombol 'Kelola Kategori' di halaman Master Item.",
+            "Categories (Areas) group items, e.g., front display, chiller, or freezer. Categories are managed per branch by admins via the 'Kelola Kategori' button on the Master Items page."
+          )}
+        </p>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-xl border border-base-300 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <PlusCircle className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-base-content">{t("Menambah Kategori", "Adding a Category")}</h3>
+              <p className="text-[11px] text-base-content/60 mt-0.5">
+                {t(
+                  "Ketik nama kategori baru di bagian atas modal lalu klik Tambah. ID kategori dibuat otomatis (misal KAT-001).",
+                  "Type a new category name at the top of the modal and click Add. The category ID is auto-generated (e.g., KAT-001)."
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl border border-base-300 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Edit3 className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-base-content">{t("Rename & Urutan", "Rename & Order")}</h3>
+              <p className="text-[11px] text-base-content/60 mt-0.5">
+                {t(
+                  "Klik ikon pensil untuk mengubah nama atau urutan kategori. Klik ikon power untuk menonaktifkan/mengaktifkan. Rename otomatis memperbarui semua item yang memakai kategori lama.",
+                  "Click the pencil icon to change a category name or order. Click the power icon to deactivate/activate. Renaming automatically updates all items using the old category."
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl border border-base-300 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <X className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-base-content">{t("Menonaktifkan", "Deactivating")}</h3>
+              <p className="text-[11px] text-base-content/60 mt-0.5">
+                {t(
+                  "Kategori yang dinonaktifkan tidak muncul saat memilih area untuk item baru, tetapi item lama yang sudah memakainya tetap tampil apa adanya — tidak ada data yang rusak.",
+                  "Deactivated categories do not appear when selecting an area for new items, but existing items already using them remain unchanged — no data is broken."
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <Callout type="note">
+          {t(
+            "Kategori bersifat per cabang. Menambahkan atau mengubah kategori di satu cabang tidak memengaruhi cabang lain.",
+            "Categories are per branch. Adding or changing categories in one branch does not affect other branches."
+          )}
+        </Callout>
+      </section>
+
       {/* Admin Only */}
       <section id="admin-only" className="scroll-mt-32 space-y-4">
         <h2 className="text-lg font-bold text-base-content flex items-center gap-2">
@@ -300,6 +383,10 @@ export default function MasterItemGuidePage() {
             <li className="flex items-start gap-2">
               <Check className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
               <span>{t("Mencari dan memfilter item", "Search and filter items")}</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
+              <span>{t("Mengelola kategori (area) per cabang", "Manage categories (areas) per branch")}</span>
             </li>
           </ul>
         </div>

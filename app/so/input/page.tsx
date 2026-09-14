@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { QuantumLoaderFull, QuantumLoaderMini } from '@/components/ui/QuantumLoader';
 import { SOGeneratingOverlay, type SOGerStep } from '@/components/SOGeneratingOverlay';
+import { ShiftCabangGate } from '@/components/ShiftCabangGate';
 import { staggerContainer, staggerItem } from '@/components/PageTransition';
 import { parseTipeInput, hasTipe, sanitizeDecimalInput } from '@/lib/domain/so';
 import type { InputTipe } from '@/lib/domain/so';
@@ -250,8 +251,9 @@ async function verifyXlsxLinkSaved(
 
 export default function InputSOPage() {
   const router = useRouter();
-  const { selectedCabang, loading: cabangLoading } = useCabang();
+  const { selectedCabang, setSelectedCabang, cabangList, loading: cabangLoading } = useCabang();
   const { user } = useAuth();
+  const [gateOpen, setGateOpen] = useState<boolean>(true);
 
   const [items, setItems] = useState<MasterItem[]>([]);
   const [previousSO, setPreviousSO] = useState<Record<string, PreviousSO>>({});
@@ -301,6 +303,47 @@ export default function InputSOPage() {
 
   // Petugas = logged-in user name
   const petugas = user?.nama || 'Tidak diketahui';
+
+  // Shift yang terakhir dipakai (sessionStorage, bukan localStorage — reset saat tab/navigasi baru)
+  const [lastShift, setLastShift] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem('stokis_so_last_shift') || 'Opening';
+    } catch {
+      return 'Opening';
+    }
+  });
+
+  // <ShiftCabangGate>: minta konfirmasi cabang+shift tiap kali enter /so/input.
+  // Pre-filled: cabang dari context (last used) + shift dari draft (jika ada) atau lastShift.
+  const gateInitialCabangId = selectedCabang?.Cabang_ID ?? null;
+  const gateInitialShift = (() => {
+    if (selectedCabang) {
+      const draft = loadDraft(selectedCabang.Cabang_ID);
+      if (draft?.shift) return draft.shift;
+    }
+    return lastShift;
+  })();
+
+  const getDraftShiftForGate = useCallback((cabangId: string): string | null => {
+    const draft = loadDraft(cabangId);
+    return draft?.shift ?? null;
+  }, []);
+
+  const handleGateConfirm = (cabangId: string, shiftVal: string) => {
+    // Pilih cabang lain (kalau beda dari context) melalui setter resmi context.
+    const target = (cabangList ?? []).find((c) => c.Cabang_ID === cabangId) || null;
+    if (target && target.Cabang_ID !== selectedCabang?.Cabang_ID) {
+      setSelectedCabang(target);
+    }
+    setShift(shiftVal);
+    setLastShift(shiftVal);
+    try {
+      sessionStorage.setItem('stokis_so_last_shift', shiftVal);
+    } catch {
+      // abai
+    }
+    setGateOpen(false);
+  };
 
   useEffect(() => {
     if (!selectedCabang) {
@@ -847,9 +890,18 @@ export default function InputSOPage() {
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-base-200 text-base-content/60 border border-base-300">
-              <Hash className="w-3.5 h-3.5" />
-              <span>{filteredItems.length} / {items.length} Item</span>
+            <div className="flex items-center gap-2">
+              <a
+                href="/docs/user-guide/stock-opname"
+                className="btn btn-ghost btn-sm btn-circle text-base-content/50 hover:text-primary"
+                title="Buka panduan Input SO"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </a>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-base-200 text-base-content/60 border border-base-300">
+                <Hash className="w-3.5 h-3.5" />
+                <span>{filteredItems.length} / {items.length} Item</span>
+              </div>
             </div>
           </div>
 
@@ -1428,6 +1480,18 @@ export default function InputSOPage() {
       <AnimatePresence>
         {submitting && <SOGeneratingOverlay step={genStep} />}
       </AnimatePresence>
+
+      {/* Gate konfirmasi cabang + shift (muncul tiap enter /so/input) */}
+      {gateOpen && (
+        <ShiftCabangGate
+          open={gateOpen}
+          cabangList={cabangList ?? []}
+          initialCabangId={gateInitialCabangId}
+          initialShift={gateInitialShift}
+          getDraftShift={getDraftShiftForGate}
+          onConfirm={handleGateConfirm}
+        />
+      )}
     </>
   );
 }
