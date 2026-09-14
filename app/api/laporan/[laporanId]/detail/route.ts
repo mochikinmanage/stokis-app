@@ -32,18 +32,32 @@ export const GET = withAuth(async (req: NextRequest, { params }, session) => {
     const data = rows.map((r) => {
       const itemId = String(r['Item_ID'] || '');
       return {
+        Laporan_ID: String(r['Laporan_ID'] || ''),
+        Tanggal_Operasional: String(r['Tanggal_Operasional'] || ''),
+        Shift: String(r['Shift'] || ''),
+        Petugas: String(r['Petugas'] || ''),
         Item_ID: itemId,
         Nama_Barang: String(r['Nama_Barang'] || ''),
         Area: String(r['Area'] || ''),
         Satuan: String(r['Satuan'] || ''),
         Threshold: r['Threshold'] != null && r['Threshold'] !== '' ? Number(r['Threshold']) : null,
+        Prev_Step1: r['Prev_Step1'] != null && r['Prev_Step1'] !== '' ? Number(r['Prev_Step1']) : null,
+        Prev_Step2: r['Prev_Step2'] != null && r['Prev_Step2'] !== '' ? Number(r['Prev_Step2']) : null,
+        Prev_Total: r['Prev_Total'] != null && r['Prev_Total'] !== '' ? Number(r['Prev_Total']) : null,
+        Prev_Tanggal: String(r['Prev_Tanggal'] || ''),
+        Prev_Shift: String(r['Prev_Shift'] || ''),
+        Prev_Keterangan: String(r['Prev_Keterangan'] || ''),
         Step1: Number(r['Step1']) || 0,
         Step2: Number(r['Step2']) || 0,
+        Total: r['Total'] != null && r['Total'] !== '' ? Number(r['Total']) : (Number(r['Step1']) || 0) + (Number(r['Step2']) || 0),
+        Penggunaan: r['Penggunaan'] != null && r['Penggunaan'] !== '' ? Number(r['Penggunaan']) : 0,
         Keterangan: String(r['Keterangan'] || ''),
+        Status: String(r['Status'] || ''),
         Tipe_Input: tipeInputMap.get(itemId) || '',
         Status_Isi: String(r['Status_Isi'] || ''),
         Tgl_Refill: String(r['Tgl_Refill'] || ''),
         Tgl_Pakai: String(r['Tgl_Pakai'] || ''),
+        Note: String(r['Note'] || ''),
         Tgl_Kedaluwarsa: String(r['Tgl_Kedaluwarsa'] || ''),
       };
     });
