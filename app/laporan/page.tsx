@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
 import { useAuth } from '@/lib/AuthContext';
 import {
   FileText,
   Search,
-  ExternalLink,
   Share2,
   Calendar,
   Clock,
@@ -37,6 +35,51 @@ interface LaporanItem {
   Jumlah_Kritis: number;
   Jumlah_Hampir_Habis: number;
   Status_Kirim_WA: string;
+}
+
+type SquareActionColor = 'primary' | 'info' | 'warning' | 'success';
+
+interface SquareActionProps {
+  href?: string;
+  target?: '_blank';
+  onClick?: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  title: string;
+  label: string;
+  icon: React.ReactNode;
+  color?: SquareActionColor;
+}
+
+const SQUARE_ACTION_STYLES: Record<SquareActionColor, string> = {
+  primary: 'border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/30',
+  info: 'border-info/40 bg-info/10 text-info hover:bg-info/20 active:bg-info/30',
+  warning: 'border-warning/40 bg-warning/10 text-warning hover:bg-warning/20 active:bg-warning/30',
+  success: 'border-success/40 bg-success/10 text-success hover:bg-success/20 active:bg-success/30',
+};
+
+function SquareAction({ href, target, onClick, disabled, loading, title, label, icon, color = 'primary' }: SquareActionProps) {
+  const classes = `btn btn-xs flex-col gap-0.5 h-11 min-w-[52px] px-1.5 rounded-lg border font-semibold transition-colors ${SQUARE_ACTION_STYLES[color]} disabled:opacity-60 disabled:cursor-not-allowed ${loading ? 'pointer-events-none' : ''}`;
+
+  const inner = (
+    <>
+      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="scale-100">{icon}</span>}
+      <span className="text-[9px] leading-none tracking-wide">{label}</span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <a href={href} target={target} rel={target === '_blank' ? 'noopener noreferrer' : undefined} title={title} className={classes}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <button onClick={onClick} disabled={disabled || loading} title={title} className={classes}>
+      {inner}
+    </button>
+  );
 }
 
 function formatWaktuDibuat(value: string): string {
@@ -407,44 +450,42 @@ export default function LaporanPage() {
                           {row.Status_Kirim_WA || 'Belum'}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right space-x-2" data-label="Aksi">
-                        {row.Link_XLSX && (
-                          <a
-                            href={row.Link_XLSX}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Buka Berkas XLSX di Google Drive"
-                            className="btn btn-ghost btn-xs text-base-content/60 hover:text-secondary"
-                          >
-                            <Table className="w-4 h-4" />
-                          </a>
-                        )}
-                        <Link
-                          href={`/laporan/${row.Laporan_ID}/edit`}
-                          title="Edit Laporan"
-                          className="btn btn-ghost btn-xs text-base-content/60 hover:text-primary"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Link>
-                        <button
-                          onClick={() => handleRegenerate(row)}
-                          disabled={regeneratingId === row.Laporan_ID}
-                          title="Buat Ulang File"
-                          className="btn btn-ghost btn-xs text-base-content/60 hover:text-warning"
-                        >
-                          {regeneratingId === row.Laporan_ID ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <RefreshCw className="w-4 h-4" />
+                      <td className="px-5 py-4 text-right" data-label="Aksi">
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          {row.Link_XLSX && (
+                            <SquareAction
+                              href={row.Link_XLSX}
+                              target="_blank"
+                              title="Buka Berkas XLSX di Google Drive"
+                              label="XLSX"
+                              color="info"
+                              icon={<Table className="w-4 h-4" />}
+                            />
                           )}
-                        </button>
-                        <button
-                          onClick={() => handleOpenWATemplate(row)}
-                          title="Siapkan Pesan WhatsApp"
-                          className="btn btn-ghost btn-xs text-base-content/60 hover:text-success"
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </button>
+                          <SquareAction
+                            href={`/laporan/${row.Laporan_ID}/edit`}
+                            title="Edit Laporan"
+                            label="Edit"
+                            color="primary"
+                            icon={<Pencil className="w-4 h-4" />}
+                          />
+                          <SquareAction
+                            onClick={() => handleRegenerate(row)}
+                            disabled={regeneratingId === row.Laporan_ID}
+                            loading={regeneratingId === row.Laporan_ID}
+                            title="Buat Ulang File"
+                            label="Ulang"
+                            color="warning"
+                            icon={<RefreshCw className="w-4 h-4" />}
+                          />
+                          <SquareAction
+                            onClick={() => handleOpenWATemplate(row)}
+                            title="Siapkan Pesan WhatsApp"
+                            label="WA"
+                            color="success"
+                            icon={<Share2 className="w-4 h-4" />}
+                          />
+                        </div>
                       </td>
                     </motion.tr>
                   ))}
