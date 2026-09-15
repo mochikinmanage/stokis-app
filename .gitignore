@@ -30,7 +30,6 @@ yarn-error.log*
 # env files
 .env.local
 .env.production
-/.env.local
 
 # vercel
 .vercel
@@ -49,11 +48,14 @@ session-*.md
 .opencode/
 opencode.json*
 
-# data
+# data files (XLSX generated at runtime)
 *.xlsx
-!Templates/PREVIEW*.xlsx
 
-# Md Files
+# seed / test data
+/seed-data.json
+RPT*.pdf
+
+# legacy md files (kept in gitignore for safety)
 /AGENTS.md
 /CLAUDE.md
 /DESIGN.md
@@ -62,9 +64,3 @@ opencode.json*
 /plan.md
 /SETUP.md
 /plan-improve-ux.md
-/plan-perbaikan.md
-
-
-
-/seed-data.json
-RPT*.pdf
