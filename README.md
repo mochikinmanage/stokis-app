@@ -146,7 +146,40 @@ REGISTRY_SPREADSHEET_ID=1aBcDeFgHiJkLmNoPqRsTuVwXyZ
 
 > **Note:** Untuk production, set env vars di Vercel Dashboard > Settings > Environment Variables.
 
-### Step 7: Run Development Server
+### Step 7: Deploy Google Apps Script (untuk Upload XLSX ke Drive)
+
+Service Account tidak punya storage quota di Google Drive. Untuk mengupload file XLSX laporan ke Drive folder cabang, aplikasi menggunakan Google Apps Script (GAS) yang berjalan di akun Google user.
+
+1. **Buka Google Apps Script**
+   - https://script.google.com → **New Project**
+
+2. **Copy semua file** dari folder `apps-script/` ke editor GAS:
+   - `Code.js`, `Utils.js`, `Registry.js`, `Cabang.js`, `MasterItem.js`, `Petugas.js`, `Users.js`, `SO.js`, `SOValidation.js`, `Laporan.js`, `Dashboard.js`, `PDF.js`, `GetKey.js`, `SetKey.js`, `SetupPhase1.js`, `TestPhase2.js`
+   - Set file `appsscript.json` → ganti isi dengan `apps-script/appsscript.json`
+
+3. **Set API Key di Script Properties**
+   - Di editor GAS: **Project Settings** (gear icon) → **Script Properties**
+   - Tambah property: `STOKIS_API_KEY` = nilai yang sama dengan env `STOKIS_API_KEY` di `.env.local`
+   - Atau jalankan fungsi `setApiKey()` dari `SetKey.js` sekali
+
+4. **Deploy sebagai Web App**
+   - Klik **Deploy** > **New deployment**
+   - Type: **Web app**
+   - Execute as: **Me**
+   - Who has access: **Anyone**
+   - Klik **Deploy**
+   - Copy **Web app URL** (format: `https://script.google.com/macros/s/.../exec`)
+
+5. **Set Environment Variable**
+   - Di `.env.local` (development):
+     ```env
+     APPS_SCRIPT_URL=https://script.google.com/macros/s/AKfyc.../exec
+     ```
+   - Di Vercel (production): tambahkan `APPS_SCRIPT_URL` di Environment Variables
+
+> **Fallback:** Jika GAS upload gagal (timeout, error, dll), aplikasi otomatis menyimpan link web view (`/laporan/view/{id}?cabang=...`) sebagai fallback. User tetap bisa melihat laporan di browser dan download XLSX dari situ.
+
+### Step 8: Run Development Server
 ```bash
 npm run dev
 ```
@@ -176,7 +209,8 @@ Di bagian **Environment Variables**, tambahkan variabel berikut:
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | `stokis-service@xxx.iam.gserviceaccount.com` | Email Service Account GCP |
 | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | `"-----BEGIN PRIVATE KEY-----\n..."` | Private Key dari file JSON GCP (pastikan newline `\n` ter-escape dengan benar) |
 | `REGISTRY_SPREADSHEET_ID` | `1aBcDeFgHiJk...` | ID Google Sheet Registry utama |
-| `APP_URL` | `https://stokis-yourproject.vercel.app` | (Opsional) URL publik aplikasi untuk link fallback XLSX |
+| `APPS_SCRIPT_URL` | `https://script.google.com/macros/s/AKfyc.../exec` | Web app URL dari Google Apps Script (upload XLSX ke Drive) |
+| `APP_URL` | `https://stokis-yourproject.vercel.app` | (Opsional) URL publik aplikasi untuk link fallback |
 
 ### 4. Deploy
 1. Klik **Deploy**
@@ -248,10 +282,8 @@ Di bagian **Environment Variables**, tambahkan variabel berikut:
 
 **Flow Request:**
 1. Frontend → API Route (Next.js)
-2. API Route → `lib/appsscript.ts` (dispatcher lokal)
-3. Dispatcher → `lib/domain/*` (validasi + logika bisnis)
-4. Domain → `lib/google/*` (Sheets API / Drive API)
-5. Google API → Spreadsheet / Drive (via Service Account JWT)
+2. API Route → Domain Service (`lib/domain/*`) → Google Sheets API
+3. Untuk upload XLSX → Google Apps Script → Google Drive
 
 ---
 
@@ -260,53 +292,24 @@ Di bagian **Environment Variables**, tambahkan variabel berikut:
 ```
 stokis/
 ├── app/                      # Next.js App Router
-│   ├── api/                  # API Routes
-│   │   ├── so/               # SO CRUD + PDF + laporan
-│   │   ├── laporan/          # Laporan endpoints
-│   │   ├── master-item/      # Master item endpoints
-│   │   ├── cabang/           # Branch management
-│   │   ├── petugas/          # Petugas management
-│   │   ├── users/            # User auth
-│   │   └── dashboard/        # Dashboard data
+│   ├── api/                  # API Routes (SO, laporan, master-item, dll.)
 │   ├── so/input/             # Input SO page
 │   ├── so/konfirmasi/        # Confirmation page
-│   ├── laporan/              # Laporan list page
+│   ├── laporan/              # Laporan list + view + edit
 │   ├── dashboard/            # Analytics pages
 │   ├── master-item/          # Master item admin
 │   ├── cabang/               # Branch admin
 │   ├── petugas/              # User management
 │   └── login/                # Login page
 ├── components/               # React components
-│   ├── ui/                   # Reusable UI (QuantumLoader, etc.)
-│   ├── WATemplateModal.tsx
-│   └── PageTransition.tsx
 ├── lib/
-│   ├── google/               # Google API layer
-│   │   ├── client.ts         # JWT client (Sheets + Drive)
-│   │   ├── sheets.ts         # CRUD dasar Google Sheets API
-│   │   ├── registry.ts       # Resolver cabang + registry
-│   │   └── drive.ts          # Upload PDF ke Google Drive
-│   ├── domain/               # Logika bisnis (port dari GAS)
-│   │   ├── ids.ts            # Generator ID + validasi
-│   │   ├── so.ts             # Konstanta kolom SO + helpers
-│   │   ├── so-validation.ts  # Validasi payload SO
-│   │   ├── errors.ts         # ApiError + helpers
-│   │   ├── so-service.ts     # submitSO, getPreviousSO
-│   │   ├── laporan-service.ts # saveLaporan, searchLaporan, WA link
-│   │   ├── cabang-service.ts  # CRUD cabang + buat cabang baru
-│   │   ├── master-item-service.ts # CRUD master item
-│   │   ├── petugas-service.ts     # CRUD petugas
-│   │   ├── users-service.ts       # Login + CRUD users
-│   │   └── dashboard-service.ts   # Dashboard harian & mingguan
-│   ├── appsscript.ts         # Dispatcher lokal (switch action -> service TS)
-│   ├── AuthContext.tsx        # Auth context
-│   ├── CabangContext.tsx      # Branch context
-│   └── utils.ts              # cn() utility
+│   ├── google/               # Google API layer (client, sheets, registry, drive)
+│   ├── domain/               # Business logic (so, laporan, cabang, master-item, dll.)
+│   └── appsscript.ts         # Dispatcher (action routing)
+├── apps-script/              # Google Apps Script (upload XLSX ke Drive)
 ├── public/                   # Static assets
-├── app/globals.css           # Tailwind + custom animations
-├── docs/
-│   └── SETUP-WITHOUT-GAS.md  # Panduan setup lengkap
-└── migrasi6.md               # Catatan migrasi GAS -> TS
+├── docs/                     # Documentation
+└── test/                     # Unit tests
 ```
 
 ---
@@ -319,6 +322,10 @@ stokis/
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Email Service Account dari GCP | Ya |
 | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | Private key dari JSON key SA | Ya |
 | `REGISTRY_SPREADSHEET_ID` | ID spreadsheet registry | Ya |
+| `APPS_SCRIPT_URL` | Web app URL dari Google Apps Script (untuk upload XLSX ke Drive) | Ya* |
+| `APP_URL` | URL publik aplikasi (untuk link fallback) | Opsional |
+
+> \* `APPS_SCRIPT_URL` wajib jika ingin upload XLSX otomatis ke Google Drive. Tanpa ini, upload ke Drive nonaktif tapi laporan tetap bisa dilihat via web view.
 
 ---
 

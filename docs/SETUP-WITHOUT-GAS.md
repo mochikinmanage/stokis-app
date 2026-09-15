@@ -274,7 +274,7 @@ Setiap cabang punya spreadsheet sendiri dengan sheet-sheet berikut.
 
 | Variable | Keterangan |
 |----------|-----------|
-| `APPS_SCRIPT_URL` | **DIHAPUS** - tidak ada lagi GAS |
+| `APPS_SCRIPT_URL` | **Opsional** — diperlukan untuk upload XLSX ke Drive via GAS. Tanpa ini, laporan tetap bisa dilihat via web view. |
 | `FOLDER_DRIVE_INDUK` | **Opsional** - bisa diatur di Settings_Global sheet |
 
 ### 5.3 Setting di Vercel
