@@ -3,7 +3,6 @@
 import React from "react";
 import { DocsPage } from "@/components/docs/DocsPage";
 import { Callout } from "@/components/docs/Callout";
-import { CodeBlock } from "@/components/docs/CodeBlock";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
   HelpCircle,
@@ -14,7 +13,6 @@ import {
   Key,
   Monitor,
   Hash,
-  ArrowRight,
 } from "lucide-react";
 
 const toc = [
@@ -99,7 +97,7 @@ export default function FAQPage() {
               <p className="text-xs font-bold text-primary">
                 {t("S1 — Stock Utuh", "S1 — Whole Stock")}
               </p>
-              <p className="text-[11px] text-base-content/60 mt-1">
+              <p className="text-xs text-base-content/60 mt-1">
                 {t(
                   "Jumlah stok dalam kemasan utuh / belum dibuka.",
                   "Stock count in intact / unopened packaging."
@@ -110,7 +108,7 @@ export default function FAQPage() {
               <p className="text-xs font-bold text-info">
                 {t("S2 — Stock Terbuka", "S2 — Opened Stock")}
               </p>
-              <p className="text-[11px] text-base-content/60 mt-1">
+              <p className="text-xs text-base-content/60 mt-1">
                 {t(
                   "Jumlah stok yang sudah dibuka / dipakai sebagian.",
                   "Stock count that has been opened / partially used."
@@ -145,7 +143,7 @@ export default function FAQPage() {
               <p className="text-xs font-bold text-primary">
                 S1 — Stock Utuh
               </p>
-              <p className="text-[11px] text-base-content/60 mt-1">
+              <p className="text-xs text-base-content/60 mt-1">
                 {t(
                   "Stok dalam kemasan utuh yang belum dibuka. Misal: dus masih segel, bungkus belum terjual.",
                   "Stock in intact packaging that hasn't been opened. Examples: sealed boxes, unsold packages."
@@ -156,7 +154,7 @@ export default function FAQPage() {
               <p className="text-xs font-bold text-info">
                 S2 — Stock Terbuka
               </p>
-              <p className="text-[11px] text-base-content/60 mt-1">
+              <p className="text-xs text-base-content/60 mt-1">
                 {t(
                   "Stok yang sudah dibuka atau dipakai sebagian. Misal: produk display yang sudah tidak utuh.",
                   "Stock that has been opened or partially used. Examples: display products no longer intact."
@@ -190,7 +188,7 @@ export default function FAQPage() {
             <p className="text-xs font-bold text-success">
               {t("Yang Perlu Dilakukan:", "What to Do:")}
             </p>
-            <ol className="text-[11px] text-base-content/70 space-y-1 list-decimal list-inside">
+            <ol className="text-xs text-base-content/70 space-y-1 list-decimal list-inside">
               <li>{t("Nyalakan kembali HP", "Turn your phone back on")}</li>
               <li>{t("Buka browser dan kembali ke halaman Input SO", "Open browser and return to Input SO page")}</li>
               <li>{t("Sistem akan menampilkan notifikasi draft ditemukan", "System will show notification that draft was found")}</li>
@@ -260,14 +258,14 @@ export default function FAQPage() {
                 key={step.num}
                 className="p-3 rounded-xl border border-base-300 flex items-start gap-3"
               >
-                <div className="w-6 h-6 rounded-full bg-primary text-primary-content flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-content flex items-center justify-center text-xs font-bold flex-shrink-0">
                   {step.num}
                 </div>
                 <div>
                   <p className="text-xs font-bold text-base-content">
                     {step.title}
                   </p>
-                  <p className="text-[11px] text-base-content/50 mt-0.5">
+                  <p className="text-xs text-base-content/50 mt-0.5">
                     {step.desc}
                   </p>
                 </div>
@@ -290,7 +288,7 @@ export default function FAQPage() {
               "PIN can only be changed by admin. Contact your system administrator to:"
             )}
           </p>
-          <ul className="text-[11px] text-base-content/70 space-y-1.5 list-disc list-inside">
+          <ul className="text-xs text-base-content/70 space-y-1.5 list-disc list-inside">
             <li>{t("Reset PIN jika lupa", "Reset PIN if forgotten")}</li>
             <li>{t("Ganti PIN untuk keamanan", "Change PIN for security")}</li>
             <li>{t("Buat akun petugas baru dengan PIN awal", "Create new staff account with initial PIN")}</li>

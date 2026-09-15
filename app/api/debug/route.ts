@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth';
 import { resolveCabang } from '@/lib/google/registry';
 
-export const GET = withAuth(async (req: NextRequest, _ctx, session) => {
+export const GET = withAuth(async (req: NextRequest, _ctx, _session) => {
   const cabangId = req.nextUrl?.searchParams.get('cabang') || '';
   if (!cabangId) {
     return NextResponse.json({ error: 'cabang param required' }, { status: 400 });

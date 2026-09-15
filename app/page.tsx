@@ -174,7 +174,7 @@ function MarketingLanding() {
                       key={i}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg bg-base-200/40 text-xs"
                     >
-                      <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                      <div className="w-5 h-5 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -200,10 +200,10 @@ function MarketingLanding() {
                       <div
                         className={
                           item.status === "Kritis"
-                            ? "px-2 py-0.5 rounded text-[10px] font-semibold bg-error/10 text-error"
+                            ? "px-2 py-0.5 rounded-lg text-xs font-semibold bg-error/10 text-error"
                             : item.status === "Hampir Habis"
-                              ? "px-2 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning"
-                              : "px-2 py-0.5 rounded text-[10px] font-semibold bg-success/10 text-success"
+                              ? "px-2 py-0.5 rounded-lg text-xs font-semibold bg-warning/10 text-warning"
+                              : "px-2 py-0.5 rounded-lg text-xs font-semibold bg-success/10 text-success"
                         }
                       >
                         {item.status}
@@ -748,7 +748,7 @@ function UserHome() {
                   <h3 className="text-xs font-semibold text-base-content group-hover:text-primary transition-colors">
                     {a.title}
                   </h3>
-                  <p className="text-[10px] text-base-content/45 mt-0.5 leading-tight">
+                  <p className="text-xs text-base-content/45 mt-0.5 leading-tight">
                     {a.desc}
                   </p>
                 </div>
@@ -778,7 +778,7 @@ function UserHome() {
                       <h3 className="text-xs font-semibold text-base-content group-hover:text-primary transition-colors">
                         {a.title}
                       </h3>
-                      <p className="text-[10px] text-base-content/45 mt-0.5 leading-tight">
+                      <p className="text-xs text-base-content/45 mt-0.5 leading-tight">
                         {a.desc}
                       </p>
                     </div>
@@ -802,15 +802,15 @@ function UserHome() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[0, 1, 2].map((i) => (
                 <div key={i} className="card bg-base-100 border border-base-300 p-5 animate-pulse">
-                  <div className="h-4 w-24 bg-base-200 rounded mb-3" />
-                  <div className="h-8 w-12 bg-base-200 rounded" />
+                  <div className="h-4 w-24 bg-base-200 rounded-lg mb-3" />
+                  <div className="h-8 w-12 bg-base-200 rounded-lg" />
                 </div>
               ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
-                <div className="p-3 bg-primary/10 text-primary rounded">
+                <div className="p-3 bg-primary/10 text-primary rounded-lg">
                   <Package className="w-6 h-6" />
                 </div>
                 <div className="space-y-0.5">
@@ -821,7 +821,7 @@ function UserHome() {
                 </div>
               </div>
               <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
-                <div className="p-3 bg-error/10 text-error rounded">
+                <div className="p-3 bg-error/10 text-error rounded-lg">
                   <AlertCircle className="w-6 h-6" />
                 </div>
                 <div className="space-y-0.5">
@@ -830,7 +830,7 @@ function UserHome() {
                 </div>
               </div>
               <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
-                <div className="p-3 bg-warning/10 text-warning rounded">
+                <div className="p-3 bg-warning/10 text-warning rounded-lg">
                   <TrendingUp className="w-6 h-6" />
                 </div>
                 <div className="space-y-0.5">
@@ -868,7 +868,7 @@ function UserHome() {
         ) : laporanLoading ? (
           <div className="card bg-base-100 border border-base-300 p-6 animate-pulse space-y-3">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-12 bg-base-200 rounded" />
+              <div key={i} className="h-12 bg-base-200 rounded-lg" />
             ))}
           </div>
         ) : laporan.length === 0 ? (

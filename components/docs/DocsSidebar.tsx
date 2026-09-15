@@ -190,7 +190,7 @@ export function DocsSidebar({ isOpen, onClose }: DocsSidebarProps) {
                 {/* Group header */}
                 <button
                   onClick={() => toggleGroup(group.label)}
-                  className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-base-content/35 hover:text-base-content/50 transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-base-content/35 hover:text-base-content/50 transition-colors"
                 >
                   <span>{lang === "en" && group.labelEn ? group.labelEn : group.label}</span>
                   <ChevronDown
@@ -239,7 +239,7 @@ export function DocsSidebar({ isOpen, onClose }: DocsSidebarProps) {
                                       key={child.href}
                                       href={child.href}
                                       onClick={onClose}
-                                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] transition-colors ${
+                                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors ${
                                         childActive
                                           ? "bg-primary/10 text-primary font-semibold"
                                           : "text-base-content/50 hover:bg-base-200 hover:text-base-content"

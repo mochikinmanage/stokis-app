@@ -119,7 +119,7 @@ export default function UserGuidePage() {
                   <p className="text-xs font-bold text-base-content group-hover:text-primary transition-colors">
                     {lang === "en" && feature.titleEn ? feature.titleEn : feature.title}
                   </p>
-                  <p className="text-[11px] text-base-content/50 mt-0.5 leading-relaxed">
+                  <p className="text-xs text-base-content/50 mt-0.5 leading-relaxed">
                     {lang === "en" && feature.descriptionEn ? feature.descriptionEn : feature.description}
                   </p>
                 </div>
@@ -143,7 +143,7 @@ export default function UserGuidePage() {
               <Shield className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">Admin</span>
             </div>
-            <p className="text-[11px] text-base-content/50">
+            <p className="text-xs text-base-content/50">
               {t(
                 "Akses penuh ke semua fitur: input SO, laporan, dashboard, dan manajemen master data (Master Item, Cabang, Petugas).",
                 "Full access to all features: SO input, reports, dashboard, and master data management (Master Items, Branches, Staff)."
@@ -155,7 +155,7 @@ export default function UserGuidePage() {
               <Key className="w-4 h-4 text-info" />
               <span className="text-xs font-bold text-base-content">Petugas</span>
             </div>
-            <p className="text-[11px] text-base-content/50">
+            <p className="text-xs text-base-content/50">
               {t(
                 "Akses input SO dan melihat laporan. Tidak dapat mengelola master data atau melihat dashboard analitik.",
                 "SO input access and view reports. Cannot manage master data or view analytics dashboard."

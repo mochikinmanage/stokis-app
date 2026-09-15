@@ -462,16 +462,16 @@ export async function getSesiLiveData(
 
 export const CABANG_SETTINGS_SHEET = 'Settings';
 
-export type UrutanLaporan = 'Area' | 'Urutan_Input';
+export type UrutanLaporan = 'Area' | 'Urutan_Input' | 'Tipe_Input';
 
 export const URUTAN_LAPORAN_KEY = 'Urutan_Laporan';
 
-const URUTAN_LAPORAN_VALUES: UrutanLaporan[] = ['Area', 'Urutan_Input'];
+const URUTAN_LAPORAN_VALUES: UrutanLaporan[] = ['Area', 'Urutan_Input', 'Tipe_Input'];
 
-/** Normalisasi nilai Urutan_Laporan; nilai tidak dikenal → default 'Urutan_Input'. */
+/** Normalisasi nilai Urutan_Laporan; nilai tidak dikenal → default 'Tipe_Input' (arsitektur laporan). */
 export function normalizeUrutanLaporan(value: unknown): UrutanLaporan {
   const s = String(value ?? '').trim();
-  return URUTAN_LAPORAN_VALUES.includes(s as UrutanLaporan) ? (s as UrutanLaporan) : 'Urutan_Input';
+  return URUTAN_LAPORAN_VALUES.includes(s as UrutanLaporan) ? (s as UrutanLaporan) : 'Tipe_Input';
 }
 
 /** Baca semua key/value sheet Settings cabang. Aman jika sheet belum ada. */

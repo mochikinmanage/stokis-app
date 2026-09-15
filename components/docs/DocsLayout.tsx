@@ -19,7 +19,7 @@ function Breadcrumb({ pathname }: { pathname: string }) {
   if (segments.length === 0) return null;
 
   return (
-    <nav className="flex items-center gap-1 text-[11px] text-base-content/40 min-w-0" aria-label="Breadcrumb">
+    <nav className="flex items-center gap-1 text-xs text-base-content/40 min-w-0" aria-label="Breadcrumb">
       {segments.map((seg, i) => {
         const isLast = i === segments.length - 1;
         const label = seg
@@ -78,7 +78,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
             <DocsSearch onClose={() => setSidebarOpen(false)} />
             <Link
               href="/"
-              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-base-content/40 hover:text-base-content/70 hover:bg-base-200 transition-colors"
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-base-content/40 hover:text-base-content/70 hover:bg-base-200 transition-colors"
             >
               <ArrowLeft className="w-3 h-3" />
               <span>{t("Kembali", "Back")}</span>

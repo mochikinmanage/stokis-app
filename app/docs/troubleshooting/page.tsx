@@ -3,7 +3,6 @@
 import React from "react";
 import { DocsPage } from "@/components/docs/DocsPage";
 import { Callout } from "@/components/docs/Callout";
-import { CodeBlock } from "@/components/docs/CodeBlock";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
   AlertTriangle,
@@ -78,7 +77,7 @@ export default function TroubleshootingPage() {
               <AlertTriangle className="w-3.5 h-3.5" />
               {t("Gejala", "Symptoms")}
             </p>
-            <ul className="text-[11px] text-base-content/70 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-base-content/70 space-y-1 list-disc list-inside">
               <li>{t("File XLSX tidak bisa didownload", "XLSX file cannot be downloaded")}</li>
               <li>{t("Halaman menampilkan pesan error saat klik download", "Page shows error when clicking download")}</li>
             </ul>
@@ -89,7 +88,7 @@ export default function TroubleshootingPage() {
               <RefreshCw className="w-3.5 h-3.5" />
               {t("Solusi", "Solution")}
             </p>
-            <ol className="text-[11px] text-base-content/70 space-y-1 list-decimal list-inside">
+            <ol className="text-xs text-base-content/70 space-y-1 list-decimal list-inside">
               <li>{t("Buka halaman laporan", "Open the reports page")}</li>
               <li>{t("Cari laporan yang ingin didownload", "Find the report you want to download")}</li>
               <li>{t("Klik tombol \"Regenerate\" atau \"Regenerate Laporan\"", "Click the \"Regenerate\" or \"Regenerate Laporan\" button")}</li>
@@ -120,7 +119,7 @@ export default function TroubleshootingPage() {
               <AlertTriangle className="w-3.5 h-3.5" />
               {t("Gejala", "Symptoms")}
             </p>
-            <ul className="text-[11px] text-base-content/70 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-base-content/70 space-y-1 list-disc list-inside">
               <li>{t("Browser tertutup atau di-refresh saat mengisi form SO", "Browser closed or refreshed while filling SO form")}</li>
               <li>{t("HP mati mendadak saat menghitung stok", "Phone died suddenly while counting stock")}</li>
               <li>{t("Koneksi internet terputus", "Internet connection lost")}</li>
@@ -132,7 +131,7 @@ export default function TroubleshootingPage() {
               <RefreshCw className="w-3.5 h-3.5" />
               {t("Solusi", "Solution")}
             </p>
-            <ol className="text-[11px] text-base-content/70 space-y-1 list-decimal list-inside">
+            <ol className="text-xs text-base-content/70 space-y-1 list-decimal list-inside">
               <li>{t("Buka kembali halaman Input SO", "Re-open the Input SO page")}</li>
               <li>{t("Sistem akan mendeteksi draft yang tersimpan", "The system will detect the saved draft")}</li>
               <li>{t("Klik \"Lanjutkan Draft\" atau \"Restore Draft\"", "Click \"Continue Draft\" or \"Restore Draft\"")}</li>
@@ -163,7 +162,7 @@ export default function TroubleshootingPage() {
               <AlertTriangle className="w-3.5 h-3.5" />
               {t("Gejala", "Symptoms")}
             </p>
-            <ul className="text-[11px] text-base-content/70 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-base-content/70 space-y-1 list-disc list-inside">
               <li>{t("Pesan \"PIN salah\" atau \"Username tidak ditemukan\"", "Message \"Wrong PIN\" or \"Username not found\"")}</li>
               <li>{t("Tidak bisa masuk meskipun sudah memasukkan PIN yang benar", "Cannot login even though correct PIN was entered")}</li>
             </ul>
@@ -174,7 +173,7 @@ export default function TroubleshootingPage() {
               <Shield className="w-3.5 h-3.5" />
               {t("Solusi", "Solution")}
             </p>
-            <ol className="text-[11px] text-base-content/70 space-y-1 list-decimal list-inside">
+            <ol className="text-xs text-base-content/70 space-y-1 list-decimal list-inside">
               <li>{t("Pastikan username diketik dengan benar (case-sensitive)", "Make sure username is typed correctly (case-sensitive)")}</li>
               <li>{t("Pastikan PIN tidak ada spasi di awal atau akhir", "Make sure PIN has no spaces at the beginning or end")}</li>
               <li>{t("Coba ketik PIN di notepad dulu, lalu copy-paste", "Try typing PIN in notepad first, then copy-paste")}</li>
@@ -204,7 +203,7 @@ export default function TroubleshootingPage() {
               <AlertTriangle className="w-3.5 h-3.5" />
               {t("Gejala", "Symptoms")}
             </p>
-            <ul className="text-[11px] text-base-content/70 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-base-content/70 space-y-1 list-disc list-inside">
               <li>{t("Dropdown cabang kosong atau tidak menampilkan cabang yang diharapkan", "Branch dropdown is empty or doesn't show expected branch")}</li>
               <li>{t("Tidak bisa akses halaman tertentu karena cabang tidak dipilih", "Cannot access certain pages because no branch is selected")}</li>
             </ul>
@@ -215,7 +214,7 @@ export default function TroubleshootingPage() {
               <Building2 className="w-3.5 h-3.5" />
               {t("Solusi", "Solution")}
             </p>
-            <ol className="text-[11px] text-base-content/70 space-y-1 list-decimal list-inside">
+            <ol className="text-xs text-base-content/70 space-y-1 list-decimal list-inside">
               <li>{t("Cek role akun Anda — petugas hanya melihat cabang yang ditugaskan", "Check your account role — staff only see assigned branches")}</li>
               <li>{t("Hubungi admin untuk memastikan akun Anda sudah ditautkan ke cabang", "Contact admin to ensure your account is linked to a branch")}</li>
               <li>{t("Jika Anda admin, pastikan cabang sudah dibuat dan statusnya aktif", "If you're admin, ensure branch is created and active")}</li>
@@ -237,7 +236,7 @@ export default function TroubleshootingPage() {
               <AlertTriangle className="w-3.5 h-3.5" />
               {t("Gejala", "Symptoms")}
             </p>
-            <ul className="text-[11px] text-base-content/70 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-base-content/70 space-y-1 list-disc list-inside">
               <li>{t("Status stok menampilkan \"Tidak Dipantau\" untuk item tertentu", "Stock status shows \"Not Monitored\" for certain items")}</li>
               <li>{t("Tidak ada angka threshold di kolom status", "No threshold number in the status column")}</li>
             </ul>
@@ -248,7 +247,7 @@ export default function TroubleshootingPage() {
               <Gauge className="w-3.5 h-3.5" />
               {t("Penjelasan & Solusi", "Explanation & Solution")}
             </p>
-            <div className="text-[11px] text-base-content/70 space-y-2">
+            <div className="text-xs text-base-content/70 space-y-2">
               <p>
                 {t(
                   "Ini bukan error. Threshold \"Tidak Dipantau\" berarti item tersebut belum memiliki threshold minimum yang ditetapkan oleh admin.",
@@ -285,7 +284,7 @@ export default function TroubleshootingPage() {
               <AlertTriangle className="w-3.5 h-3.5" />
               {t("Gejala", "Symptoms")}
             </p>
-            <ul className="text-[11px] text-base-content/70 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-base-content/70 space-y-1 list-disc list-inside">
               <li>{t("Tiba-tiba logout atau diarahkan ke halaman login", "Suddenly logged out or redirected to login page")}</li>
               <li>{t("Pesan \"Session expired\" atau \"Unauthorized\"", "Message \"Session expired\" or \"Unauthorized\"")}</li>
             </ul>
@@ -296,7 +295,7 @@ export default function TroubleshootingPage() {
               <RefreshCw className="w-3.5 h-3.5" />
               {t("Solusi", "Solution")}
             </p>
-            <ol className="text-[11px] text-base-content/70 space-y-1 list-decimal list-inside">
+            <ol className="text-xs text-base-content/70 space-y-1 list-decimal list-inside">
               <li>{t("Login kembali dengan username dan PIN", "Login again with username and PIN")}</li>
               <li>{t("Session berlaku selama 7 hari. Setelah itu, login ulang diperlukan", "Session is valid for 7 days. After that, re-login is required")}</li>
               <li>{t("Jika sering expired, pastikan cookie tidak diblokir browser", "If frequently expired, ensure cookies aren't blocked by browser")}</li>
@@ -318,7 +317,7 @@ export default function TroubleshootingPage() {
               <AlertTriangle className="w-3.5 h-3.5" />
               {t("Gejala", "Symptoms")}
             </p>
-            <ul className="text-[11px] text-base-content/70 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-base-content/70 space-y-1 list-disc list-inside">
               <li>{t("Halaman lambat dimuat", "Page loads slowly")}</li>
               <li>{t("Data dashboard tidak muncul dalam beberapa detik", "Dashboard data doesn't appear for several seconds")}</li>
               <li>{t("Form SO lambat merespons input", "SO form responds slowly to input")}</li>
@@ -330,7 +329,7 @@ export default function TroubleshootingPage() {
               <Wifi className="w-3.5 h-3.5" />
               {t("Penyebab & Solusi", "Cause & Solution")}
             </p>
-            <div className="text-[11px] text-base-content/70 space-y-2">
+            <div className="text-xs text-base-content/70 space-y-2">
               <p>
                 {t(
                   "Stokis menggunakan Google Sheets sebagai database. Setiap request data melibatkan panggilan API ke Google:",

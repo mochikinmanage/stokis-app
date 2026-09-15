@@ -113,6 +113,18 @@ export function normalizeCount(v: unknown): number {
   return isFinite(n) && n >= 0 ? n : 0;
 }
 
+/** Tanggal hari ini dalam zona waktu lokal (bukan UTC), format yyyy-mm-dd. */
+export function todayLocalISO(d = new Date()): string {
+  return toLocalISO(d);
+}
+
+export function toLocalISO(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export interface ValidationError {
   code: string;
   message: string;

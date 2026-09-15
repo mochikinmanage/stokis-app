@@ -71,7 +71,7 @@ function tipeBadgeColor(t?: string) {
 
 export default function MasterItemPage() {
   const { selectedCabang } = useCabang();
-  const { hasAnyRole, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
 
   const [items, setItems] = useState<MasterItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -114,8 +114,7 @@ export default function MasterItemPage() {
       if (json.success && Array.isArray(json.data)) {
         setItems(json.data);
       }
-    } catch (e) {
-      console.error('Error fetching master items:', e);
+    } catch {
       setErrorMsg('Gagal memuat data barang. Periksa koneksi internet Anda.');
     } finally {
       setLoading(false);
@@ -131,8 +130,7 @@ export default function MasterItemPage() {
       if (json.success && Array.isArray(json.data)) {
         setKategoriList(json.data);
       }
-    } catch (e) {
-      console.error('Error fetching kategori:', e);
+    } catch {
     } finally {
       setKategoriLoading(false);
     }
@@ -756,12 +754,12 @@ export default function MasterItemPage() {
                         </td>
                         <td className="px-4 py-3 text-center">
                           {item.Aktif ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-success/10 text-success border border-success/20">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                               Aktif
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-base-200 text-base-content/40">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-base-200 text-base-content/40">
                               Nonaktif
                             </span>
                           )}
@@ -890,7 +888,7 @@ export default function MasterItemPage() {
                       onChange={(e) => setNewItem({ ...newItem, Threshold: sanitizeDecimalInput(e.target.value) })}
                       className="input input-bordered w-full text-sm font-semibold tabular-nums"
                     />
-                    <p className="text-[11px] text-base-content/40">Threshold = 0 berarti tidak dipantau</p>
+                    <p className="text-xs text-base-content/40">Threshold = 0 berarti tidak dipantau</p>
                   </div>
 
                   <div className="space-y-1.5">
@@ -1052,7 +1050,7 @@ export default function MasterItemPage() {
                           <>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-base-content truncate">{k.Nama_Kategori}</p>
-                              <p className="text-[10px] text-base-content/40">{k.Kategori_ID}</p>
+                              <p className="text-xs text-base-content/40">{k.Kategori_ID}</p>
                             </div>
                             {!k.Aktif && (
                               <span className="badge badge-ghost badge-xs text-base-content/50">Nonaktif</span>

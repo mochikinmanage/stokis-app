@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useCallback, useEffect, useState } from "react";
+import React, { createContext, useContext, useCallback, useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { OnboardingTour } from "@/components/OnboardingTour";
-import { isTourDone } from "@/lib/tour";
+import { isTourDone, getTourStepsForRole } from "@/lib/tour";
 
 interface TourContextValue {
   openTour: () => void;
@@ -16,6 +16,9 @@ const TourContext = createContext<TourContextValue | undefined>(undefined);
 export function TourProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+
+  // Saring step yang tidak berlaku untuk role user (mis. dashboard admin-only).
+  const steps = useMemo(() => getTourStepsForRole(user), [user]);
 
   const openTour = useCallback(() => setOpen(true), []);
   const closeTour = useCallback(() => setOpen(false), []);
@@ -32,7 +35,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   return (
     <TourContext.Provider value={{ openTour, closeTour, isTourOpen: open }}>
       {children}
-      {open && <OnboardingTour onClose={closeTour} />}
+      {open && <OnboardingTour onClose={closeTour} steps={steps} />}
     </TourContext.Provider>
   );
 }

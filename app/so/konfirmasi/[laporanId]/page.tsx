@@ -23,24 +23,12 @@ export default function KonfirmasiLaporanPage() {
   const laporanId = params?.laporanId as string;
   const { selectedCabang } = useCabang();
 
-  const [showRegenerate, setShowRegenerate] = useState<boolean>(false);
-const [laporan, setLaporan] = useState<any>(null);
+  const [laporan, setLaporan] = useState<any>(null);
 const [loading, setLoading] = useState<boolean>(true);
 const [waSent, setWaSent] = useState<boolean>(false);
 const [showWATemplate, setShowWATemplate] = useState<boolean>(false);
 const [errorMsg, setErrorMsg] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
-
-  // Read the flag set by the input page (if Link_XLSX was not ready)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const flag = localStorage.getItem('so_showRegenerate') === 'true';
-      setShowRegenerate(flag);
-      // clear flag so it does not persist to next laporan
-      localStorage.removeItem('so_showRegenerate');
-    }
-  }, []);
-
 
   useEffect(() => {
     if (!selectedCabang || !laporanId) return;
@@ -56,8 +44,7 @@ const [errorMsg, setErrorMsg] = useState<string>('');
             setWaSent(true);
           }
         }
-      } catch (e) {
-        console.error('Error fetching laporan:', e);
+      } catch {
         setErrorMsg('Gagal memuat detail laporan. Periksa koneksi internet Anda.');
       } finally {
         setLoading(false);
@@ -86,8 +73,8 @@ const [errorMsg, setErrorMsg] = useState<string>('');
         } else if (json.success && Array.isArray(json.data?.items)) {
           setTotalItem(json.data.items.length);
         }
-      } catch (e) {
-        console.error('Failed to fetch total items', e);
+      } catch {
+        // abaikan: total item tidak kritis untuk render
       }
     };
     fetchTotal();
@@ -118,15 +105,20 @@ const [errorMsg, setErrorMsg] = useState<string>('');
       setIsRegenerating(false);
     }
   };
-  const handleWASent = () => {
+  const handleWASent = async () => {
     setWaSent(true);
     setShowWATemplate(false);
-    if (laporanId) {
-      fetch(`/api/laporan/${laporanId}/status-wa`, {
+    if (!laporanId) return;
+    try {
+      const res = await fetch(`/api/laporan/${laporanId}/status-wa`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cabangId: selectedCabang?.Cabang_ID }),
       });
+      const json = await res.json();
+      // abaikan hasil non-sukses: non-kritis, modal tetap ditutup
+    } catch {
+      // abaikan: non-kritis
     }
   };
 
@@ -199,8 +191,8 @@ const [errorMsg, setErrorMsg] = useState<string>('');
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <div>
-                <div className="text-[11px] font-black tracking-widest uppercase text-base-content/50">
-                  {selectedCabang?.Nama_Cabang || 'MOCHIKIN'}
+                <div className="text-xs font-black tracking-widest uppercase text-base-content/50">
+                  {selectedCabang?.Nama_Cabang || '-'}
                 </div>
                 <h1 className="text-xl font-extrabold text-base-content tracking-tight uppercase">
                   Struk Stock Opname
@@ -222,7 +214,7 @@ const [errorMsg, setErrorMsg] = useState<string>('');
             <div className="p-6 space-y-4 text-xs font-mono">
               <div className="flex items-center justify-between pb-2 border-b border-dashed border-base-300">
                 <span className="text-base-content/60 font-semibold uppercase">No. Laporan</span>
-                <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded text-[11px] border border-primary/20">
+                <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg text-xs border border-primary/20">
                   {laporanId}
                 </span>
               </div>
@@ -243,19 +235,19 @@ const [errorMsg, setErrorMsg] = useState<string>('');
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-base-content/60 uppercase">Total Master Item</span>
-                    <span className="font-semibold text-base-content">{totalItem || 136} Item</span>
+                    <span className="font-semibold text-base-content">{totalItem > 0 ? `${totalItem} Item` : '—'}</span>
                   </div>
 
                   <div className="border-t border-dashed border-base-300 pt-2.5 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-base-content/60 uppercase">Status Kritis</span>
-                      <span className="font-bold text-error bg-error/10 px-2 py-0.5 rounded tabular-nums">
+                      <span className="font-bold text-error bg-error/10 px-2 py-0.5 rounded-lg tabular-nums">
                         {laporan.Jumlah_Kritis} Item
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-base-content/60 uppercase">Status Hampir Habis</span>
-                      <span className="font-bold text-warning bg-warning/10 px-2 py-0.5 rounded tabular-nums">
+                      <span className="font-bold text-warning bg-warning/10 px-2 py-0.5 rounded-lg tabular-nums">
                         {laporan.Jumlah_Hampir_Habis} Item
                       </span>
                     </div>
@@ -281,8 +273,10 @@ const [errorMsg, setErrorMsg] = useState<string>('');
                   <div className="w-0.5 h-full bg-base-content"></div>
                   <div className="w-2 h-full bg-base-content"></div>
                 </div>
-                <div className="text-[10px] tracking-widest uppercase text-base-content/50">
-                  *** LAPORAN STRUK RESMI MOCHIKIN ***
+                <div className="text-xs tracking-widest uppercase text-base-content/50">
+                  {selectedCabang?.Nama_Cabang
+                    ? `*** LAPORAN STRUK RESMI ${selectedCabang.Nama_Cabang.toUpperCase()} ***`
+                    : '*** LAPORAN STRUK RESMI ***'}
                 </div>
               </div>
             </div>
@@ -381,11 +375,12 @@ const [errorMsg, setErrorMsg] = useState<string>('');
           <WATemplateModal
             isOpen={showWATemplate}
             onClose={() => setShowWATemplate(false)}
+            onSent={handleWASent}
             cabangNama={selectedCabang?.Nama_Cabang || '-'}
             tanggal={laporan.Tanggal_Operasional}
             shift={laporan.Shift}
             petugas={laporan.Petugas}
-            totalItem={totalItem || 136}
+            totalItem={totalItem}
             jumlahKritis={laporan.Jumlah_Kritis}
             jumlahHampirHabis={laporan.Jumlah_Hampir_Habis}
             linkXLSX={xlsxLink}

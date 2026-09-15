@@ -10,18 +10,14 @@ import {
   Clock,
   User,
   Search,
-  Filter,
   Send,
   CheckCircle2,
   AlertCircle,
   AlertTriangle,
   HelpCircle,
   StickyNote,
-  ArrowUp,
-  ArrowDown,
   Hash,
   Layers,
-  Share2,
   FileSpreadsheet,
   MessageCircle,
 } from "lucide-react";
@@ -40,7 +36,7 @@ const toc = [
 ];
 
 export default function StockOpnameGuidePage() {
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <DocsPage
@@ -89,7 +85,7 @@ export default function StockOpnameGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Langkah 1 — Pilih Cabang", "Step 1 — Select Branch")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Cabang yang dipilih terakhir otomatis tampil sebagai pilihan awal. Tinggal konfirmasi, atau ganti ke cabang lain.",
                   "The last selected branch is pre-filled. Just confirm it, or switch to another branch."
@@ -104,7 +100,7 @@ export default function StockOpnameGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Langkah 2 — Pilih Shift", "Step 2 — Select Shift")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Pilih Opening atau Closing. Tombol untuk melanjutkan baru aktif setelah shift dipilih.",
                   "Choose Opening or Closing. The button to continue only activates after a shift is selected."
@@ -119,7 +115,7 @@ export default function StockOpnameGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Interaksi dengan Draft", "Interaction with Drafts")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Jika ada draft tersimpan untuk kombinasi cabang+shift lain, muncul peringatan bahwa draft tersebut akan diabaikan.",
                   "If a saved draft exists for a different branch+shift combination, a warning appears that the draft will be ignored."
@@ -151,7 +147,7 @@ export default function StockOpnameGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Tanggal Operasional", "Operational Date")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Tanggal efektif pencatatan stok. Default ke hari ini.",
                   "Effective date for stock recording. Defaults to today."
@@ -166,7 +162,7 @@ export default function StockOpnameGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Shift Kerja", "Work Shift")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Pilih Opening (pagi) atau Closing (sore/malam). Digunakan untuk membedakan sesi dalam satu hari.",
                   "Select Opening (morning) or Closing (evening/night). Used to distinguish sessions within a day."
@@ -181,7 +177,7 @@ export default function StockOpnameGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Petugas", "Staff")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Nama petugas diambil otomatis dari akun yang sedang login. Tidak dapat diubah.",
                   "Staff name is automatically taken from the logged-in account. Cannot be changed."
@@ -212,7 +208,7 @@ export default function StockOpnameGuidePage() {
               <Search className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Pencarian & Filter", "Search & Filter")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Gunakan kolom pencarian untuk mencari barang berdasarkan nama atau ID item. Filter area untuk mempersempit tampilan ke area tertentu.",
                 "Use the search field to find items by name or item ID. Filter by area to narrow the view to a specific area."
@@ -225,7 +221,7 @@ export default function StockOpnameGuidePage() {
               <Hash className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Input Angka", "Number Input")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Masukkan jumlah stok fisik yang ditemukan di setiap lokasi. Total dihitung otomatis (Total = S1 + S2).",
                 "Enter the physical stock count found at each location. Total is calculated automatically (Total = S1 + S2)."
@@ -238,7 +234,7 @@ export default function StockOpnameGuidePage() {
               <StickyNote className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Keterangan (Opsional)", "Notes (Optional)")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Tambahkan catatan untuk item tertentu jika diperlukan, misal: 'Barang rusak', 'Sedang dalam pengiriman'.",
                 "Add notes for specific items if needed, e.g., 'Damaged goods', 'Pending delivery'."
@@ -264,10 +260,10 @@ export default function StockOpnameGuidePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-2">
-            <span className="badge badge-primary text-[10px] font-bold uppercase">
+            <span className="badge badge-primary text-xs font-bold uppercase">
               {t("S1 — Stock Utuh", "S1 — Whole Stock")}
             </span>
-            <p className="text-[11px] text-base-content/60 leading-relaxed">
+            <p className="text-xs text-base-content/60 leading-relaxed">
               {t(
                 "Jumlah stok dalam kemasan utuh / belum dibuka. Misal: dus belum dibuka, bungkus belum terjual, stok cadangan dalam kemasan asli.",
                 "Stock count in intact / unopened packaging. Examples: unopened boxes, unsold sealed packages, reserve stock in original packaging."
@@ -275,10 +271,10 @@ export default function StockOpnameGuidePage() {
             </p>
           </div>
           <div className="p-4 rounded-xl border border-info/20 bg-info/5 space-y-2">
-            <span className="badge badge-info text-[10px] font-bold uppercase">
+            <span className="badge badge-info text-xs font-bold uppercase">
               {t("S2 — Stock Terbuka", "S2 — Opened Stock")}
             </span>
-            <p className="text-[11px] text-base-content/60 leading-relaxed">
+            <p className="text-xs text-base-content/60 leading-relaxed">
               {t(
                 "Jumlah stok yang sudah dibuka / dipakai sebagian. Misal: produk sudah dibuka untuk display, sisa stok di rak yang tidak utuh lagi.",
                 "Stock count that has been opened / partially used. Examples: products opened for display, remaining shelf stock that is no longer intact."
@@ -321,7 +317,7 @@ export default function StockOpnameGuidePage() {
             <tbody className="text-base-content">
               <tr className="border-b border-base-300">
                 <td className="px-4 py-3">
-                  <span className="badge badge-error gap-1 text-[11px] font-bold">
+                  <span className="badge badge-error gap-1 text-xs font-bold">
                     <AlertCircle className="w-3 h-3" />
                     {t("Kritis", "Critical")}
                   </span>
@@ -330,12 +326,12 @@ export default function StockOpnameGuidePage() {
                   {t("Total ≤ Threshold", "Total ≤ Threshold")}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="badge badge-error text-[11px]">{t("Merah", "Red")}</span>
+                  <span className="badge badge-error text-xs">{t("Merah", "Red")}</span>
                 </td>
               </tr>
               <tr className="border-b border-base-300">
                 <td className="px-4 py-3">
-                  <span className="badge badge-warning gap-1 text-[11px] font-bold">
+                  <span className="badge badge-warning gap-1 text-xs font-bold">
                     <AlertTriangle className="w-3 h-3" />
                     {t("Hampir Habis", "Low Stock")}
                   </span>
@@ -344,12 +340,12 @@ export default function StockOpnameGuidePage() {
                   {t("Threshold < Total ≤ Threshold × 2", "Threshold < Total ≤ Threshold × 2")}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="badge badge-warning text-[11px]">{t("Kuning", "Yellow")}</span>
+                  <span className="badge badge-warning text-xs">{t("Kuning", "Yellow")}</span>
                 </td>
               </tr>
               <tr className="border-b border-base-300">
                 <td className="px-4 py-3">
-                  <span className="badge badge-success gap-1 text-[11px] font-bold">
+                  <span className="badge badge-success gap-1 text-xs font-bold">
                     <CheckCircle2 className="w-3 h-3" />
                     {t("Aman", "Safe")}
                   </span>
@@ -358,12 +354,12 @@ export default function StockOpnameGuidePage() {
                   {t("Total > Threshold × 2", "Total > Threshold × 2")}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="badge badge-success text-[11px]">{t("Hijau", "Green")}</span>
+                  <span className="badge badge-success text-xs">{t("Hijau", "Green")}</span>
                 </td>
               </tr>
               <tr>
                 <td className="px-4 py-3">
-                  <span className="badge badge-ghost gap-1 text-[11px] font-medium">
+                  <span className="badge badge-ghost gap-1 text-xs font-medium">
                     <HelpCircle className="w-3 h-3" />
                     {t("Tidak Dipantau", "Not Monitored")}
                   </span>
@@ -372,7 +368,7 @@ export default function StockOpnameGuidePage() {
                   {t("Threshold = 0 atau tidak diatur", "Threshold = 0 or not set")}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="badge badge-ghost text-[11px]">{t("Abu-abu", "Gray")}</span>
+                  <span className="badge badge-ghost text-xs">{t("Abu-abu", "Gray")}</span>
                 </td>
               </tr>
             </tbody>
@@ -433,7 +429,7 @@ export default function StockOpnameGuidePage() {
               </div>
               <div>
                 <h3 className="text-xs font-bold text-base-content">{step.title}</h3>
-                <p className="text-[11px] text-base-content/60 mt-0.5">{step.desc}</p>
+                <p className="text-xs text-base-content/60 mt-0.5">{step.desc}</p>
               </div>
             </div>
           ))}
@@ -464,7 +460,7 @@ export default function StockOpnameGuidePage() {
         <div className="space-y-3">
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Kapan Draft Disimpan?", "When is Draft Saved?")}</h3>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Draft disimpan secara otomatis dengan debounce 400ms setiap Anda mengubah angka stok. Jika browser tertutup atau HP mati, data tetap tersimpan.",
                 "Draft is automatically saved with 400ms debounce every time you change stock numbers. If the browser closes or phone dies, data remains saved."
@@ -474,7 +470,7 @@ export default function StockOpnameGuidePage() {
 
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Memulihkan Draft", "Restoring Draft")}</h3>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 'Ketika membuka halaman Input SO dengan draft tersimpan, muncul banner peringatan. Klik "Lanjutkan" untuk memulihkan data atau "Buang & Mulai Baru" untuk menghapus draft.',
                 'When opening the Input SO page with a saved draft, a warning banner appears. Click "Continue" to restore data or "Discard & Start New" to delete the draft.'
@@ -484,7 +480,7 @@ export default function StockOpnameGuidePage() {
 
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Kapan Draft Dihapus?", "When is Draft Deleted?")}</h3>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Draft dihapus otomatis setelah submit berhasil atau saat Anda memilih 'Buang & Mulai Baru'.",
                 "Draft is automatically deleted after successful submit or when you choose 'Discard & Start New'."
@@ -514,7 +510,7 @@ export default function StockOpnameGuidePage() {
               <CheckCircle2 className="w-4 h-4 text-success" />
               <span className="text-xs font-bold text-base-content">{t("Detail Laporan", "Report Details")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "ID Laporan, tanggal, shift, petugas, jumlah item kritis, dan jumlah item hampir habis.",
                 "Report ID, date, shift, staff, critical item count, and low stock item count."
@@ -526,7 +522,7 @@ export default function StockOpnameGuidePage() {
               <FileSpreadsheet className="w-4 h-4 text-success" />
               <span className="text-xs font-bold text-base-content">{t("Link XLSX", "XLSX Link")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Tombol untuk membuka file XLSX langsung di Google Drive.",
                 "Button to open the XLSX file directly in Google Drive."
@@ -553,7 +549,7 @@ export default function StockOpnameGuidePage() {
         <div className="space-y-3">
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Template Pesan", "Message Template")}</h3>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Template pesan berisi informasi: nama cabang, tanggal, shift, total item, jumlah kritis, jumlah hampir habis, dan link file XLSX.",
                 "Message template contains: branch name, date, shift, total items, critical count, low stock count, and XLSX file link."
@@ -563,7 +559,7 @@ export default function StockOpnameGuidePage() {
 
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Status Pengiriman", "Send Status")}</h3>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Status 'Sudah Dikirim' ditandai otomatis setelah Anda mengirim pesan. Status ini terlihat di halaman Laporan.",
                 "Status 'Sent' is automatically marked after you send the message. This status is visible on the Reports page."

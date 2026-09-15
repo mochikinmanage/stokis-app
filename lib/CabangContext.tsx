@@ -57,8 +57,8 @@ export function CabangProvider({ children }: { children: React.ReactNode }) {
       if (json.success && Array.isArray(json.data)) {
         setAllCabangs(json.data);
       }
-    } catch (e) {
-      console.error("Error fetching cabang list:", e);
+    } catch {
+      // abaikan: state tetap kosong, UI menampilkan opsi "Pilih Cabang..."
     } finally {
       if (id === fetchIdRef.current) {
         setLoading(false);

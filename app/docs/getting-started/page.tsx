@@ -28,7 +28,7 @@ const toc = [
 ];
 
 export default function GettingStartedPage() {
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <DocsPage
@@ -61,7 +61,7 @@ export default function GettingStartedPage() {
               <Monitor className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Browser (Desktop)", "Browser (Desktop)")}</span>
             </div>
-            <p className="text-[11px] text-base-content/50">
+            <p className="text-xs text-base-content/50">
               {t(
                 "Chrome, Firefox, Safari, atau Edge versi terbaru. Resolusi minimal 1024×768.",
                 "Chrome, Firefox, Safari, or Edge latest version. Minimum resolution 1024×768."
@@ -73,7 +73,7 @@ export default function GettingStartedPage() {
               <Smartphone className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Browser (Mobile)", "Browser (Mobile)")}</span>
             </div>
-            <p className="text-[11px] text-base-content/50">
+            <p className="text-xs text-base-content/50">
               {t(
                 "Chrome atau Safari di iOS/Android. Tampilan responsif untuk layar kecil.",
                 "Chrome or Safari on iOS/Android. Responsive layout for small screens."
@@ -88,7 +88,7 @@ export default function GettingStartedPage() {
               <Key className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Akun & PIN", "Account & PIN")}</span>
             </div>
-            <p className="text-[11px] text-base-content/50">
+            <p className="text-xs text-base-content/50">
               {t(
                 "Anda memerlukan akun dengan PIN yang diberikan oleh admin. Setiap akun memiliki role (Admin atau Petugas) dan akses cabang yang ditentukan.",
                 "You need an account with a PIN provided by an admin. Each account has a role (Admin or Staff) and determined branch access."
@@ -156,7 +156,7 @@ export default function GettingStartedPage() {
                 <h3 className="text-xs font-bold text-base-content">
                   {step.title}
                 </h3>
-                <p className="text-[11px] text-base-content/60 mt-1 leading-relaxed">
+                <p className="text-xs text-base-content/60 mt-1 leading-relaxed">
                   {step.desc}
                 </p>
               </div>
@@ -189,7 +189,7 @@ export default function GettingStartedPage() {
         <div className="space-y-3" id="setup-master-item">
           <div className="p-4 rounded-xl border border-base-300 space-y-2 scroll-mt-32">
             <h3 className="text-xs font-bold text-base-content">{t("1. Konfigurasi Master Item", "1. Configure Master Items")}</h3>
-            <p className="text-[11px] text-base-content/60 leading-relaxed">
+            <p className="text-xs text-base-content/60 leading-relaxed">
               {t(
                 'Buka menu "Items" (hanya terlihat oleh admin). Di sini Anda bisa menambah, mengedit, atau menonaktifkan barang. Setiap barang memiliki nama, satuan, dan threshold minimum yang menentukan status stok.',
                 'Open the "Items" menu (visible only to admins). Here you can add, edit, or deactivate items. Each item has a name, unit, and minimum threshold that determines stock status.'
@@ -199,7 +199,7 @@ export default function GettingStartedPage() {
 
           <div className="p-4 rounded-xl border border-base-300 space-y-2 scroll-mt-32" id="setup-cabang">
             <h3 className="text-xs font-bold text-base-content">{t("2. Konfigurasi Cabang", "2. Configure Branches")}</h3>
-            <p className="text-[11px] text-base-content/60 leading-relaxed">
+            <p className="text-xs text-base-content/60 leading-relaxed">
               {t(
                 'Buka menu "Cabang" untuk mengelola daftar cabang. Setiap cabang memiliki spreadsheet terisolasi untuk data stok dan folder Google Drive untuk penyimpanan file.',
                 'Open the "Branches" menu to manage the branch list. Each branch has an isolated spreadsheet for stock data and a Google Drive folder for file storage.'
@@ -209,7 +209,7 @@ export default function GettingStartedPage() {
 
           <div className="p-4 rounded-xl border border-base-300 space-y-2 scroll-mt-32" id="setup-petugas">
             <h3 className="text-xs font-bold text-base-content">{t("3. Konfigurasi Petugas", "3. Configure Staff")}</h3>
-            <p className="text-[11px] text-base-content/60 leading-relaxed">
+            <p className="text-xs text-base-content/60 leading-relaxed">
               {t(
                 'Buka menu "Petugas" untuk menambah akun petugas baru. Setiap petugas memiliki username, PIN, nama, role, dan akses cabang yang ditentukan.',
                 'Open the "Staff" menu to add new staff accounts. Each staff member has a username, PIN, name, role, and determined branch access.'

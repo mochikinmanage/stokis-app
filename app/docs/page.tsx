@@ -239,7 +239,7 @@ export default function DocsIndexPage() {
                   <p className="text-xs font-bold text-base-content group-hover:text-primary transition-colors">
                     {section.title}
                   </p>
-                  <p className="text-[11px] text-base-content/45 mt-0.5 leading-relaxed">
+                  <p className="text-xs text-base-content/45 mt-0.5 leading-relaxed">
                     {lang === "en" && section.descriptionEn
                       ? section.descriptionEn
                       : section.description}

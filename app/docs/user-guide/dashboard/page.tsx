@@ -23,7 +23,7 @@ const toc = [
 ];
 
 export default function DashboardGuidePage() {
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <DocsPage
@@ -71,7 +71,7 @@ export default function DashboardGuidePage() {
               <Calendar className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Filter Tanggal", "Date Filter")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Pilih tanggal untuk melihat data pada hari tersebut. Default ke hari ini.",
                 "Select a date to view data for that day. Defaults to today."
@@ -84,7 +84,7 @@ export default function DashboardGuidePage() {
               <SwitcherIcon />
               <span className="text-xs font-bold text-base-content">{t("Switcher Harian/Mingguan", "Daily/Weekly Switcher")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Toggle antara tampilan Harian dan Mingguan di bagian atas halaman.",
                 "Toggle between Daily and Weekly views at the top of the page."
@@ -98,21 +98,21 @@ export default function DashboardGuidePage() {
           <div className="p-4 rounded-xl border border-base-300 space-y-1">
             <div className="flex items-center gap-2">
               <Package className="w-4 h-4 text-primary" />
-              <span className="text-[11px] font-semibold text-base-content/60">{t("Total Item Terhitung", "Total Counted Items")}</span>
+              <span className="text-xs font-semibold text-base-content/60">{t("Total Item Terhitung", "Total Counted Items")}</span>
             </div>
             <p className="text-lg font-bold text-base-content">{t("Jumlah seluruh item yang dihitung pada tanggal tersebut", "Total items counted on that date")}</p>
           </div>
           <div className="p-4 rounded-xl border border-base-300 space-y-1">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-error" />
-              <span className="text-[11px] font-semibold text-base-content/60">{t("Item Status Kritis", "Critical Items")}</span>
+              <span className="text-xs font-semibold text-base-content/60">{t("Item Status Kritis", "Critical Items")}</span>
             </div>
             <p className="text-lg font-bold text-error">{t("Jumlah item yang perlu restock segera", "Items needing immediate restock")}</p>
           </div>
           <div className="p-4 rounded-xl border border-base-300 space-y-1">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-warning" />
-              <span className="text-[11px] font-semibold text-base-content/60">{t("Item Hampir Habis", "Low Stock Items")}</span>
+              <span className="text-xs font-semibold text-base-content/60">{t("Item Hampir Habis", "Low Stock Items")}</span>
             </div>
             <p className="text-lg font-bold text-warning">{t("Jumlah item yang mendekati batas minimum", "Items approaching minimum threshold")}</p>
           </div>
@@ -147,7 +147,7 @@ export default function DashboardGuidePage() {
               <Calendar className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Rentang Tanggal", "Date Range")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Pilih tanggal awal dan akhir. Default adalah 7 hari terakhir hingga hari ini.",
                 "Select start and end dates. Default is the last 7 days until today."
@@ -160,7 +160,7 @@ export default function DashboardGuidePage() {
               <Activity className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Total Transaksi", "Total Transactions")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Jumlah total item terhitung dalam periode yang dipilih.",
                 "Total counted items within the selected period."
@@ -194,8 +194,8 @@ export default function DashboardGuidePage() {
 
         <div className="space-y-3">
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-primary text-[10px] font-bold uppercase">Bar Chart</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-primary text-xs font-bold uppercase">Bar Chart</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "Grafik batang untuk membandingkan jumlah antar kategori (Kritis, Hampir Habis, Aman) atau tren harian.",
                 "Bar chart for comparing counts between categories (Critical, Low Stock, Safe) or daily trends."
@@ -203,8 +203,8 @@ export default function DashboardGuidePage() {
             </p>
           </div>
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-primary text-[10px] font-bold uppercase">Line Chart</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-primary text-xs font-bold uppercase">Line Chart</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "Grafik garis untuk melihat tren perubahan data dari waktu ke waktu.",
                 "Line chart for viewing data change trends over time."
@@ -212,8 +212,8 @@ export default function DashboardGuidePage() {
             </p>
           </div>
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-primary text-[10px] font-bold uppercase">Area Chart</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-primary text-xs font-bold uppercase">Area Chart</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "Grafik area untuk visualisasi tren dengan area berwarna di bawah garis.",
                 "Area chart for trend visualization with colored area below the line."
@@ -239,8 +239,8 @@ export default function DashboardGuidePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-2">
-            <span className="badge badge-primary text-[10px] font-bold uppercase">Admin</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-primary text-xs font-bold uppercase">Admin</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "Dapat mengakses Dashboard Harian dan Mingguan, mengubah filter tanggal, dan beralih jenis grafik.",
                 "Can access Daily and Weekly Dashboards, change date filters, and switch chart types."
@@ -248,8 +248,8 @@ export default function DashboardGuidePage() {
             </p>
           </div>
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-ghost text-[10px] font-bold uppercase">Petugas</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-ghost text-xs font-bold uppercase">Petugas</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "Tidak memiliki akses ke menu Dashboard. Hanya dapat input SO dan melihat laporan.",
                 "Does not have access to the Dashboard menu. Can only input SO and view reports."

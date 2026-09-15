@@ -66,7 +66,9 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
           });
         }
       })
-      .catch(console.error);
+      .catch(() => {
+        // abaikan: info header opsional
+      });
 
     // Fetch detail items
     fetch(`/api/laporan/${laporanId}/detail?cabang=${selectedCabang.Cabang_ID}`)
@@ -78,8 +80,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
           setError('Gagal memuat detail laporan');
         }
       })
-      .catch((e) => {
-        console.error(e);
+      .catch(() => {
         setError('Gagal memuat detail laporan');
       })
       .finally(() => setLoading(false));
@@ -148,8 +149,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
       } else {
         setError(json.error?.message || 'Gagal menyimpan perubahan');
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
       setError('Terjadi kesalahan saat menyimpan');
     } finally {
       setSaving(false);
@@ -237,7 +237,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
           <Check className="w-5 h-5" />
           <span>{successMsg}</span>
           {isNewFile && (
-            <span className="text-xs ml-2 bg-warning/20 px-2 py-1 rounded">
+            <span className="text-xs ml-2 bg-warning/20 px-2 py-1 rounded-lg">
               (File baru dibuat — link berubah)
             </span>
           )}

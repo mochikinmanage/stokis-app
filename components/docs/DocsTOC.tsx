@@ -44,7 +44,7 @@ export function DocsTOC({ items }: DocsTOCProps) {
 
   return (
     <nav className="hidden xl:block sticky top-24 w-56 flex-shrink-0 self-start py-8">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40 mb-3 px-3">
+      <p className="text-xs font-bold uppercase tracking-wider text-base-content/40 mb-3 px-3">
         {lang === "en" ? "On this page" : "Di halaman ini"}
       </p>
       <ul className="space-y-0.5 border-l border-base-200">
@@ -55,7 +55,7 @@ export function DocsTOC({ items }: DocsTOCProps) {
             <li key={item.id}>
               <a
                 href={`#${item.id}`}
-                className={`block text-[11px] py-1 transition-all border-l-2 -ml-px ${
+                className={`block text-xs py-1 transition-all border-l-2 -ml-px ${
                   item.level === 3 ? "pl-6" : "pl-3"
                 } ${
                   isActive

@@ -7,8 +7,6 @@ import {
   Building2,
   PlusCircle,
   Store,
-  Phone,
-  User,
   Edit2,
   X,
   CheckCircle2,
@@ -55,8 +53,7 @@ export default function CabangAdminPage() {
       if (json.success && Array.isArray(json.data)) {
         setCabangList(json.data);
       }
-    } catch (e) {
-      console.error('Error fetching all cabang:', e);
+    } catch {
       setErrorMsg('Gagal memuat daftar cabang. Periksa koneksi internet Anda.');
     } finally {
       setLoading(false);

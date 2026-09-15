@@ -5,10 +5,8 @@ import { DocsPage } from "@/components/docs/DocsPage";
 import { Callout } from "@/components/docs/Callout";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
-  Building2,
   PlusCircle,
   Edit2,
-  ExternalLink,
   Folder,
   FileSpreadsheet,
   Shield,
@@ -96,7 +94,7 @@ export default function CabangGuidePage() {
               </div>
               <div>
                 <h3 className="text-xs font-bold text-base-content">{step.title}</h3>
-                <p className="text-[11px] text-base-content/60 mt-0.5">{step.desc}</p>
+                <p className="text-xs text-base-content/60 mt-0.5">{step.desc}</p>
               </div>
             </div>
           ))}
@@ -153,7 +151,7 @@ export default function CabangGuidePage() {
               ].map((row) => (
                 <tr key={row.field} className="border-b border-base-300">
                   <td className="px-4 py-3 font-semibold text-xs">{row.field}</td>
-                  <td className="px-4 py-3 text-[11px] text-base-content/60">{row.desc}</td>
+                  <td className="px-4 py-3 text-xs text-base-content/60">{row.desc}</td>
                 </tr>
               ))}
             </tbody>
@@ -181,7 +179,7 @@ export default function CabangGuidePage() {
               <Store className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Spreadsheet Terpisah", "Separate Spreadsheets")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Setiap cabang memiliki Google Sheets sendiri. Data SO dan master item tidak bercampur dengan cabang lain.",
                 "Each branch has its own Google Sheet. SO data and master items do not mix with other branches."
@@ -193,7 +191,7 @@ export default function CabangGuidePage() {
               <Folder className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Folder Drive Terpisah", "Separate Drive Folders")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "File XLSX laporan disimpan di folder Drive khusus cabang. Tidak ada akses silang antar cabang.",
                 "Report XLSX files are stored in a branch-specific Drive folder. No cross-branch access."
@@ -228,9 +226,9 @@ export default function CabangGuidePage() {
           <div className="p-4 rounded-xl border border-success/20 bg-success/5 space-y-2">
             <div className="flex items-center gap-2">
               <FileSpreadsheet className="w-4 h-4 text-success" />
-              <span className="badge badge-success text-[10px] font-bold uppercase">Sheets</span>
+              <span className="badge badge-success text-xs font-bold uppercase">Sheets</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Tautan ke spreadsheet Google Sheets milik cabang. Klik untuk membuka langsung.",
                 "Link to the branch's Google Sheet. Click to open directly."
@@ -240,9 +238,9 @@ export default function CabangGuidePage() {
           <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-2">
             <div className="flex items-center gap-2">
               <Folder className="w-4 h-4 text-primary" />
-              <span className="badge badge-primary text-[10px] font-bold uppercase">Drive</span>
+              <span className="badge badge-primary text-xs font-bold uppercase">Drive</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Tautan ke folder Google Drive cabang. Semua file XLSX laporan tersimpan di sini.",
                 "Link to the branch's Google Drive folder. All XLSX report files are stored here."
@@ -288,7 +286,7 @@ export default function CabangGuidePage() {
               "Only admins can manage branches. Features available to admins:"
             )}
           </p>
-          <ul className="text-[11px] text-base-content/60 space-y-1">
+          <ul className="text-xs text-base-content/60 space-y-1">
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
               <span>{t("Menambah cabang baru (otomatis buat spreadsheet & Drive)", "Add new branch (auto-create spreadsheet & Drive)")}</span>

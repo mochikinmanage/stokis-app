@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
@@ -199,7 +199,7 @@ export default function LoginPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.3 }}
-          className="text-center text-[11px] mt-5 text-base-content/40"
+          className="text-center text-xs mt-5 text-base-content/40"
         >
           Stokis v1.0 &middot; Sistem Stock Opname
         </motion.p>

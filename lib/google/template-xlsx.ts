@@ -268,20 +268,23 @@ export async function generateXlsxFromTemplate(
   // For items with compound tipeInput (e.g. 'boolean,date'), we route each item
   // by its primary type (first entry from getReportTypes).
 
-  const groupMode = input.groupMode === 'Area' ? 'Area' : 'Urutan_Input';
+  const groupMode: 'Area' | 'Urutan_Input' | 'Tipe_Input' =
+    input.groupMode === 'Area' || input.groupMode === 'Urutan_Input' || input.groupMode === 'Tipe_Input'
+      ? input.groupMode
+      : 'Tipe_Input';
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
   // Build area → item map
   const byArea = new Map<string, XlsxItem[]>();
-  if (groupMode === 'Area') {
+  if (groupMode === 'Urutan_Input') {
+    byArea.set('', input.items);
+  } else {
     input.items.forEach((it) => {
       const key = (it.area || '').trim() || 'Area Umum';
       if (!byArea.has(key)) byArea.set(key, []);
       byArea.get(key)!.push(it);
     });
-  } else {
-    byArea.set('', input.items);
   }
 
   // Per-area: split into typed sub-groups, order sub-groups by TYPE_ORDER

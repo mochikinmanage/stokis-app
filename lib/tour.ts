@@ -8,6 +8,8 @@ export interface TourStep {
   path?: string;
   /** Placement of the popover relative to the highlighted element. */
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'center';
+  /** Optional role restriction: step is shown only to matching roles. */
+  roles?: Array<'admin' | 'petugas'>;
 }
 
 export interface TourDefinition {
@@ -40,6 +42,19 @@ export function resetTourDone(): void {
   } catch {
     /* ignore */
   }
+}
+
+export type UserRole = 'admin' | 'petugas';
+
+/** Saring langkah tur berdasarkan role user; langkah tanpa `roles` selalu ikut. */
+export function getTourStepsForRole(user: {
+  role?: string;
+} | null): TourStep[] {
+  const role = user?.role ?? 'petugas';
+  const normalized: UserRole = role === 'admin' ? 'admin' : 'petugas';
+  return ONBOARDING_TOUR.steps.filter(
+    (s) => !s.roles || s.roles.includes(normalized),
+  );
 }
 
 /**
@@ -175,6 +190,7 @@ export const ONBOARDING_TOUR: TourDefinition = {
       selector: '[data-onboard="dashboard-heading"]',
       placement: 'bottom',
       path: '/dashboard/harian',
+      roles: ['admin'],
     },
     {
       id: 'done',

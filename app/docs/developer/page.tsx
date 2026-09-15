@@ -37,7 +37,7 @@ const toc = [
 ];
 
 export default function DeveloperPage() {
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <DocsPage
@@ -89,7 +89,7 @@ export default function DeveloperPage() {
               key={item.title}
               className="p-3 rounded-xl border border-base-300"
             >
-              <p className="text-[11px] text-base-content/50">{item.title}</p>
+              <p className="text-xs text-base-content/50">{item.title}</p>
               <p className="text-xs font-bold text-base-content mt-0.5">
                 {item.desc}
               </p>
@@ -190,15 +190,15 @@ export default function DeveloperPage() {
               key={env.name}
               className="p-3 rounded-xl border border-base-300 flex items-start gap-3"
             >
-              <code className="text-[11px] bg-base-200 px-2 py-1 rounded font-mono text-primary flex-shrink-0">
+              <code className="text-xs bg-base-200 px-2 py-1 rounded-lg font-mono text-primary flex-shrink-0">
                 {env.name}
               </code>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-base-content/70">
+                <p className="text-xs text-base-content/70">
                   {env.desc}
                 </p>
                 <span
-                  className={`text-[10px] font-bold mt-1 inline-block ${
+                  className={`text-xs font-bold mt-1 inline-block ${
                     env.required ? "text-error" : "text-base-content/40"
                   }`}
                 >
@@ -235,7 +235,7 @@ export default function DeveloperPage() {
                 className="p-2.5 rounded-xl border border-base-300 flex items-center gap-3"
               >
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                  className={`text-xs font-bold px-2 py-0.5 rounded-lg ${
                     api.method === "POST"
                       ? "bg-primary/10 text-primary"
                       : "bg-success/10 text-success"
@@ -243,10 +243,10 @@ export default function DeveloperPage() {
                 >
                   {api.method}
                 </span>
-                <code className="text-[11px] font-mono text-base-content/80">
+                <code className="text-xs font-mono text-base-content/80">
                   {api.path}
                 </code>
-                <span className="text-[11px] text-base-content/50 ml-auto hidden sm:block">
+                <span className="text-xs text-base-content/50 ml-auto hidden sm:block">
                   {api.desc}
                 </span>
               </div>
@@ -272,7 +272,7 @@ export default function DeveloperPage() {
                 className="p-2.5 rounded-xl border border-base-300 flex items-center gap-3"
               >
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                  className={`text-xs font-bold px-2 py-0.5 rounded-lg ${
                     api.method === "POST"
                       ? "bg-primary/10 text-primary"
                       : "bg-success/10 text-success"
@@ -280,10 +280,10 @@ export default function DeveloperPage() {
                 >
                   {api.method}
                 </span>
-                <code className="text-[11px] font-mono text-base-content/80">
+                <code className="text-xs font-mono text-base-content/80">
                   {api.path}
                 </code>
-                <span className="text-[11px] text-base-content/50 ml-auto hidden sm:block">
+                <span className="text-xs text-base-content/50 ml-auto hidden sm:block">
                   {api.desc}
                 </span>
               </div>
@@ -308,7 +308,7 @@ export default function DeveloperPage() {
                 className="p-2.5 rounded-xl border border-base-300 flex items-center gap-3"
               >
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                  className={`text-xs font-bold px-2 py-0.5 rounded-lg ${
                     api.method === "POST"
                       ? "bg-primary/10 text-primary"
                       : "bg-success/10 text-success"
@@ -316,10 +316,10 @@ export default function DeveloperPage() {
                 >
                   {api.method}
                 </span>
-                <code className="text-[11px] font-mono text-base-content/80">
+                <code className="text-xs font-mono text-base-content/80">
                   {api.path}
                 </code>
-                <span className="text-[11px] text-base-content/50 ml-auto hidden sm:block">
+                <span className="text-xs text-base-content/50 ml-auto hidden sm:block">
                   {api.desc}
                 </span>
               </div>
@@ -349,13 +349,13 @@ export default function DeveloperPage() {
                 key={api.path + api.method}
                 className="p-2.5 rounded-xl border border-base-300 flex items-center gap-3"
               >
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-warning/10 text-warning">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-warning/10 text-warning">
                   {api.method}
                 </span>
-                <code className="text-[11px] font-mono text-base-content/80">
+                <code className="text-xs font-mono text-base-content/80">
                   {api.path}
                 </code>
-                <span className="text-[11px] text-base-content/50 ml-auto hidden sm:block">
+                <span className="text-xs text-base-content/50 ml-auto hidden sm:block">
                   {api.desc}
                 </span>
               </div>
@@ -377,13 +377,13 @@ export default function DeveloperPage() {
                 key={api.path}
                 className="p-2.5 rounded-xl border border-base-300 flex items-center gap-3"
               >
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-success/10 text-success">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-success/10 text-success">
                   {api.method}
                 </span>
-                <code className="text-[11px] font-mono text-base-content/80">
+                <code className="text-xs font-mono text-base-content/80">
                   {api.path}
                 </code>
-                <span className="text-[11px] text-base-content/50 ml-auto hidden sm:block">
+                <span className="text-xs text-base-content/50 ml-auto hidden sm:block">
                   {api.desc}
                 </span>
               </div>
@@ -410,7 +410,7 @@ export default function DeveloperPage() {
             <p className="text-xs font-bold text-base-content">
               {t("Alur Autentikasi", "Authentication Flow")}
             </p>
-            <ol className="text-[11px] text-base-content/60 space-y-1 list-decimal list-inside">
+            <ol className="text-xs text-base-content/60 space-y-1 list-decimal list-inside">
               <li>{t("User mengirim username + PIN", "User sends username + PIN")}</li>
               <li>{t("Server mencari user di Google Sheets", "Server finds user in Google Sheets")}</li>
               <li>{t("Membandingkan PIN langsung (plaintext)", "Compares PIN directly (plaintext)")}</li>
@@ -465,7 +465,7 @@ Max-Age: 7 days (604800 seconds)`}
               Registry Spreadsheet
             </p>
             <div className="overflow-x-auto">
-              <table className="table table-xs text-[11px]">
+              <table className="table table-xs text-xs">
                 <thead>
                   <tr className="text-base-content/60">
                     <th>Sheet</th>
@@ -499,7 +499,7 @@ Max-Age: 7 days (604800 seconds)`}
               Per-Branch Spreadsheet
             </p>
             <div className="overflow-x-auto">
-              <table className="table table-xs text-[11px]">
+              <table className="table table-xs text-xs">
                 <thead>
                   <tr className="text-base-content/60">
                     <th>Sheet</th>
@@ -548,7 +548,7 @@ Max-Age: 7 days (604800 seconds)`}
             <p className="text-xs font-bold text-base-content">
               {t("Langkah Deploy", "Deploy Steps")}
             </p>
-            <ol className="text-[11px] text-base-content/60 space-y-1 list-decimal list-inside">
+            <ol className="text-xs text-base-content/60 space-y-1 list-decimal list-inside">
               <li>{t("Push kode ke repository Git", "Push code to Git repository")}</li>
               <li>{t("Hubungkan repository ke Vercel", "Connect repository to Vercel")}</li>
               <li>{t("Set environment variables di Vercel dashboard", "Set environment variables in Vercel dashboard")}</li>
@@ -582,7 +582,7 @@ npm start`}
             <p className="text-xs font-bold text-base-content">
               {t("Lingkungan Development", "Development Environment")}
             </p>
-            <ul className="text-[11px] text-base-content/60 space-y-1 list-disc list-inside">
+            <ul className="text-xs text-base-content/60 space-y-1 list-disc list-inside">
               <li>{t("Copy .env.example ke .env.local", "Copy .env.example to .env.local")}</li>
               <li>{t("Isi semua environment variables", "Fill in all environment variables")}</li>
               <li>{t("Jalankan npm run dev", "Run npm run dev")}</li>

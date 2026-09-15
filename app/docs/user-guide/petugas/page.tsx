@@ -5,7 +5,6 @@ import { DocsPage } from "@/components/docs/DocsPage";
 import { Callout } from "@/components/docs/Callout";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
-  Users,
   UserPlus,
   Edit2,
   Trash2,
@@ -13,7 +12,6 @@ import {
   Key,
   Store,
   Lock,
-  AlertTriangle,
   CheckCircle2,
   RefreshCw,
 } from "lucide-react";
@@ -30,7 +28,7 @@ const toc = [
 ];
 
 export default function PetugasGuidePage() {
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <DocsPage
@@ -113,12 +111,12 @@ export default function PetugasGuidePage() {
                   <td className="px-4 py-3 font-semibold text-xs">{row.field}</td>
                   <td className="px-4 py-3">
                     {row.required ? (
-                      <span className="badge badge-primary text-[10px]">{t("Ya", "Yes")}</span>
+                      <span className="badge badge-primary text-xs">{t("Ya", "Yes")}</span>
                     ) : (
-                      <span className="badge badge-ghost text-[10px]">{t("Tidak", "No")}</span>
+                      <span className="badge badge-ghost text-xs">{t("Tidak", "No")}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-[11px] text-base-content/60">{row.desc}</td>
+                  <td className="px-4 py-3 text-xs text-base-content/60">{row.desc}</td>
                 </tr>
               ))}
             </tbody>
@@ -143,7 +141,7 @@ export default function PetugasGuidePage() {
         <div className="space-y-3">
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Field yang Dapat Diubah", "Editable Fields")}</h3>
-            <ul className="text-[11px] text-base-content/60 space-y-1">
+            <ul className="text-xs text-base-content/60 space-y-1">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
                 <span>{t("Nama Lengkap", "Full Name")}</span>
@@ -165,7 +163,7 @@ export default function PetugasGuidePage() {
 
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Field yang Tidak Dapat Diubah", "Non-Editable Fields")}</h3>
-            <ul className="text-[11px] text-base-content/60 space-y-1">
+            <ul className="text-xs text-base-content/60 space-y-1">
               <li className="flex items-start gap-2">
                 <span className="text-error mt-0.5">•</span>
                 <span>{t("Username (tetap setelah dibuat)", "Username (fixed after creation)")}</span>
@@ -195,7 +193,7 @@ export default function PetugasGuidePage() {
               <Lock className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Hashing PIN", "PIN Hashing")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "PIN dikirim ke server dan dibandingkan dengan yang tersimpan di spreadsheet.",
                 "PIN is sent to the server and matched against the stored value."
@@ -208,7 +206,7 @@ export default function PetugasGuidePage() {
               <Key className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("PIN 6 Digit", "6-Digit PIN")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "PIN harus berupa 6 digit numerik. Hanya angka yang diterima (0-9).",
                 "PIN must be 6 numeric digits. Only numbers are accepted (0-9)."
@@ -221,7 +219,7 @@ export default function PetugasGuidePage() {
               <RefreshCw className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-base-content">{t("Reset PIN", "Reset PIN")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Admin dapat mengatur PIN baru untuk pengguna. Kosongkan kolom PIN saat edit jika tidak ingin mengubah.",
                 "Admin can set a new PIN for users. Leave PIN field blank when editing if you don't want to change it."
@@ -244,7 +242,7 @@ export default function PetugasGuidePage() {
               <Shield className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-primary">Admin</span>
             </div>
-            <ul className="text-[11px] text-base-content/60 space-y-1">
+            <ul className="text-xs text-base-content/60 space-y-1">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
                 <span>{t("Input SO", "SO Input")}</span>
@@ -277,7 +275,7 @@ export default function PetugasGuidePage() {
               <Key className="w-4 h-4 text-info" />
               <span className="text-xs font-bold text-info">Petugas</span>
             </div>
-            <ul className="text-[11px] text-base-content/60 space-y-1">
+            <ul className="text-xs text-base-content/60 space-y-1">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
                 <span>{t("Input SO", "SO Input")}</span>
@@ -324,7 +322,7 @@ export default function PetugasGuidePage() {
         <div className="space-y-3">
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Cabang yang Terlihat", "Visible Branches")}</h3>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Switcher di navbar hanya menampilkan cabang yang diakses pengguna.",
                 "The navbar switcher only shows branches the user can access."
@@ -334,7 +332,7 @@ export default function PetugasGuidePage() {
 
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Data yang Dapat Diakses", "Accessible Data")}</h3>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "SO, laporan, master item, dan data lain hanya menampilkan data cabang yang dipilih.",
                 "SO, reports, master items, and other data only show data for the selected branch."
@@ -344,7 +342,7 @@ export default function PetugasGuidePage() {
 
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <h3 className="text-xs font-bold text-base-content">{t("Multi-Cabang", "Multi-Branch")}</h3>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Pengguna dapat ditetapkan ke beberapa cabang sekaligus. Cukup centang lebih dari satu cabang saat menambah/mengedit.",
                 "Users can be assigned to multiple branches at once. Just check more than one branch when adding/editing."
@@ -374,7 +372,7 @@ export default function PetugasGuidePage() {
               <RefreshCw className="w-4 h-4 text-warning" />
               <span className="text-xs font-bold text-warning">{t("Nonaktifkan/Aktifkan", "Deactivate/Activate")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Pengguna nonaktif tidak dapat login. Data tetap tersimpan. Klik 'Aktifkan' untuk mengembalikan akses.",
                 "Inactive users cannot log in. Data remains saved. Click 'Activate' to restore access."
@@ -387,7 +385,7 @@ export default function PetugasGuidePage() {
               <Trash2 className="w-4 h-4 text-error" />
               <span className="text-xs font-bold text-error">{t("Hapus Pengguna", "Delete User")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Menghapus pengguna secara permanen menghapus baris dari spreadsheet. Tindakan ini tidak dapat dibatalkan.",
                 "Deleting a user permanently removes the row from the spreadsheet. This action cannot be undone."
@@ -417,7 +415,7 @@ export default function PetugasGuidePage() {
               "Only admins can manage users. Features available to admins:"
             )}
           </p>
-          <ul className="text-[11px] text-base-content/60 space-y-1">
+          <ul className="text-xs text-base-content/60 space-y-1">
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
               <span>{t("Menambah pengguna baru", "Add new users")}</span>

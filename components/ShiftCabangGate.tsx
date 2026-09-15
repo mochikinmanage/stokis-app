@@ -88,7 +88,7 @@ export function ShiftCabangGate({
                         : 'bg-base-200'
                     }`}
                   />
-                  <span className={`text-[10px] font-semibold uppercase tracking-wide ${
+                  <span className={`text-xs font-semibold uppercase tracking-wide ${
                     step === s ? 'text-primary' : 'text-base-content/40'
                   }`}>
                     {i + 1}
@@ -190,12 +190,12 @@ export function ShiftCabangGate({
             {/* Footer */}
             <div className="flex items-center justify-between gap-3 pt-1">
               {step === 'shift' ? (
-                <button type="button" onClick={() => setStep('cabang')} className="btn btn-sm btn-ghost gap-1.5">
+                <button type="button" onClick={() => setStep('cabang')} className="btn btn-ghost gap-1.5 min-h-[44px]">
                   <ArrowLeft className="w-4 h-4" />
                   Kembali
                 </button>
               ) : (
-                <span className="text-[11px] text-base-content/50 px-1">
+                <span className="text-xs text-base-content/50 px-1">
                   Langkah {step === 'cabang' ? '1' : '2'} dari 2
                 </span>
               )}
@@ -205,7 +205,7 @@ export function ShiftCabangGate({
                   type="button"
                   onClick={handleNext}
                   disabled={nextDisabled}
-                  className="btn btn-sm btn-primary gap-1.5"
+                  className="btn btn-primary gap-1.5 min-h-[44px]"
                 >
                   Lanjut
                   <ChevronRight className="w-4 h-4" />
@@ -215,7 +215,7 @@ export function ShiftCabangGate({
                   type="button"
                   onClick={handleConfirm}
                   disabled={nextDisabled}
-                  className="btn btn-sm btn-primary gap-1.5"
+                  className="btn btn-primary gap-1.5 min-h-[44px]"
                 >
                   Mulai Input
                   <ShieldCheck className="w-4 h-4" />

@@ -97,7 +97,7 @@ export interface XlsxReportInput {
   shift: string;
   petugas: string;
   items: XlsxItem[];
-  groupMode?: 'Area' | 'Urutan_Input';
+  groupMode?: 'Area' | 'Urutan_Input' | 'Tipe_Input';
   previousSOInfo?: { tanggal?: string | number | null; shift?: string | number | null; petugas?: string | number | null } | null;
   note?: string;
 }
@@ -490,10 +490,13 @@ export async function generateXlsxReport(input: XlsxReportInput): Promise<{ buff
   const hasUtilitas = utilitasBoolean.length > 0 || utilitasNumeric.length > 0;
 
   // ─── REGULAR DATA ROWS ──────────────────────────────────────────
-  const groupMode: 'Area' | 'Urutan_Input' = input.groupMode === 'Area' ? 'Area' : 'Urutan_Input';
+  const groupMode: 'Area' | 'Urutan_Input' | 'Tipe_Input' =
+    input.groupMode === 'Area' || input.groupMode === 'Urutan_Input' || input.groupMode === 'Tipe_Input'
+      ? input.groupMode
+      : 'Tipe_Input';
   const groups: Array<{ area?: string; items: XlsxItem[] }> = [];
 
-  if (groupMode === 'Area') {
+  if (groupMode === 'Area' || groupMode === 'Tipe_Input') {
     const byArea = new Map<string, XlsxItem[]>();
     regularItems.forEach((it) => {
       const key = (it.area || '').trim() || 'Area Umum';

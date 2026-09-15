@@ -11,10 +11,8 @@ import {
   Clock,
   User,
   ExternalLink,
-  Share2,
   RefreshCw,
   Table,
-  AlertCircle,
   CheckCircle2,
   MessageCircle,
 } from "lucide-react";
@@ -31,7 +29,7 @@ const toc = [
 ];
 
 export default function LaporanGuidePage() {
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <DocsPage
@@ -87,7 +85,7 @@ export default function LaporanGuidePage() {
               ].map((row) => (
                 <tr key={row.col} className="border-b border-base-300">
                   <td className="px-4 py-3 font-semibold text-xs">{row.col}</td>
-                  <td className="px-4 py-3 text-[11px] text-base-content/60">{row.desc}</td>
+                  <td className="px-4 py-3 text-xs text-base-content/60">{row.desc}</td>
                 </tr>
               ))}
             </tbody>
@@ -116,7 +114,7 @@ export default function LaporanGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Filter Tanggal", "Date Filter")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Pilih tanggal spesifik untuk melihat laporan pada hari tersebut.",
                   "Select a specific date to view reports from that day."
@@ -131,7 +129,7 @@ export default function LaporanGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Filter Shift", "Shift Filter")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   'Pilih "Semua Shift", "Opening", atau "Closing".',
                   'Select "All Shifts", "Opening", or "Closing".'
@@ -146,7 +144,7 @@ export default function LaporanGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Pencarian Petugas", "Staff Search")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Ketik nama petugas untuk filter berdasarkan pencatat. Pencarian menggunakan debounce 300ms.",
                   "Type staff name to filter by recorder. Search uses 300ms debounce."
@@ -178,7 +176,7 @@ export default function LaporanGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Isi Tampilan", "What Is Shown")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Item per area, nilai stok sesuai tipe (S1/S2, status isi, tanggal, atau keterangan), status threshold (Kritis / Hampir Habis / Aman), dan ringkasan jumlah kritis di header.",
                   "Items per area, stock values per type (S1/S2, fill status, dates, or notes), threshold status (Critical / Low Stock / Safe), and a critical-count summary in the header."
@@ -193,7 +191,7 @@ export default function LaporanGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Bukan Pengganti File", "Not a File Replacement")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Viewer hanya untuk cek cepat. Tombol 'Unduh XLSX' dan 'Unduh PDF' tetap tersedia di halaman viewer untuk export, print, atau berbagi.",
                   "The viewer is for quick checks only. The 'Unduh XLSX' and 'Unduh PDF' buttons remain available on the viewer page for export, printing, or sharing."
@@ -227,8 +225,8 @@ export default function LaporanGuidePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-primary text-[10px] font-bold uppercase">XLSX</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-primary text-xs font-bold uppercase">XLSX</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "Data lengkap per item: nama barang, satuan, area, S1 (stock utuh), S2 (stock terbuka), total, pemakaian (MINES jika berkurang / PLUS jika bertambah), threshold, status, dan keterangan.",
                 "Complete data per item: item name, unit, area, S1 (whole stock), S2 (opened stock), total, usage (MINES if decreased / PLUS if increased), threshold, status, and notes."
@@ -236,8 +234,8 @@ export default function LaporanGuidePage() {
             </p>
           </div>
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-success text-[10px] font-bold uppercase">Google Drive</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-success text-xs font-bold uppercase">Google Drive</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "File tersimpan otomatis di folder Drive cabang. Klik ikon Table pada tabel laporan untuk membuka langsung.",
                 "File is automatically saved in the branch Drive folder. Click the Table icon in the report table to open directly."
@@ -269,7 +267,7 @@ export default function LaporanGuidePage() {
             t("Update link XLSX di database laporan", "Update XLSX link in the report database"),
           ].map((step, i) => (
             <div key={i} className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-primary text-primary-content flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-full bg-primary text-primary-content flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                 {i + 1}
               </div>
               <p className="text-xs text-base-content/70">{step}</p>
@@ -300,7 +298,7 @@ export default function LaporanGuidePage() {
         </p>
 
         <div className="p-4 rounded-xl border border-success/20 bg-success/5 space-y-2">
-          <ul className="text-[11px] text-base-content/70 space-y-1.5">
+          <ul className="text-xs text-base-content/70 space-y-1.5">
             <li className="flex items-start gap-2">
               <span className="text-success mt-0.5">•</span>
               <span>{t("Nama cabang", "Branch name")}</span>

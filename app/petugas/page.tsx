@@ -64,8 +64,7 @@ export default function PetugasPage() {
       } else {
         setErrorMsg(json.error?.message || 'Gagal memuat daftar pengguna.');
       }
-    } catch (e) {
-      console.error('Error fetching users:', e);
+    } catch {
       setErrorMsg('Gagal memuat daftar pengguna. Periksa koneksi internet Anda.');
     } finally {
       setLoading(false);

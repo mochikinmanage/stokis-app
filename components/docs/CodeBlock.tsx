@@ -25,12 +25,12 @@ export function CodeBlock({
     <div className="rounded-xl border border-base-300 overflow-hidden bg-base-200/50">
       {filename && (
         <div className="flex items-center justify-between px-4 py-2 border-b border-base-300 bg-base-200">
-          <span className="text-[11px] font-mono font-semibold text-base-content/60">
+          <span className="text-xs font-mono font-semibold text-base-content/60">
             {filename}
           </span>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 text-[11px] text-base-content/40 hover:text-base-content/70 transition-colors"
+            className="flex items-center gap-1 text-xs text-base-content/40 hover:text-base-content/70 transition-colors"
           >
             {copied ? (
               <>

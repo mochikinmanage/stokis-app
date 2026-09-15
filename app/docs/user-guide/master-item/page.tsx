@@ -30,7 +30,7 @@ const toc = [
 ];
 
 export default function MasterItemGuidePage() {
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <DocsPage
@@ -126,12 +126,12 @@ export default function MasterItemGuidePage() {
                   <td className="px-4 py-3 font-semibold text-xs">{row.field}</td>
                   <td className="px-4 py-3">
                     {row.required ? (
-                      <span className="badge badge-primary text-[10px]">{t("Ya", "Yes")}</span>
+                      <span className="badge badge-primary text-xs">{t("Ya", "Yes")}</span>
                     ) : (
-                      <span className="badge badge-ghost text-[10px]">{t("Tidak", "No")}</span>
+                      <span className="badge badge-ghost text-xs">{t("Tidak", "No")}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-[11px] text-base-content/60">{row.desc}</td>
+                  <td className="px-4 py-3 text-xs text-base-content/60">{row.desc}</td>
                 </tr>
               ))}
             </tbody>
@@ -159,7 +159,7 @@ export default function MasterItemGuidePage() {
               <AlertCircle className="w-4 h-4 text-error" />
               <span className="text-xs font-bold text-error">{t("Threshold = 0", "Threshold = 0")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Jika threshold diatur ke 0, item tidak dipantau dan status akan menampilkan 'Tidak Dipantau' (abu-abu).",
                 "If threshold is set to 0, the item is not monitored and will display 'Not Monitored' (gray) status."
@@ -172,7 +172,7 @@ export default function MasterItemGuidePage() {
               <CheckCircle2 className="w-4 h-4 text-warning" />
               <span className="text-xs font-bold text-warning">{t("Threshold > 0", "Threshold > 0")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Status dihitung otomatis: Kritis (Total ≤ Threshold), Hampir Habis (Threshold < Total ≤ Threshold × 2), Aman (Total > Threshold × 2).",
                 "Status is calculated automatically: Critical (Total ≤ Threshold), Low Stock (Threshold < Total ≤ Threshold × 2), Safe (Total > Threshold × 2)."
@@ -185,7 +185,7 @@ export default function MasterItemGuidePage() {
               <Sliders className="w-4 h-4 text-primary" />
               <span className="text-xs font-bold text-primary">{t("Angka Desimal Koma", "Decimal Comma Values")}</span>
             </div>
-            <p className="text-[11px] text-base-content/60">
+            <p className="text-xs text-base-content/60">
               {t(
                 "Penulisan desimal ala Indonesia (misal 0,5) dikenali otomatis oleh sistem dan dikonversi menjadi 0.5 tanpa menjadi nol. Ini berlaku untuk nilai threshold desimal.",
                 "Indonesian-style decimal comma (e.g., 0,5) is automatically recognized by the system and converted to 0.5 without turning it into zero. This applies to decimal threshold values."
@@ -218,8 +218,8 @@ export default function MasterItemGuidePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-4 rounded-xl border border-success/20 bg-success/5 space-y-2">
-            <span className="badge badge-success text-[10px] font-bold uppercase">{t("Aktif", "Active")}</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-success text-xs font-bold uppercase">{t("Aktif", "Active")}</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "Item muncul di form SO dan dapat dihitung. Badge hijau pada kolom Status.",
                 "Item appears in SO forms and can be counted. Green badge in Status column."
@@ -227,8 +227,8 @@ export default function MasterItemGuidePage() {
             </p>
           </div>
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-ghost text-[10px] font-bold uppercase">{t("Nonaktif", "Inactive")}</span>
-            <p className="text-[11px] text-base-content/60">
+            <span className="badge badge-ghost text-xs font-bold uppercase">{t("Nonaktif", "Inactive")}</span>
+            <p className="text-xs text-base-content/60">
               {t(
                 "Item tidak muncul di form SO. Badge abu-abu pada kolom Status. Klik 'Aktifkan' untuk mengembalikan.",
                 "Item does not appear in SO forms. Gray badge in Status column. Click 'Activate' to restore."
@@ -259,7 +259,7 @@ export default function MasterItemGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Pencarian", "Search")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Ketik nama barang, ID item, atau area. Pencarian bersifat case-insensitive.",
                   "Type item name, item ID, or area. Search is case-insensitive."
@@ -273,7 +273,7 @@ export default function MasterItemGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Filter Area", "Area Filter")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Pilih area tertentu dari dropdown untuk melihat hanya item di area tersebut.",
                   "Select a specific area from the dropdown to view only items in that area."
@@ -305,7 +305,7 @@ export default function MasterItemGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Menambah Kategori", "Adding a Category")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Ketik nama kategori baru di bagian atas modal lalu klik Tambah. ID kategori dibuat otomatis (misal KAT-001).",
                   "Type a new category name at the top of the modal and click Add. The category ID is auto-generated (e.g., KAT-001)."
@@ -320,7 +320,7 @@ export default function MasterItemGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Rename & Urutan", "Rename & Order")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Klik ikon pensil untuk mengubah nama atau urutan kategori. Klik ikon power untuk menonaktifkan/mengaktifkan. Rename otomatis memperbarui semua item yang memakai kategori lama.",
                   "Click the pencil icon to change a category name or order. Click the power icon to deactivate/activate. Renaming automatically updates all items using the old category."
@@ -335,7 +335,7 @@ export default function MasterItemGuidePage() {
             </div>
             <div>
               <h3 className="text-xs font-bold text-base-content">{t("Menonaktifkan", "Deactivating")}</h3>
-              <p className="text-[11px] text-base-content/60 mt-0.5">
+              <p className="text-xs text-base-content/60 mt-0.5">
                 {t(
                   "Kategori yang dinonaktifkan tidak muncul saat memilih area untuk item baru, tetapi item lama yang sudah memakainya tetap tampil apa adanya — tidak ada data yang rusak.",
                   "Deactivated categories do not appear when selecting an area for new items, but existing items already using them remain unchanged — no data is broken."
@@ -367,7 +367,7 @@ export default function MasterItemGuidePage() {
               "Only admins can manage Master Items. Features available to admins:"
             )}
           </p>
-          <ul className="text-[11px] text-base-content/60 space-y-1">
+          <ul className="text-xs text-base-content/60 space-y-1">
             <li className="flex items-start gap-2">
               <Check className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
               <span>{t("Menambah item baru", "Add new items")}</span>

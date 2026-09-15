@@ -25,7 +25,7 @@ const toc = [
 ];
 
 export default function IntroductionPage() {
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <DocsPage
@@ -178,7 +178,7 @@ export default function IntroductionPage() {
                   <p className="text-xs font-bold text-base-content">
                     {feature.title}
                   </p>
-                  <p className="text-[11px] text-base-content/50 mt-0.5">
+                  <p className="text-xs text-base-content/50 mt-0.5">
                     {feature.desc}
                   </p>
                 </div>
@@ -197,7 +197,7 @@ export default function IntroductionPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-primary text-[10px] font-bold uppercase">
+            <span className="badge badge-primary text-xs font-bold uppercase">
               Admin
             </span>
             <p className="text-xs text-base-content/70">
@@ -208,7 +208,7 @@ export default function IntroductionPage() {
             </p>
           </div>
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
-            <span className="badge badge-info text-[10px] font-bold uppercase">
+            <span className="badge badge-info text-xs font-bold uppercase">
               Petugas
             </span>
             <p className="text-xs text-base-content/70">

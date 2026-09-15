@@ -1,18 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
 import { useAuth } from '@/lib/AuthContext';
 import {
   FileText,
-  Search,
   Share2,
   Calendar,
   Clock,
   User,
   ShieldAlert,
-  Filter,
   AlertTriangle,
   Table,
   RefreshCw,
@@ -107,8 +105,8 @@ export default function LaporanPage() {
   const [laporanList, setLaporanList] = useState<LaporanItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  type UrutanLaporan = 'Area' | 'Urutan_Input';
-  const [urutanLaporan, setUrutanLaporan] = useState<UrutanLaporan>('Urutan_Input');
+  type UrutanLaporan = 'Area' | 'Urutan_Input' | 'Tipe_Input';
+  const [urutanLaporan, setUrutanLaporan] = useState<UrutanLaporan>('Tipe_Input');
   const [settingsSaving, setSettingsSaving] = useState<boolean>(false);
   const [settingsMsg, setSettingsMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -139,9 +137,11 @@ export default function LaporanPage() {
           setTotalMasterItems(json.data.length);
         }
       })
-      .catch((e) => console.error('Error loading master item count:', e));
+      .catch(() => {
+        // abaikan: non-kritis
+      });
   }, [selectedCabang?.Cabang_ID]);
-  const fetchLaporan = async () => {
+  const fetchLaporan = useCallback(async () => {
     if (!selectedCabang) return;
     try {
       setLoading(true);
@@ -157,17 +157,18 @@ export default function LaporanPage() {
       if (json.success && Array.isArray(json.data)) {
         setLaporanList([...json.data].reverse());
       }
-    } catch (e) {
-      console.error('Error fetching laporan:', e);
+    } catch {
       setErrorMsg('Gagal memuat laporan. Periksa koneksi internet Anda.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCabang, filterTanggal, filterShift, debouncedPetugas]);
 
   useEffect(() => {
-    fetchLaporan();
-  }, [selectedCabang, filterTanggal, filterShift, debouncedPetugas]);
+    queueMicrotask(() => {
+      void fetchLaporan();
+    });
+  }, [fetchLaporan]);
 
   useEffect(() => {
     if (!isAdmin || !selectedCabang?.Cabang_ID) return;
@@ -175,7 +176,7 @@ export default function LaporanPage() {
       .then((res) => res.json())
       .then((json) => {
         if (json.success && json.data?.urutanLaporan) {
-          setUrutanLaporan(json.data.urutanLaporan === 'Area' ? 'Area' : 'Urutan_Input');
+          setUrutanLaporan(['Area', 'Urutan_Input', 'Tipe_Input'].includes(json.data.urutanLaporan) ? json.data.urutanLaporan : 'Tipe_Input');
         }
       })
       .catch(() => {
@@ -220,16 +221,6 @@ export default function LaporanPage() {
   const handleOpenWATemplate = (laporan: LaporanItem) => {
     setSelectedLaporan(laporan);
     setShowWATemplate(true);
-  };
-
-  const handleWASent = (laporanId: string) => {
-    setShowWATemplate(false);
-    setSelectedLaporan(null);
-    fetch(`/api/laporan/${laporanId}/status-wa`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cabangId: selectedCabang?.Cabang_ID }),
-    });
   };
 
   const handleRegenerate = async (row: LaporanItem) => {
@@ -320,8 +311,9 @@ export default function LaporanPage() {
                   disabled={settingsSaving}
                   className="select select-bordered min-h-[42px] text-sm w-full sm:w-auto"
                 >
+                  <option value="Tipe_Input">Arsitektur Laporan (Default)</option>
                   <option value="Area">Per Kategori / Area</option>
-                  <option value="Urutan_Input">Default - Urutan Master Item</option>
+                  <option value="Urutan_Input">Urutan Master Item</option>
                 </select>
                 {settingsSaving && (
                   <Loader2 className="w-4 h-4 animate-spin text-primary flex-shrink-0" />
@@ -534,7 +526,7 @@ export default function LaporanPage() {
             tanggal={selectedLaporan.Tanggal_Operasional}
             shift={selectedLaporan.Shift}
             petugas={selectedLaporan.Petugas}
-            totalItem={totalMasterItems || 136}
+            totalItem={totalMasterItems}
             jumlahKritis={selectedLaporan.Jumlah_Kritis}
             jumlahHampirHabis={selectedLaporan.Jumlah_Hampir_Habis}
             linkXLSX={selectedLaporan.Link_XLSX || ''}

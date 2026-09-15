@@ -38,18 +38,31 @@ function scrollIntoViewIfNeeded(el: Element) {
  * waktu dan menampilkan popover penjelasan. Komponen hanya dirender ketika
  * sedang aktif (dikelola oleh TourProvider), jadi state selalu segar.
  */
-export function OnboardingTour({ onClose }: { onClose: () => void }) {
+export function OnboardingTour({
+  onClose,
+  steps = ONBOARDING_TOUR.steps,
+}: {
+  onClose: () => void;
+  steps?: TourStep[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
 
   const [stepIndex, setStepIndex] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const [probe, setProbe] = useState(0);
+  // Hitungan gagal menemukan elemen target; dipakai untuk auto-skip step
+  // yang elemennya tidak ada (mis. cabang belum dipilih, atau role admin-only).
+  const [missCount, setMissCount] = useState(0);
 
-  const steps = ONBOARDING_TOUR.steps;
   const step = steps[stepIndex];
   const total = steps.length;
   const isLast = stepIndex === total - 1;
+
+  // Tidak ada langkah yang sesuai untuk role user → tutup tur.
+  useEffect(() => {
+    if (total === 0) onClose();
+  }, [total, onClose]);
 
   // Apakah langkah ini membutuhkan pindah halaman yang belum aktif?
   const needsNav = Boolean(step.path && step.path !== pathname);
@@ -100,7 +113,19 @@ export function OnboardingTour({ onClose }: { onClose: () => void }) {
       measure();
     }, 0);
     const t1 = window.setTimeout(measure, 250);
-    const t2 = window.setTimeout(measure, 900);
+    const t2 = window.setTimeout(() => {
+      // Elemen target tidak kunjung muncul (mis. belum pilih cabang, atau
+      // selector ini di halaman admin-only) → skor miss. Setelah beberapa
+      // kali, langkah dilewati otomatis agar tur tidak macet.
+      if (step.selector && step.placement !== "center") {
+        const el = document.querySelector(step.selector);
+        if (!el) {
+          setMissCount((c) => c + 1);
+          return;
+        }
+      }
+      measure();
+    }, 900);
     return () => {
       window.clearTimeout(t0);
       window.clearTimeout(t1);
@@ -130,6 +155,26 @@ export function OnboardingTour({ onClose }: { onClose: () => void }) {
     markTourDone();
     onClose();
   };
+
+  // Lewati langkah yang elemennya tidak ditemukan (mis. cabang belum dipilih).
+  useEffect(() => {
+    if (missCount < 2) return;
+    setMissCount(0);
+    if (stepIndex < total - 1) {
+      goTo(stepIndex + 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missCount, stepIndex, total]);
+
+  // Tutup tur dengan tombol Escape (aksesibilitas keyboard).
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") finish();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const isCenter = step.placement === "center" || (!step.selector && !needsNav);
 
@@ -183,16 +228,21 @@ export function OnboardingTour({ onClose }: { onClose: () => void }) {
               <h3 className="text-base font-bold text-base-content mb-1.5">{step.title}</h3>
               <p className="text-sm text-base-content/70 leading-relaxed">{step.description}</p>
 
-              <div className="flex items-center gap-1.5 mt-4">
+              <div className="flex items-center gap-1 mt-4">
                 {steps.map((s, i) => (
                   <button
                     key={s.id}
                     onClick={() => goTo(i)}
                     aria-label={`Langkah ${i + 1}`}
-                    className={`h-1.5 rounded-full transition-all ${
-                      i === stepIndex ? "w-5 bg-primary" : "w-1.5 bg-base-300"
-                    }`}
-                  />
+                    aria-current={i === stepIndex ? "step" : undefined}
+                    className="flex items-center justify-center p-2 -my-2 min-h-[24px] min-w-[24px]"
+                  >
+                    <span
+                      className={`h-1.5 rounded-full transition-all ${
+                        i === stepIndex ? "w-5 bg-primary" : "w-1.5 bg-base-300"
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
 

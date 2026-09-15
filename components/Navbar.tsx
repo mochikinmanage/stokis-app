@@ -23,6 +23,7 @@ import {
   Menu,
   X,
   BookOpen,
+  MoreHorizontal,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -40,10 +41,14 @@ const bottomNavItems: NavItem[] = [
   { name: "Beranda", nameEn: "Home", href: "/", icon: Home },
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
-  { name: "Item", nameEn: "Items", href: "/master-item", icon: Package, roles: ["admin"] },
   { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
-  { name: "Lainnya", nameEn: "More", href: "/cabang", icon: Building2, roles: ["admin"] },
-  { name: "Tutor", nameEn: "Tutor", href: "/tutorial", icon: HelpCircle },
+];
+
+const moreMenuItems: NavItem[] = [
+  { name: "Master Item", nameEn: "Items", href: "/master-item", icon: Package, roles: ["admin"] },
+  { name: "Petugas", nameEn: "Staff", href: "/petugas", icon: Users, roles: ["admin"] },
+  { name: "Cabang", nameEn: "Branches", href: "/cabang", icon: Building2, roles: ["admin"] },
+  { name: "Tutorial", nameEn: "Tutorial", href: "/tutorial", icon: HelpCircle },
   { name: "Keluar", nameEn: "Logout", href: "/logout", icon: LogOut },
 ];
 
@@ -70,30 +75,41 @@ export function Navbar() {
 
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
   const adminMenuRef = useRef<HTMLDivElement>(null);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   const isVisible = (item: NavItem) => !item.roles || item.roles.includes(role);
 
   const filteredDesktop = desktopCoreItems.filter(isVisible);
   const filteredBottom = bottomNavItems.filter(isVisible);
+  const filteredMore = moreMenuItems.filter(isVisible);
   const showAdminMenu = role === "admin";
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
+    // Dashboard punya dua sub-halaman (harian & mingguan): akhiran mana pun aktif.
+    if (href === "/dashboard/harian") {
+      return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+    }
+    // Exact match atau sub-rute di bawah href ("/laporan" aktif pada "/laporan/abc").
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   const isAdminMenuActive = adminMenuItems.some((item) => isActive(item.href));
 
   useEffect(() => {
-    if (!adminMenuOpen) return;
+    if (!adminMenuOpen && !moreMenuOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (adminMenuRef.current && !adminMenuRef.current.contains(e.target as Node)) {
         setAdminMenuOpen(false);
       }
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [adminMenuOpen]);
+  }, [adminMenuOpen, moreMenuOpen]);
 
   return (
     <>
@@ -116,7 +132,7 @@ export function Navbar() {
                 <span className="text-sm font-bold tracking-tight text-base-content">
                   STOKIS
                 </span>
-                <span className="text-[10px] font-semibold tracking-wide uppercase mt-0.5 text-base-content/50">
+                <span className="text-xs font-semibold tracking-wide uppercase mt-0.5 text-base-content/50">
                   {lang === 'en' ? 'Operations' : 'Operasional'}
                 </span>
               </div>
@@ -133,6 +149,7 @@ export function Navbar() {
                     key={item.name}
                     href={item.href}
                     prefetch={false}
+                    aria-current={active ? 'page' : undefined}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${
                       active
                         ? 'bg-primary/10 text-primary'
@@ -173,6 +190,7 @@ export function Navbar() {
                             key={item.name}
                             href={item.href}
                             prefetch={false}
+                            aria-current={active ? 'page' : undefined}
                             onClick={() => setAdminMenuOpen(false)}
                             className={`flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold transition-colors ${
                               active
@@ -204,7 +222,7 @@ export function Navbar() {
               </button>
 
               {/* Branch Selector */}
-              <div data-onboard="cabang" className="flex items-center rounded-md px-2.5 py-1.5 bg-base-200 border border-base-300 max-w-[160px] sm:max-w-none">
+              <div data-onboard="cabang" className="flex items-center rounded-md px-2.5 py-1.5 bg-base-200 border border-base-300 max-w-[160px] sm:max-w-none" title={selectedCabang?.Nama_Cabang}>
                 <Store className="w-3.5 h-3.5 mr-1.5 flex-shrink-0 text-primary" />
                 <select
                   value={selectedCabang?.Cabang_ID || ""}
@@ -260,38 +278,13 @@ export function Navbar() {
           {filteredBottom.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
-            const isLogout = item.href === "/logout";
-            const isTutorial = item.href === "/tutorial";
-            if (isTutorial) {
-              return (
-                <button
-                  key={item.name}
-                  onClick={openTour}
-                  className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-colors text-base-content/50 hover:text-primary"
-                >
-                  <div className="p-1.5 rounded-lg">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <span className="text-[10px] font-semibold">{item.name}</span>
-                </button>
-              );
-            }
-            return isLogout ? (
-              <button
-                key={item.name}
-                onClick={logout}
-                className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-colors text-base-content/50 hover:text-error"
-              >
-                <div className="p-1.5 rounded-lg">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-semibold">{item.name}</span>
-              </button>
-            ) : (
+            return (
               <Link
                 key={item.name}
                 href={item.href}
                 prefetch={false}
+                aria-current={active ? 'page' : undefined}
+                onClick={() => setMoreMenuOpen(false)}
                 className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-colors ${
                   active ? 'text-primary' : 'text-base-content/50'
                 }`}
@@ -299,14 +292,120 @@ export function Navbar() {
                 <div className={`p-1.5 rounded-lg transition-colors ${active ? 'bg-primary/10' : ''}`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <span className={`text-[10px] font-semibold ${active ? 'text-primary' : ''}`}>
+                <span className={`text-xs font-semibold ${active ? 'text-primary' : ''}`}>
                   {item.name}
                 </span>
               </Link>
             );
           })}
+
+          {/* Lainnya — buka drawer menu sekunder */}
+          <button
+            onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 transition-colors ${
+              moreMenuOpen ? 'text-primary' : 'text-base-content/50'
+            }`}
+            aria-label={lang === 'en' ? 'More menu' : 'Menu lainnya'}
+            aria-expanded={moreMenuOpen}
+          >
+            <div className={`p-1.5 rounded-lg transition-colors ${moreMenuOpen ? 'bg-primary/10' : ''}`}>
+              <MoreHorizontal className="w-5 h-5" />
+            </div>
+            <span className={`text-xs font-semibold ${moreMenuOpen ? 'text-primary' : ''}`}>
+              {lang === 'en' ? 'More' : 'Lainnya'}
+            </span>
+          </button>
         </div>
       </nav>
+
+      {/* More Menu Drawer (mobile) */}
+      {moreMenuOpen && (
+        <>
+          <div
+            className="md:hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
+            onClick={() => setMoreMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            ref={moreMenuRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={lang === 'en' ? 'More menu' : 'Menu lainnya'}
+            className="md:hidden fixed z-[70] bottom-0 left-0 right-0 rounded-t-2xl bg-base-100 border-t border-base-300 shadow-2xl pb-[env(safe-area-inset-bottom)]"
+          >
+            <div className="flex items-center justify-between px-5 pt-4 pb-2">
+              <span className="font-bold text-sm text-base-content">
+                {lang === 'en' ? 'More' : 'Lainnya'}
+              </span>
+              <button
+                onClick={() => setMoreMenuOpen(false)}
+                className="p-2 -mr-2 rounded-lg text-base-content/50 hover:text-base-content hover:bg-base-200 min-h-[44px] min-w-[44px]"
+                aria-label={lang === 'en' ? 'Close menu' : 'Tutup menu'}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-3 pb-4 max-h-[60vh] overflow-y-auto">
+              {filteredMore.map((item) => {
+                const Icon = item.icon;
+                const isLogout = item.href === "/logout";
+                const isTutorial = item.href === "/tutorial";
+                if (isTutorial) {
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setMoreMenuOpen(false);
+                        openTour();
+                      }}
+                      className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-colors hover:bg-base-200 min-h-[44px]"
+                    >
+                      <Icon className="w-5 h-5 text-primary flex-shrink-0" />
+                      <span className="text-sm font-semibold text-base-content">
+                        {lang === 'en' && item.nameEn ? item.nameEn : item.name}
+                      </span>
+                    </button>
+                  );
+                }
+                if (isLogout) {
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setMoreMenuOpen(false);
+                        logout();
+                      }}
+                      className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-colors hover:bg-error/10 min-h-[44px]"
+                    >
+                      <Icon className="w-5 h-5 text-error flex-shrink-0" />
+                      <span className="text-sm font-semibold text-error">
+                        {lang === 'en' && item.nameEn ? item.nameEn : item.name}
+                      </span>
+                    </button>
+                  );
+                }
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    prefetch={false}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
+                    onClick={() => setMoreMenuOpen(false)}
+                    className={`flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-colors hover:bg-base-200 min-h-[44px] ${
+                      isActive(item.href) ? 'text-primary' : ''
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 flex-shrink-0 ${isActive(item.href) ? 'text-primary' : 'text-base-content/70'}`} />
+                    <span className={`text-sm font-semibold ${isActive(item.href) ? 'text-primary' : 'text-base-content'}`}>
+                      {lang === 'en' && item.nameEn ? item.nameEn : item.name}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

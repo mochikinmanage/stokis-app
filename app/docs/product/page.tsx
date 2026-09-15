@@ -3,7 +3,6 @@
 import React from "react";
 import { DocsPage } from "@/components/docs/DocsPage";
 import { Callout } from "@/components/docs/Callout";
-import { CodeBlock } from "@/components/docs/CodeBlock";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
   Building2,
@@ -138,7 +137,7 @@ export default function ProductPage() {
                 <p className="text-xs font-bold text-base-content">
                   {item.title}
                 </p>
-                <p className="text-[11px] text-base-content/50">
+                <p className="text-xs text-base-content/50">
                   {item.desc}
                 </p>
               </div>
@@ -213,14 +212,14 @@ export default function ProductPage() {
                 key={item.step}
                 className="p-3 rounded-xl border border-base-300 flex items-start gap-3"
               >
-                <div className="w-6 h-6 rounded-full bg-primary text-primary-content flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-content flex items-center justify-center text-xs font-bold flex-shrink-0">
                   {item.step}
                 </div>
                 <div>
                   <p className="text-xs font-bold text-base-content">
                     {item.title}
                   </p>
-                  <p className="text-[11px] text-base-content/50 mt-0.5">
+                  <p className="text-xs text-base-content/50 mt-0.5">
                     {item.desc}
                   </p>
                 </div>
@@ -242,19 +241,19 @@ export default function ProductPage() {
             </p>
             <ul className="list-disc list-inside space-y-1 text-base-content/60">
               <li>
-                <code className="text-[11px] bg-base-200 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-base-200 px-1.5 py-0.5 rounded-lg">
                   /api/so/[laporanId]/xlsx
                 </code>{" "}
                 — {t("Download langsung", "Direct download")}
               </li>
               <li>
-                <code className="text-[11px] bg-base-200 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-base-200 px-1.5 py-0.5 rounded-lg">
                   /api/so/[laporanId]/xlsx-file
                 </code>{" "}
                 — {t("Serve file", "Serve file")}
               </li>
               <li>
-                <code className="text-[11px] bg-base-200 px-1.5 py-0.5 rounded">
+                <code className="text-xs bg-base-200 px-1.5 py-0.5 rounded-lg">
                   /api/so/[laporanId]/save-laporan
                 </code>{" "}
                 — {t("Simpan metadata laporan", "Save report metadata")}
@@ -287,7 +286,7 @@ export default function ProductPage() {
                 <p className="text-xs font-bold text-error">
                   {t("Kritis", "Critical")}
                 </p>
-                <p className="text-[11px] text-base-content/50 mt-1">
+                <p className="text-xs text-base-content/50 mt-1">
                   {t("Stok = 0", "Stock = 0")}
                 </p>
               </div>
@@ -295,7 +294,7 @@ export default function ProductPage() {
                 <p className="text-xs font-bold text-warning">
                   {t("Hampir Habis", "Low")}
                 </p>
-                <p className="text-[11px] text-base-content/50 mt-1">
+                <p className="text-xs text-base-content/50 mt-1">
                   {t("0 < Stok ≤ Threshold", "0 < Stock ≤ Threshold")}
                 </p>
               </div>
@@ -303,7 +302,7 @@ export default function ProductPage() {
                 <p className="text-xs font-bold text-success">
                   {t("Aman", "Safe")}
                 </p>
-                <p className="text-[11px] text-base-content/50 mt-1">
+                <p className="text-xs text-base-content/50 mt-1">
                   {t("Stok > Threshold", "Stock > Threshold")}
                 </p>
               </div>
@@ -332,7 +331,7 @@ export default function ProductPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="p-3 rounded-xl border border-primary/20 bg-primary/5">
                 <p className="text-xs font-bold text-primary">S1 — Stock Utuh</p>
-                <p className="text-[11px] text-base-content/50 mt-1">
+                <p className="text-xs text-base-content/50 mt-1">
                   {t(
                     "Stok dalam kemasan utuh / belum dibuka.",
                     "Stock in intact / unopened packaging."
@@ -341,7 +340,7 @@ export default function ProductPage() {
               </div>
               <div className="p-3 rounded-xl border border-info/20 bg-info/5">
                 <p className="text-xs font-bold text-info">S2 — Stock Terbuka</p>
-                <p className="text-[11px] text-base-content/50 mt-1">
+                <p className="text-xs text-base-content/50 mt-1">
                   {t(
                     "Stok yang sudah dibuka / dipakai sebagian.",
                     "Stock that has been opened / partially used."
@@ -349,7 +348,7 @@ export default function ProductPage() {
                 </p>
               </div>
             </div>
-            <p className="text-[11px] text-base-content/50">
+            <p className="text-xs text-base-content/50">
               {t(
                 "Penghitungan dilakukan saat shift Opening (pagi) dan shift Closing (malam). Total = S1 + S2.",
                 "Counting is done during Opening shift (morning) and Closing shift (evening). Total = S1 + S2."
@@ -381,27 +380,27 @@ export default function ProductPage() {
               <p className="text-xs font-bold text-base-content">
                 {t("Registry Spreadsheet", "Registry Spreadsheet")}
               </p>
-              <ul className="text-[11px] text-base-content/60 space-y-1 list-disc list-inside">
+              <ul className="text-xs text-base-content/60 space-y-1 list-disc list-inside">
                 <li>
-                  <code className="bg-base-200 px-1 py-0.5 rounded">
+                  <code className="bg-base-200 px-1 py-0.5 rounded-lg">
                     Daftar_Cabang
                   </code>{" "}
                   — {t("ID cabang, nama, spreadsheet ID, folder Drive ID", "Branch ID, name, spreadsheet ID, Drive folder ID")}
                 </li>
                 <li>
-                  <code className="bg-base-200 px-1 py-0.5 rounded">
+                  <code className="bg-base-200 px-1 py-0.5 rounded-lg">
                     Users
                   </code>{" "}
                   — {t("ID user, username, PIN, nama, role, cabang ID", "User ID, username, PIN, name, role, branch ID")}
                 </li>
                 <li>
-                  <code className="bg-base-200 px-1 py-0.5 rounded">
+                  <code className="bg-base-200 px-1 py-0.5 rounded-lg">
                     Settings_Global
                   </code>{" "}
                   — {t("Pasangan key-value", "Key-value pairs")}
                 </li>
                 <li>
-                  <code className="bg-base-200 px-1 py-0.5 rounded">
+                  <code className="bg-base-200 px-1 py-0.5 rounded-lg">
                     Template_Referensi
                   </code>{" "}
                   — {t("ID spreadsheet template", "Template spreadsheet ID")}
@@ -412,27 +411,27 @@ export default function ProductPage() {
               <p className="text-xs font-bold text-base-content">
                 {t("Per-Cabang Spreadsheet", "Per-Branch Spreadsheet")}
               </p>
-              <ul className="text-[11px] text-base-content/60 space-y-1 list-disc list-inside">
+              <ul className="text-xs text-base-content/60 space-y-1 list-disc list-inside">
                 <li>
-                  <code className="bg-base-200 px-1 py-0.5 rounded">
+                  <code className="bg-base-200 px-1 py-0.5 rounded-lg">
                     Master_Item
                   </code>{" "}
                   — {t("Katalog barang dengan threshold", "Item catalog with thresholds")}
                 </li>
                 <li>
-                  <code className="bg-base-200 px-1 py-0.5 rounded">
+                  <code className="bg-base-200 px-1 py-0.5 rounded-lg">
                     SO_Transaksi
                   </code>{" "}
                   — {t("Catatan stock opname", "Stock opname records")}
                 </li>
                 <li>
-                  <code className="bg-base-200 px-1 py-0.5 rounded">
+                  <code className="bg-base-200 px-1 py-0.5 rounded-lg">
                     Laporan_PDF
                   </code>{" "}
                   — {t("Catatan laporan", "Report records")}
                 </li>
                 <li>
-                  <code className="bg-base-200 px-1 py-0.5 rounded">
+                  <code className="bg-base-200 px-1 py-0.5 rounded-lg">
                     Petugas
                   </code>{" "}
                   — {t("Staff tingkat cabang", "Branch-level staff")}
@@ -495,10 +494,10 @@ export default function ProductPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-4 rounded-xl border border-base-300 space-y-3">
-            <span className="badge badge-primary text-[10px] font-bold uppercase">
+            <span className="badge badge-primary text-xs font-bold uppercase">
               Admin
             </span>
-            <ul className="text-[11px] text-base-content/70 space-y-1.5">
+            <ul className="text-xs text-base-content/70 space-y-1.5">
               <li className="flex items-start gap-2">
                 <span className="text-primary">✓</span>
                 {t("Kelola Master Item (CRUD)", "Manage Master Items (CRUD)")}
@@ -531,10 +530,10 @@ export default function ProductPage() {
           </div>
 
           <div className="p-4 rounded-xl border border-base-300 space-y-3">
-            <span className="badge badge-info text-[10px] font-bold uppercase">
+            <span className="badge badge-info text-xs font-bold uppercase">
               Petugas
             </span>
-            <ul className="text-[11px] text-base-content/70 space-y-1.5">
+            <ul className="text-xs text-base-content/70 space-y-1.5">
               <li className="flex items-start gap-2">
                 <span className="text-info">✓</span>
                 {t("Input Stock Opname", "Input Stock Opname")}

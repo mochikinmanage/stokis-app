@@ -7,6 +7,7 @@ import { TourProvider } from '@/lib/TourContext';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { AuthGuard } from '@/components/AuthGuard';
 import { Navbar } from '@/components/Navbar';
+import { PageTransition } from '@/components/PageTransition';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,9 +37,15 @@ export default function RootLayout({
             <LanguageProvider>
               <AuthGuard>
                 <TourProvider>
+                  <a
+                    href="#main-content"
+                    className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-content focus:text-sm font-semibold"
+                  >
+                    Lewati ke konten utama
+                  </a>
                   <Navbar />
-                  <main className="flex-1 w-full overflow-x-clip">
-                    {children}
+                  <main id="main-content" className="flex-1 w-full overflow-x-clip">
+                    <PageTransition>{children}</PageTransition>
                   </main>
                 </TourProvider>
               </AuthGuard>

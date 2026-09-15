@@ -3,18 +3,13 @@
 import React from "react";
 import { DocsPage } from "@/components/docs/DocsPage";
 import { Callout } from "@/components/docs/Callout";
-import { CodeBlock } from "@/components/docs/CodeBlock";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
-  History,
-  Tag,
   Sparkles,
   BarChart3,
   MessageSquare,
   Globe,
-  Plus,
   CheckCircle2,
-  Zap,
 } from "lucide-react";
 
 const toc = [
@@ -149,7 +144,7 @@ export default function ChangelogPage() {
                     <span className="text-lg font-black text-base-content">
                       v{v.version}
                     </span>
-                    <span className="text-[11px] text-base-content/40">
+                    <span className="text-xs text-base-content/40">
                       {v.date}
                     </span>
                   </div>
@@ -164,7 +159,7 @@ export default function ChangelogPage() {
                 {v.changes.map((change, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-2 text-[11px]"
+                    className="flex items-start gap-2 text-xs"
                   >
                     <span className="mt-0.5 flex-shrink-0">
                       <CheckCircle2 className="w-3.5 h-3.5 text-success" />

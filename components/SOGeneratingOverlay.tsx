@@ -39,6 +39,15 @@ const STEP_CONFIG: Record<SOGerStep, { label: string; icon: React.ReactNode }> =
 
 export function SOGeneratingOverlay({ step, texto }: SOGeneratingOverlayProps) {
   const currentIdx = STEP_ORDER.indexOf(step);
+  const [elapsed, setElapsed] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (step === 'selesai') return; // berhenti saat selesai
+    const timer = window.setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [step]);
+
+  const stepPercent = Math.round(((currentIdx + 1) / STEP_ORDER.length) * 100);
 
   return (
     <motion.div
@@ -58,9 +67,17 @@ export function SOGeneratingOverlay({ step, texto }: SOGeneratingOverlayProps) {
       >
         <div className="flex flex-col items-center gap-3">
           <QuantumLoader text={texto || 'Membuat laporan...'} size="lg" />
+          <p className="text-sm font-medium text-base-content/70 text-center">
+            Langkah {currentIdx + 1} dari {STEP_ORDER.length} ({stepPercent}%)
+          </p>
           <p className="text-base font-semibold text-base-content text-center">
             {STEP_CONFIG[step].label}
           </p>
+          {step !== 'selesai' && (
+            <p className="text-xs text-base-content/50 tabular-nums">
+              Berjalan selama {elapsed} detik
+            </p>
+          )}
         </div>
 
         <ol className="space-y-2.5">

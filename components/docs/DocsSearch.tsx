@@ -166,7 +166,7 @@ export function DocsSearch({ onClose }: DocsSearchProps) {
       >
         <Search className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">{t("Cari dokumentasi...", "Search docs...")}</span>
-        <kbd className="hidden md:inline ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-base-300 text-base-content/40">
+        <kbd className="hidden md:inline ml-auto text-xs font-mono px-1.5 py-0.5 rounded-lg bg-base-300 text-base-content/40">
           /
         </kbd>
       </button>
@@ -196,7 +196,7 @@ export function DocsSearch({ onClose }: DocsSearchProps) {
                   setIsOpen(false);
                   setQuery("");
                 }}
-                className="p-1 rounded hover:bg-base-200 text-base-content/40"
+                className="p-1 rounded-lg hover:bg-base-200 text-base-content/40"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -238,7 +238,7 @@ export function DocsSearch({ onClose }: DocsSearchProps) {
                               : entry.title}
                           </p>
                           {entry.description && (
-                            <p className="text-[11px] text-base-content/50 mt-0.5">
+                            <p className="text-xs text-base-content/50 mt-0.5">
                               {entry.description}
                             </p>
                           )}
