@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
+import { toLocalISO } from '@/lib/domain/so';
+import { CHART_THEME_FALLBACK, CHART_TICK_FONT_SIZE, type ChartTheme } from '@/lib/chart-theme';
 import {
   BarChart3,
   AlertCircle,
@@ -42,18 +44,27 @@ interface DashboardData {
   detail: any[];
 }
 
-function StatusBarChart({ data }: { data: any[] }) {
+function tooltipStyle(theme: ChartTheme) {
+  return {
+    backgroundColor: theme.tooltipBg,
+    borderRadius: '8px',
+    border: `1px solid ${theme.tooltipBorder}`,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  };
+}
+
+function StatusBarChart({ data, theme }: { data: any[]; theme: ChartTheme }) {
   return (
     <BarChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.935 0.004 260)" vertical={false} />
-      <XAxis dataKey="name" tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} />
-      <YAxis tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} allowDecimals={false} />
+      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+      <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} />
+      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
       <Tooltip
-        contentStyle={{ backgroundColor: 'oklch(0.99 0.002 260)', borderRadius: '4px', border: '1px solid oklch(0.90 0.005 260)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-        itemStyle={{ color: 'oklch(0.18 0.03 260)' }}
+        contentStyle={tooltipStyle(theme)}
+        itemStyle={{ color: theme.tooltipText }}
       />
       <Legend verticalAlign="bottom" height={36} />
-      <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={48}>
+      <Bar dataKey="value" name="Jumlah" radius={[6, 6, 0, 0]} barSize={48}>
         {data.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={entry.color} />
         ))}
@@ -62,37 +73,43 @@ function StatusBarChart({ data }: { data: any[] }) {
   );
 }
 
-function StatusLineChart({ data }: { data: any[] }) {
+function StatusLineChart({ data, theme }: { data: any[]; theme: ChartTheme }) {
   return (
     <RechartsLineChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.935 0.004 260)" vertical={false} />
-      <XAxis dataKey="name" tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} />
-      <YAxis tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} allowDecimals={false} />
+      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+      <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} />
+      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
       <Tooltip
-        contentStyle={{ backgroundColor: 'oklch(0.99 0.002 260)', borderRadius: '4px', border: '1px solid oklch(0.90 0.005 260)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-        itemStyle={{ color: 'oklch(0.18 0.03 260)' }}
+        contentStyle={tooltipStyle(theme)}
+        itemStyle={{ color: theme.tooltipText }}
       />
       <Legend verticalAlign="bottom" height={36} />
-      <Line type="monotone" dataKey="value" stroke="oklch(0.46 0.17 260)" strokeWidth={3} dot={{ r: 4 }} />
+      <Line type="monotone" dataKey="value" name="Jumlah" stroke={theme.series} strokeWidth={3} dot={{ r: 4 }} />
     </RechartsLineChart>
   );
 }
 
-function StatusAreaChart({ data }: { data: any[] }) {
+function StatusAreaChart({ data, theme }: { data: any[]; theme: ChartTheme }) {
   return (
     <RechartsAreaChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.935 0.004 260)" vertical={false} />
-      <XAxis dataKey="name" tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} />
-      <YAxis tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} allowDecimals={false} />
+      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+      <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} />
+      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
       <Tooltip
-        contentStyle={{ backgroundColor: 'oklch(0.99 0.002 260)', borderRadius: '4px', border: '1px solid oklch(0.90 0.005 260)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-        itemStyle={{ color: 'oklch(0.18 0.03 260)' }}
+        contentStyle={tooltipStyle(theme)}
+        itemStyle={{ color: theme.tooltipText }}
       />
       <Legend verticalAlign="bottom" height={36} />
-      <Area type="monotone" dataKey="value" stroke="oklch(0.46 0.17 260)" fill="oklch(0.935 0.004 260)" strokeWidth={3} />
+      <Area type="monotone" dataKey="value" name="Jumlah" stroke={theme.series} fill={theme.areaFill} strokeWidth={3} />
     </RechartsAreaChart>
   );
 }
+
+const CHART_OPTIONS: { type: ChartType; label: string; Icon: typeof BarChart3Icon }[] = [
+  { type: 'bar', label: 'Batang', Icon: BarChart3Icon },
+  { type: 'line', label: 'Garis', Icon: LineChartIcon },
+  { type: 'area', label: 'Area', Icon: AreaChartIcon },
+];
 
 export default function DashboardHarianPage() {
   const { selectedCabang } = useCabang();
@@ -104,69 +121,71 @@ export default function DashboardHarianPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [chartType, setChartType] = useState<ChartType>('bar');
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const [retryNonce, setRetryNonce] = useState<number>(0);
+  // Tema statis (data-theme="stokis"): fallback = nilai CSS var DaisyUI yang sama persis.
+  // Tanpa state/effect → bebas hydration mismatch & set-state-in-effect.
+  const theme: ChartTheme = CHART_THEME_FALLBACK;
 
-  // Fetch available dates on mount
+  // Fetch available dates on mount (AbortController untuk hindari race)
   useEffect(() => {
     if (!selectedCabang) return;
+    const controller = new AbortController();
     setDatesLoading(true);
-    fetch(`/api/dashboard/dates/${selectedCabang.Cabang_ID}`)
+    fetch(`/api/dashboard/dates/${selectedCabang.Cabang_ID}`, { signal: controller.signal })
       .then(r => r.json())
       .then(json => {
         if (json.success && json.data?.dates?.length > 0) {
           setAvailableDates(json.data.dates);
           setTanggal(json.data.dates[0]); // latest date
         } else {
-          const today = new Date().toISOString().split('T')[0];
+          const today = toLocalISO(new Date());
           setAvailableDates([]);
           setTanggal(today);
         }
       })
-      .catch(() => {
-        const today = new Date().toISOString().split('T')[0];
-        setTanggal(today);
+      .catch((err: unknown) => {
+        if ((err as { name?: string })?.name === 'AbortError') return;
+        setTanggal(toLocalISO(new Date()));
       })
       .finally(() => setDatesLoading(false));
+    return () => controller.abort();
   }, [selectedCabang]);
 
-  const fetchDashboard = useCallback(async () => {
+  useEffect(() => {
     if (!selectedCabang || !tanggal) return;
-    try {
+    const controller = new AbortController();
+    (async () => {
       setLoading(true);
       setErrorMsg('');
-      const url = `/api/dashboard/harian?cabang=${selectedCabang.Cabang_ID}&tanggal=${tanggal}`;
-      console.log('[Dashboard] Fetching:', url);
-      const res = await fetch(url);
-      const json = await res.json();
-      console.log('[Dashboard] Response:', json);
-      if (json.success && json.data) {
-        setData(json.data);
-      } else {
-        const errMsg = json.error?.message || 'Gagal memuat data dashboard.';
-        console.error('[Dashboard] API error:', errMsg);
-        setErrorMsg(errMsg);
+      try {
+        const url = `/api/dashboard/harian?cabang=${selectedCabang.Cabang_ID}&tanggal=${tanggal}`;
+        const res = await fetch(url, { signal: controller.signal });
+        const json = await res.json();
+        if (json.success && json.data) {
+          setData(json.data);
+        } else {
+          setErrorMsg(json.error?.message || 'Gagal memuat data dashboard.');
+          setData(null);
+        }
+      } catch (err: unknown) {
+        if ((err as { name?: string })?.name === 'AbortError') return;
+        setErrorMsg('Gagal memuat data dashboard. Periksa koneksi internet Anda.');
         setData(null);
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error('[Dashboard] Fetch error:', e);
-      setErrorMsg('Gagal memuat data dashboard. Periksa koneksi internet Anda.');
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCabang, tanggal]);
-
-  useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+    })();
+    return () => controller.abort();
+  }, [selectedCabang, tanggal, retryNonce]);
 
   const chartData = useMemo(() => {
     if (!data) return [];
     return [
-      { name: 'Kritis', value: data.kritis || 0, color: '#ef4444' },
-      { name: 'Hampir Habis', value: data.hampirHabis || 0, color: '#f59e0b' },
-      { name: 'Aman', value: data.aman || 0, color: '#22c55e' },
+      { name: 'Kritis', value: data.kritis || 0, color: theme.barColors.kritis },
+      { name: 'Hampir Habis', value: data.hampirHabis || 0, color: theme.barColors.hampirHabis },
+      { name: 'Aman', value: data.aman || 0, color: theme.barColors.aman },
     ];
-  }, [data]);
+  }, [data, theme]);
 
   if (!selectedCabang) {
     return (
@@ -186,7 +205,7 @@ export default function DashboardHarianPage() {
       <div className="p-12 text-center card bg-base-100 border border-base-300 space-y-4">
         <AlertCircle className="w-10 h-10 text-error mx-auto" />
         <p className="text-base-content/60 text-sm">{errorMsg}</p>
-        <button onClick={fetchDashboard} className="btn btn-primary btn-sm gap-2">
+        <button onClick={() => setRetryNonce((n) => n + 1)} className="btn btn-primary btn-sm gap-2">
           <RefreshCw className="w-4 h-4" />
           Coba Lagi
         </button>
@@ -194,23 +213,16 @@ export default function DashboardHarianPage() {
     );
   }
 
-  const ChartIcon = chartType === 'bar' ? BarChart3Icon : chartType === 'line' ? LineChartIcon : AreaChartIcon;
-
   const renderChart = () => {
-    if (chartData.every((d) => d.value === 0)) {
-      return (
-        <div className="h-full flex items-center justify-center text-base-content/40 text-sm">
-          Tidak ada data untuk ditampilkan pada tanggal ini.
-        </div>
-      );
-    }
+    // Grafik selalu dirender (axis + legend + bar 0) saat data ada.
+    // Empty-state hanya ditangani untuk tabel; chart kosong tetap tampil utk konteks.
     switch (chartType) {
       case 'bar':
-        return <StatusBarChart data={chartData} />;
+        return <StatusBarChart data={chartData} theme={theme} />;
       case 'line':
-        return <StatusLineChart data={chartData} />;
+        return <StatusLineChart data={chartData} theme={theme} />;
       case 'area':
-        return <StatusAreaChart data={chartData} />;
+        return <StatusAreaChart data={chartData} theme={theme} />;
     }
   };
 
@@ -233,9 +245,9 @@ export default function DashboardHarianPage() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex bg-base-200 rounded p-1 text-sm font-medium">
-            <span className="bg-base-100 text-base-content px-3 py-1 rounded shadow-sm">Harian</span>
-            <Link href="/dashboard/mingguan" className="text-base-content/60 hover:text-base-content px-3 py-1 rounded transition-colors">
+          <div className="flex bg-base-200 rounded-lg p-1 text-sm font-medium">
+            <span className="bg-base-100 text-base-content px-3 py-1 rounded-lg shadow-sm">Harian</span>
+            <Link href="/dashboard/mingguan" className="text-base-content/60 hover:text-base-content px-3 py-1 rounded-lg transition-colors">
               Mingguan
             </Link>
           </div>
@@ -244,6 +256,7 @@ export default function DashboardHarianPage() {
             value={tanggal}
             onChange={(e) => setTanggal(e.target.value)}
             disabled={datesLoading}
+            aria-label="Pilih tanggal"
             className="select select-bordered px-3 py-1.5 text-sm tabular-nums"
           >
             {availableDates.length > 0 ? (
@@ -255,21 +268,23 @@ export default function DashboardHarianPage() {
             )}
           </select>
 
-          <div className="flex bg-base-200 rounded p-1">
-            {(['bar', 'line', 'area'] as ChartType[]).map((type) => {
-              const Icon = type === 'bar' ? BarChart3Icon : type === 'line' ? LineChartIcon : AreaChartIcon;
+          <div className="flex bg-base-200 rounded-lg p-1" role="group" aria-label="Tipe grafik">
+            {CHART_OPTIONS.map(({ type, label, Icon }) => {
+              const active = chartType === type;
               return (
                 <button
                   key={type}
                   onClick={() => setChartType(type)}
-                  className={`p-1.5 rounded transition-colors ${
-                    chartType === type
+                  aria-pressed={active}
+                  title={label}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors min-h-[36px] ${
+                    active
                       ? 'bg-base-100 text-primary shadow-sm'
                       : 'text-base-content/60 hover:text-base-content'
                   }`}
-                  title={`${type.charAt(0).toUpperCase() + type.slice(1)} Chart`}
                 >
                   <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{label}</span>
                 </button>
               );
             })}
@@ -284,7 +299,7 @@ export default function DashboardHarianPage() {
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
-          <div className="p-3 bg-primary/10 text-primary rounded">
+          <div className="p-3 bg-primary/10 text-primary rounded-lg">
             <Package className="w-6 h-6" />
           </div>
           <div className="space-y-0.5">
@@ -294,7 +309,7 @@ export default function DashboardHarianPage() {
         </div>
 
         <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
-          <div className="p-3 bg-error/10 text-error rounded">
+          <div className="p-3 bg-error/10 text-error rounded-lg">
             <AlertCircle className="w-6 h-6" />
           </div>
           <div className="space-y-0.5">
@@ -304,7 +319,7 @@ export default function DashboardHarianPage() {
         </div>
 
         <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
-          <div className="p-3 bg-warning/10 text-warning rounded">
+          <div className="p-3 bg-warning/10 text-warning rounded-lg">
             <TrendingUp className="w-6 h-6" />
           </div>
           <div className="space-y-0.5">
@@ -322,15 +337,16 @@ export default function DashboardHarianPage() {
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-base-content flex items-center gap-2">
-            <ChartIcon className="w-5 h-5 text-primary" />
+            {chartType === 'bar' ? <BarChart3Icon className="w-5 h-5 text-primary" /> : chartType === 'line' ? <LineChartIcon className="w-5 h-5 text-primary" /> : <AreaChartIcon className="w-5 h-5 text-primary" />}
             <span>Distribusi Status Item</span>
           </h3>
-          <span className="text-xs font-medium text-base-content/60 bg-base-200 px-2 py-1 rounded">
+          <span className="text-xs font-medium text-base-content/60 bg-base-200 px-2 py-1 rounded-lg">
             {data?.totalTransaksi ?? 0} Total Transaksi
           </span>
         </div>
 
-        <div className="h-[320px] w-full">
+        <div className="h-[320px] w-full min-h-[320px] min-w-0">
+          <h3 className="sr-only">Grafik distribusi status item</h3>
           <ResponsiveContainer width="100%" height="100%">
             {renderChart()}
           </ResponsiveContainer>
@@ -357,6 +373,7 @@ export default function DashboardHarianPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm mobile-card-table">
+              <caption className="sr-only">Rincian Catatan Stock Opname tanggal {tanggal}</caption>
               <thead className="bg-base-200 border-b border-base-300">
                 <tr className="font-semibold text-base-content/60">
                   <th className="px-5 py-3">Nama Barang</th>

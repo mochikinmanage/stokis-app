@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
+import { toLocalISO } from '@/lib/domain/so';
+import { CHART_THEME_FALLBACK, CHART_TICK_FONT_SIZE, type ChartTheme } from '@/lib/chart-theme';
 import {
   TrendingUp,
   ShieldAlert,
@@ -50,80 +52,80 @@ interface DailyStats {
   aman: number;
 }
 
-function TrendBarChart({ data }: { data: DailyStats[] }) {
+function tooltipStyle(theme: ChartTheme) {
+  return {
+    backgroundColor: theme.tooltipBg,
+    borderRadius: '8px',
+    border: `1px solid ${theme.tooltipBorder}`,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  };
+}
+
+function TrendBarChart({ data, theme }: { data: DailyStats[]; theme: ChartTheme }) {
   return (
     <BarChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.935 0.004 260)" vertical={false} />
-      <XAxis
-        dataKey="date"
-        tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 10 }}
-        axisLine={false}
-        tickFormatter={(val) => {
-          const parts = val.split('-');
-          return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
-        }}
-      />
-      <YAxis tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} allowDecimals={false} />
+      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+      <XAxis dataKey="date" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} tickFormatter={(val: string) => {
+        const parts = val.split('-');
+        return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
+      }} />
+      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
       <Tooltip
-        contentStyle={{ backgroundColor: 'oklch(0.99 0.002 260)', borderRadius: '4px', border: '1px solid oklch(0.90 0.005 260)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-        itemStyle={{ color: 'oklch(0.18 0.03 260)' }}
+        contentStyle={tooltipStyle(theme)}
+        itemStyle={{ color: theme.tooltipText }}
         formatter={(value: number) => [`${value} Item`, 'Total']}
       />
       <Legend verticalAlign="bottom" height={36} />
-      <Bar dataKey="count" radius={[4, 4, 0, 0]} barSize={32} fill="oklch(0.46 0.17 260)" />
+      <Bar dataKey="count" name="Total" radius={[6, 6, 0, 0]} barSize={32} fill={theme.series} />
     </BarChart>
   );
 }
 
-function TrendLineChart({ data }: { data: DailyStats[] }) {
+function TrendLineChart({ data, theme }: { data: DailyStats[]; theme: ChartTheme }) {
   return (
     <RechartsLineChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.935 0.004 260)" vertical={false} />
-      <XAxis
-        dataKey="date"
-        tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 10 }}
-        axisLine={false}
-        tickFormatter={(val) => {
-          const parts = val.split('-');
-          return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
-        }}
-      />
-      <YAxis tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} allowDecimals={false} />
+      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+      <XAxis dataKey="date" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} tickFormatter={(val: string) => {
+        const parts = val.split('-');
+        return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
+      }} />
+      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
       <Tooltip
-        contentStyle={{ backgroundColor: 'oklch(0.99 0.002 260)', borderRadius: '4px', border: '1px solid oklch(0.90 0.005 260)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-        itemStyle={{ color: 'oklch(0.18 0.03 260)' }}
+        contentStyle={tooltipStyle(theme)}
+        itemStyle={{ color: theme.tooltipText }}
         formatter={(value: number) => [`${value} Item`, 'Total']}
       />
       <Legend verticalAlign="bottom" height={36} />
-      <Line type="monotone" dataKey="count" stroke="oklch(0.46 0.17 260)" strokeWidth={3} dot={{ r: 4 }} />
+      <Line type="monotone" dataKey="count" name="Total" stroke={theme.series} strokeWidth={3} dot={{ r: 4 }} />
     </RechartsLineChart>
   );
 }
 
-function TrendAreaChart({ data }: { data: DailyStats[] }) {
+function TrendAreaChart({ data, theme }: { data: DailyStats[]; theme: ChartTheme }) {
   return (
     <RechartsAreaChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.935 0.004 260)" vertical={false} />
-      <XAxis
-        dataKey="date"
-        tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 10 }}
-        axisLine={false}
-        tickFormatter={(val) => {
-          const parts = val.split('-');
-          return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
-        }}
-      />
-      <YAxis tick={{ fill: 'oklch(0.40 0.03 260)', fontSize: 12 }} axisLine={false} allowDecimals={false} />
+      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+      <XAxis dataKey="date" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} tickFormatter={(val: string) => {
+        const parts = val.split('-');
+        return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
+      }} />
+      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
       <Tooltip
-        contentStyle={{ backgroundColor: 'oklch(0.99 0.002 260)', borderRadius: '4px', border: '1px solid oklch(0.90 0.005 260)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-        itemStyle={{ color: 'oklch(0.18 0.03 260)' }}
+        contentStyle={tooltipStyle(theme)}
+        itemStyle={{ color: theme.tooltipText }}
         formatter={(value: number) => [`${value} Item`, 'Total']}
       />
       <Legend verticalAlign="bottom" height={36} />
-      <Area type="monotone" dataKey="count" stroke="oklch(0.46 0.17 260)" fill="oklch(0.935 0.004 260)" strokeWidth={3} />
+      <Area type="monotone" dataKey="count" name="Total" stroke={theme.series} fill={theme.areaFill} strokeWidth={3} />
     </RechartsAreaChart>
   );
 }
+
+const CHART_OPTIONS: { type: ChartType; label: string; Icon: typeof BarChart3Icon }[] = [
+  { type: 'bar', label: 'Batang', Icon: BarChart3Icon },
+  { type: 'line', label: 'Garis', Icon: LineChartIcon },
+  { type: 'area', label: 'Area', Icon: AreaChartIcon },
+];
 
 export default function DashboardMingguanPage() {
   const { selectedCabang } = useCabang();
@@ -136,95 +138,82 @@ export default function DashboardMingguanPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [chartType, setChartType] = useState<ChartType>('bar');
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const [retryNonce, setRetryNonce] = useState<number>(0);
+  const [searchDates, setSearchDates] = useState<{ dari: string; sampai: string }>({ dari: '', sampai: '' });
+  // Tema statis (data-theme="stokis"): fallback = nilai CSS var DaisyUI yang sama persis.
+  // Tanpa state/effect → bebas hydration mismatch & set-state-in-effect.
+  const theme: ChartTheme = CHART_THEME_FALLBACK;
 
-  // Single effect: fetch dates first, then fetch dashboard data
+  // Effect 1: fetch available dates & set default range (AbortController utk anti race)
   useEffect(() => {
     if (!selectedCabang) return;
-    const cabangId = selectedCabang.Cabang_ID;
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
+    const controller = new AbortController();
+    (async () => {
       setDatesLoading(true);
-      setErrorMsg('');
       try {
-        // Step 1: fetch available dates
-        const datesRes = await fetch(`/api/dashboard/dates/${cabangId}`);
+        const datesRes = await fetch(`/api/dashboard/dates/${selectedCabang.Cabang_ID}`, { signal: controller.signal });
         const datesJson = await datesRes.json();
-        let dariVal = '';
-        let sampaiVal = '';
+        let dariVal = dari;
+        let sampaiVal = sampai;
         if (datesJson.success && datesJson.data?.dates?.length > 0) {
           const dates: string[] = datesJson.data.dates;
           sampaiVal = dates[0];
           dariVal = dates[dates.length - 1];
         } else {
-          const today = new Date().toISOString().split('T')[0];
-          const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
-          dariVal = weekAgo;
+          const today = toLocalISO(new Date());
+          dariVal = toLocalISO(new Date(Date.now() - 7 * 86400000));
           sampaiVal = today;
         }
-        if (cancelled) return;
         setDari(dariVal);
         setSampai(sampaiVal);
+      } catch (err: unknown) {
+        if ((err as { name?: string })?.name === 'AbortError') return;
+        const today = toLocalISO(new Date());
+        setDari(toLocalISO(new Date(Date.now() - 7 * 86400000)));
+        setSampai(today);
+      } finally {
         setDatesLoading(false);
+      }
+    })();
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCabang]);
 
-        // Step 2: fetch dashboard data with resolved dates
-        const url = `/api/dashboard/mingguan?cabang=${cabangId}&dari=${dariVal}&sampai=${sampaiVal}`;
-        console.log('[DashboardMingguan] Fetching:', url);
-        const res = await fetch(url);
+  // Effect 2: debounce perubahan tanggal → trigger pencarian
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchDates({ dari, sampai });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [dari, sampai]);
+
+  // Effect 3: fetch data saat rentang (debounced) berubah (AbortController anti race)
+  useEffect(() => {
+    if (!selectedCabang || !searchDates.dari || !searchDates.sampai) return;
+    const controller = new AbortController();
+    (async () => {
+      setLoading(true);
+      setErrorMsg('');
+      try {
+        const url = `/api/dashboard/mingguan?cabang=${selectedCabang.Cabang_ID}&dari=${searchDates.dari}&sampai=${searchDates.sampai}`;
+        const res = await fetch(url, { signal: controller.signal });
         const json = await res.json();
-        console.log('[DashboardMingguan] Response:', json);
-        if (cancelled) return;
         if (json.success && json.data) {
           setData(json.data);
         } else {
-          const errMsg = json.error?.message || 'Gagal memuat data tren.';
-          console.error('[DashboardMingguan] API error:', errMsg);
-          setErrorMsg(errMsg);
           setData(null);
+          setErrorMsg(json.error?.message || 'Gagal memuat data tren.');
         }
-      } catch (e) {
-        console.error('[DashboardMingguan] Fetch error:', e);
-        if (!cancelled) {
-          setErrorMsg('Gagal memuat data tren. Periksa koneksi internet Anda.');
-          setData(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => { cancelled = true; };
-  }, [selectedCabang]);
-
-  // Manual refetch when user changes dates
-  const refetchWithDates = useCallback(async (newDari: string, newSampai: string) => {
-    if (!selectedCabang || !newDari || !newSampai) return;
-    try {
-      setLoading(true);
-      setErrorMsg('');
-      const url = `/api/dashboard/mingguan?cabang=${selectedCabang.Cabang_ID}&dari=${newDari}&sampai=${newSampai}`;
-      console.log('[DashboardMingguan] Refetching:', url);
-      const res = await fetch(url);
-      const json = await res.json();
-      console.log('[DashboardMingguan] Response:', json);
-      if (json.success && json.data) {
-        setData(json.data);
-      } else {
-        const errMsg = json.error?.message || 'Gagal memuat data tren.';
-        console.error('[DashboardMingguan] API error:', errMsg);
-        setErrorMsg(errMsg);
+      } catch (err: unknown) {
+        if ((err as { name?: string })?.name === 'AbortError') return;
         setData(null);
+        setErrorMsg('Gagal memuat data tren. Periksa koneksi internet Anda.');
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error('[DashboardMingguan] Fetch error:', e);
-      setErrorMsg('Gagal memuat data tren. Periksa koneksi internet Anda.');
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCabang]);
+    })();
+    return () => controller.abort();
+  }, [selectedCabang, searchDates.dari, searchDates.sampai, retryNonce]);
 
   const trendData: DailyStats[] = useMemo(() => {
     if (!data?.trenPerHari) return [];
@@ -255,7 +244,7 @@ export default function DashboardMingguanPage() {
       <div className="p-12 text-center card bg-base-100 border border-base-300 space-y-4">
         <AlertCircle className="w-10 h-10 text-error mx-auto" />
         <p className="text-base-content/60 text-sm">{errorMsg}</p>
-        <button onClick={() => dari && sampai && refetchWithDates(dari, sampai)} className="btn btn-primary btn-sm gap-2">
+        <button onClick={() => setRetryNonce((n) => n + 1)} className="btn btn-primary btn-sm gap-2">
           <RefreshCw className="w-4 h-4" />
           Coba Lagi
         </button>
@@ -263,23 +252,16 @@ export default function DashboardMingguanPage() {
     );
   }
 
-  const ChartIcon = chartType === 'bar' ? BarChart3Icon : chartType === 'line' ? LineChartIcon : AreaChartIcon;
-
   const renderChart = () => {
-    if (trendData.length === 0) {
-      return (
-        <div className="h-full flex items-center justify-center text-base-content/40 text-sm">
-          Tidak ada data tren pada rentang tanggal ini.
-        </div>
-      );
-    }
+    // Grafik selalu dirender (axis + legend + kolom) saat data ada.
+    // Empty-state ditangani kartu "Distribusi Aktivitas Harian" di bawah.
     switch (chartType) {
       case 'bar':
-        return <TrendBarChart data={trendData} />;
+        return <TrendBarChart data={trendData} theme={theme} />;
       case 'line':
-        return <TrendLineChart data={trendData} />;
+        return <TrendLineChart data={trendData} theme={theme} />;
       case 'area':
-        return <TrendAreaChart data={trendData} />;
+        return <TrendAreaChart data={trendData} theme={theme} />;
     }
   };
 
@@ -302,54 +284,50 @@ export default function DashboardMingguanPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex bg-base-200 rounded p-1 text-sm font-medium">
-            <Link href="/dashboard/harian" className="text-base-content/60 hover:text-base-content px-3 py-1 rounded transition-colors">
+          <div className="flex bg-base-200 rounded-lg p-1 text-sm font-medium">
+            <Link href="/dashboard/harian" className="text-base-content/60 hover:text-base-content px-3 py-1 rounded-lg transition-colors">
               Harian
             </Link>
-            <span className="bg-base-100 text-base-content px-3 py-1 rounded shadow-sm">Mingguan</span>
+            <span className="bg-base-100 text-base-content px-3 py-1 rounded-lg shadow-sm">Mingguan</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-base-content/60">
             <input
               type="date"
               value={dari}
-              onChange={(e) => {
-                const newDari = e.target.value;
-                setDari(newDari);
-                if (newDari && sampai) refetchWithDates(newDari, sampai);
-              }}
+              onChange={(e) => setDari(e.target.value)}
               disabled={datesLoading}
+              aria-label="Dari tanggal"
               className="input input-bordered px-3 py-1.5 text-sm tabular-nums"
             />
             <span>sampai</span>
             <input
               type="date"
               value={sampai}
-              onChange={(e) => {
-                const newSampai = e.target.value;
-                setSampai(newSampai);
-                if (dari && newSampai) refetchWithDates(dari, newSampai);
-              }}
+              onChange={(e) => setSampai(e.target.value)}
               disabled={datesLoading}
+              aria-label="Sampai tanggal"
               className="input input-bordered px-3 py-1.5 text-sm tabular-nums"
             />
           </div>
 
-          <div className="flex bg-base-200 rounded p-1">
-            {(['bar', 'line', 'area'] as ChartType[]).map((type) => {
-              const Icon = type === 'bar' ? BarChart3Icon : type === 'line' ? LineChartIcon : AreaChartIcon;
+          <div className="flex bg-base-200 rounded-lg p-1" role="group" aria-label="Tipe grafik">
+            {CHART_OPTIONS.map(({ type, label, Icon }) => {
+              const active = chartType === type;
               return (
                 <button
                   key={type}
                   onClick={() => setChartType(type)}
-                  className={`p-1.5 rounded transition-colors ${
-                    chartType === type
+                  aria-pressed={active}
+                  title={label}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors min-h-[36px] ${
+                    active
                       ? 'bg-base-100 text-primary shadow-sm'
                       : 'text-base-content/60 hover:text-base-content'
                   }`}
-                  title={`${type.charAt(0).toUpperCase() + type.slice(1)} Chart`}
                 >
                   <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{label}</span>
                 </button>
               );
             })}
@@ -368,7 +346,7 @@ export default function DashboardMingguanPage() {
           <h2 className="text-3xl font-bold text-base-content tabular-nums">{data?.totalTransaksi ?? 0} Transaksi</h2>
           <p className="text-sm text-base-content/60 tabular-nums">Periode: {formatDateShort(data?.dari || '')} hingga {formatDateShort(data?.sampai || '')}</p>
         </div>
-        <div className="p-4 bg-primary/10 text-primary rounded">
+        <div className="p-4 bg-primary/10 text-primary rounded-lg">
           <Activity className="w-8 h-8" />
         </div>
       </motion.div>
@@ -381,15 +359,16 @@ export default function DashboardMingguanPage() {
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-base-content flex items-center gap-2">
-            <ChartIcon className="w-5 h-5 text-primary" />
+            {chartType === 'bar' ? <BarChart3Icon className="w-5 h-5 text-primary" /> : chartType === 'line' ? <LineChartIcon className="w-5 h-5 text-primary" /> : <AreaChartIcon className="w-5 h-5 text-primary" />}
             <span>Tren Aktivitas Harian</span>
           </h3>
-          <span className="text-xs font-medium text-base-content/60 bg-base-200 px-2 py-1 rounded">
+          <span className="text-xs font-medium text-base-content/60 bg-base-200 px-2 py-1 rounded-lg">
             {data?.totalTransaksi ?? 0} Total Transaksi
           </span>
         </div>
 
-        <div className="h-[320px] w-full">
+        <div className="h-[320px] w-full min-h-[320px] min-w-0">
+          <h3 className="sr-only">Grafik tren aktivitas harian</h3>
           <ResponsiveContainer width="100%" height="100%">
             {renderChart()}
           </ResponsiveContainer>
@@ -411,17 +390,17 @@ export default function DashboardMingguanPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-            {trendData.map((day, i) => (
+            {trendData.map((day) => (
               <motion.div
                 key={day.date}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.05 * i }}
-                className="p-4 bg-base-200 border border-base-300 rounded text-center space-y-1"
+                transition={{ delay: 0.05 * trendData.indexOf(day) }}
+                className="p-4 bg-base-200 border border-base-300 rounded-lg text-center space-y-1"
               >
                 <span className="text-xs text-base-content/60 block tabular-nums">{formatDateShort(day.date)}</span>
                 <span className="text-2xl font-bold text-primary tabular-nums block">{day.count}</span>
-                <div className="flex items-center justify-center gap-2 text-[10px] text-base-content/60 mt-1">
+                <div className="flex items-center justify-center gap-2 text-xs text-base-content/60 mt-1">
                   <span className="badge badge-error badge-xs">{day.kritis}K</span>
                   <span className="badge badge-warning badge-xs">{day.hampirHabis}H</span>
                   <span className="badge badge-success badge-xs">{day.aman}A</span>
