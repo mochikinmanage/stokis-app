@@ -117,7 +117,6 @@ export const POST = withAuth(async (req: NextRequest, { params }, session) => {
   // Upload to Drive via GAS with retry logic
   const keySesi = typeof sesiId === 'string' && sesiId ? sesiId : laporanId;
   let xlsxLink = '';
-  let uploadSuccess = false;
 
   try {
     const { folderId } = await resolveCabang(cabangId);
@@ -130,14 +129,13 @@ export const POST = withAuth(async (req: NextRequest, { params }, session) => {
         buffer,
       });
       xlsxLink = res.webViewLink || res.downloadUrl;
-      uploadSuccess = true;
       console.log(`[XLSX] Upload success: ${xlsxLink}`);
     }
   } catch (err) {
-    // Upload failed after all retries - NO FALLBACK
-    console.error('[XLSX] GAS upload failed after 3 retries. No fallback link created:', err);
-    xlsxLink = '';
-    uploadSuccess = false;
+    // Upload failed after all retries - fallback to in-app web view
+    console.error('[XLSX] GAS upload failed after 3 retries. Using web view fallback:', err);
+    const origin = req.nextUrl?.origin || process.env.APP_URL || '';
+    xlsxLink = `${origin}/laporan/view/${encodeURIComponent(laporanId)}?cabang=${encodeURIComponent(cabangId)}`;
   }
 
   // Always update database with the result (empty string if failed)

@@ -26,12 +26,13 @@ import {
   ArrowDown,
   Pencil,
   AlertTriangle,
+  ArrowLeft,
 } from 'lucide-react';
 import { QuantumLoaderFull, QuantumLoaderMini } from '@/components/ui/QuantumLoader';
 import { SOGeneratingOverlay, type SOGerStep } from '@/components/SOGeneratingOverlay';
 import { ShiftCabangGate } from '@/components/ShiftCabangGate';
 import { staggerContainer, staggerItem } from '@/components/PageTransition';
-import { parseTipeInput, hasTipe, sanitizeDecimalInput } from '@/lib/domain/so';
+import { parseTipeInput, hasTipe, sanitizeDecimalInput, todayLocalISO } from '@/lib/domain/so';
 import type { InputTipe } from '@/lib/domain/so';
 
 interface MasterItem {
@@ -143,6 +144,7 @@ interface SODraft {
   sesiId: string;
   tanggalOperasional: string;
   shift: string;
+  note: string;
   updatedAt: number;
 }
 
@@ -219,27 +221,26 @@ async function verifyXlsxLinkSaved(
           throw new Error('Non‑JSON or error response');
         }
         json = await res.json();
-      } catch (e) {
-        console.warn(`[Verify] Attempt ${attempt}/${maxRetries}: failed to parse JSON –`, e);
+      } catch {
         json = null;
       }
 
       if (json && json.success && json.data?.laporan?.Link_XLSX) {
         const link = json.data.laporan.Link_XLSX;
-        // Verify it's a Drive link, not fallback API link
-        if (link.includes('drive.google.com') || link.includes('drivesdk')) {
-          console.log(`✅ Link_XLSX verified: ${link}`);
+        // Accept Drive link OR in-app web view link
+        if (
+          link.includes('drive.google.com') ||
+          link.includes('drivesdk') ||
+          link.includes('/laporan/view/')
+        ) {
           return laporanId;
         }
       }
 
-      console.log(`[Verify] Attempt ${attempt}/${maxRetries}: Link_XLSX not yet ready, retrying...`);
-
       if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, intervalMs));
       }
-    } catch (err) {
-      console.error(`[Verify] Attempt ${attempt}/${maxRetries} failed:`, err);
+    } catch {
       if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, intervalMs));
       }
@@ -248,6 +249,314 @@ async function verifyXlsxLinkSaved(
   
   throw new Error(`Link_XLSX tidak terupdate di database setelah ${maxRetries} percobaan`);
 }
+
+// ─────────────────────────────────────────────────────────────
+// Item row — diekstrak & di-memo agar setiap keystroke tidak
+// me-render ulang seluruh daftar item (~130 baris).
+// ─────────────────────────────────────────────────────────────
+
+type SOField = 'step1' | 'step2' | 'keterangan' | 'statusIsi' | 'tglRefill' | 'tglPakai';
+
+interface SOSingleCount {
+  step1: string;
+  step2: string;
+  keterangan: string;
+  statusIsi?: string;
+  tglRefill?: string;
+  tglPakai?: string;
+}
+
+function getStatusBadgeModule(total: number, thresholdRaw: unknown) {
+  let threshold: number | null = null;
+  if (thresholdRaw !== undefined && thresholdRaw !== null && String(thresholdRaw).trim() !== '') {
+    const s = String(thresholdRaw).replace(',', '.').trim();
+    const n = parseFloat(s);
+    if (!isNaN(n)) threshold = n;
+  }
+
+  if (threshold === null || threshold < 0) {
+    return (
+      <span className="badge badge-ghost text-xs font-medium gap-1">
+        <HelpCircle className="w-3 h-3" />
+        <span>Tidak Dipantau</span>
+      </span>
+    );
+  }
+  if (total <= threshold) {
+    return (
+      <span className="badge badge-error text-xs font-bold gap-1">
+        <AlertCircle className="w-3 h-3" />
+        <span>Kritis</span>
+      </span>
+    );
+  }
+  if (threshold > 0 && total <= threshold * 2) {
+    return (
+      <span className="badge badge-warning text-xs font-bold gap-1">
+        <AlertCircle className="w-3 h-3" />
+        <span>Hampir Habis</span>
+      </span>
+    );
+  }
+  return (
+    <span className="badge badge-success text-xs font-bold gap-1">
+      <CheckCircle2 className="w-3 h-3" />
+      <span>Aman</span>
+    </span>
+  );
+}
+
+const SOItemRow = React.memo(function SOItemRow({
+  item,
+  indexLabel,
+  count,
+  prev,
+  onChange,
+}: {
+  item: MasterItem;
+  indexLabel: number | string;
+  count: SOSingleCount | undefined;
+  prev: PreviousSO | undefined;
+  onChange: (itemId: string, field: SOField, value: string | undefined) => void;
+}) {
+  const step1Val = count?.step1 || '';
+  const step2Val = count?.step2 || '';
+  const keteranganVal = count?.keterangan || '';
+  const statusIsiVal = count?.statusIsi;
+  const total = (Number(step1Val) || 0) + (Number(step2Val) || 0);
+
+  const hasPrev = Boolean(prev);
+  const tipeInput: InputTipe[] = parseTipeInput(item.Tipe_Input);
+  const isDual = hasTipe(tipeInput, 'dual');
+  const isBoolean = hasTipe(tipeInput, 'boolean');
+  const isDate = hasTipe(tipeInput, 'date');
+
+  // Nilai efektif: input user kalau disentuh, else auto-carry dari prev.
+  const effStatus = statusIsiVal !== undefined ? statusIsiVal : (prev?.statusIsi || '');
+  const statusSel = statusIsiVal !== undefined ? statusIsiVal : (prev?.statusIsi || '');
+  const effRefill = (count?.tglRefill || '') || (prev?.tglRefill || '');
+  const effPakai = (count?.tglPakai || '') || (prev?.tglPakai || '');
+
+  return (
+    <div
+      data-item-id={item.Item_ID}
+      className="px-3 sm:px-4 py-2 transition-colors border-b border-base-300 hover:bg-base-200"
+    >
+      {/* Item header: name, satuan, threshold, status */}
+      <div className="flex items-center gap-2 flex-wrap mb-1">
+        <span className="text-xs font-bold tabular-nums px-1.5 py-0.5 rounded-lg bg-primary/10 text-primary">
+          {indexLabel}
+        </span>
+        <span className="font-extrabold text-[13px] text-base-content">
+          {item.Nama_Barang}
+        </span>
+        <span className="text-xs font-mono text-base-content/50">
+          ({item.Satuan})
+        </span>
+        <span className="ml-auto flex items-center gap-3 flex-wrap">
+          {isBoolean ? (
+            effStatus === 'Penuh'
+              ? <span className="badge badge-success text-xs font-bold gap-1"><CheckCircle2 className="w-3 h-3" /><span>Penuh</span></span>
+              : effStatus === 'Dipakai'
+                ? <span className="badge badge-warning text-xs font-bold gap-1"><AlertTriangle className="w-3 h-3" /><span>Dipakai</span></span>
+                : effStatus === 'Habis'
+                  ? <span className="badge badge-error text-xs font-bold gap-1"><AlertCircle className="w-3 h-3" /><span>Habis</span></span>
+                  : <span className="badge badge-ghost text-xs font-bold gap-1"><HelpCircle className="w-3 h-3" /><span>Pilih...</span></span>
+          ) : (
+            <>
+              <span className="text-xs tabular-nums text-base-content/60">
+                Batas Min: <span className="font-bold text-base-content">{item.Threshold}</span>
+              </span>
+              {getStatusBadgeModule(total, item.Threshold)}
+            </>
+          )}
+        </span>
+      </div>
+
+      {(isBoolean || isDate) && (
+        <div className={`grid grid-cols-2 gap-1 ${(isBoolean && isDate) ? 'sm:grid-cols-6' : (isBoolean ? 'sm:grid-cols-2' : 'sm:grid-cols-4')}`}>
+          {isBoolean && (
+            <>
+              <div>
+                 <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
+                  Status Sebelumnya
+                </span>
+                <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+                  <span className="text-xs font-bold tabular-nums">{prev?.statusIsi ? prev.statusIsi : '–'}</span>
+                </div>
+              </div>
+              <div>
+                 <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
+                  Nilai Saat Ini
+                </span>
+                <select
+                  value={statusSel}
+                  onChange={(e) => onChange(item.Item_ID, 'statusIsi', e.target.value || '')}
+                  aria-label={`Status ${item.Nama_Barang}`}
+                  className="w-full min-h-[44px] px-1 text-center text-xs font-semibold cursor-pointer select select-bordered rounded-md"
+                >
+                  <option value="">Pilih...</option>
+                  <option value="Penuh">Penuh</option>
+                  <option value="Dipakai">Dipakai</option>
+                  <option value="Habis">Habis</option>
+                </select>
+              </div>
+            </>
+          )}
+          {isDate && (
+            <>
+              <div>
+                <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
+                  Refill Sebelumnya
+                </span>
+                <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+                  <span className="text-xs font-bold tabular-nums">{prev?.tglRefill ? prev.tglRefill : '–'}</span>
+                </div>
+              </div>
+              <div>
+                <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
+                  Tgl Refill
+                </span>
+                <input
+                  type="date"
+                  value={effRefill}
+                  onChange={(e) => onChange(item.Item_ID, 'tglRefill', e.target.value)}
+                  aria-label={`Tanggal refill ${item.Nama_Barang}`}
+                  className="w-full min-h-[44px] px-1 text-center text-xs font-semibold tabular-nums input input-bordered rounded-md"
+                />
+              </div>
+              <div>
+                <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
+                  Pakai Sebelumnya
+                </span>
+                <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+                  <span className="text-xs font-bold tabular-nums">{prev?.tglPakai ? prev.tglPakai : '–'}</span>
+                </div>
+              </div>
+              <div>
+                <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
+                  Tgl Pakai
+                </span>
+                <input
+                  type="date"
+                  value={effPakai}
+                  onChange={(e) => onChange(item.Item_ID, 'tglPakai', e.target.value)}
+                  aria-label={`Tanggal pakai ${item.Nama_Barang}`}
+                  className="w-full min-h-[44px] px-1 text-center text-xs font-semibold tabular-nums input input-bordered rounded-md"
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {!isBoolean && !isDate && (
+        <div className={`grid gap-1 ${isDual ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-2 sm:grid-cols-4'}`}>
+          {/* ── SO SEBELUMNYA (read-only) ── */}
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
+              S1
+            </span>
+            <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+              <span className="text-xs font-bold tabular-nums">{prev ? prev.step1 : '–'}</span>
+            </div>
+          </div>
+          {isDual && (
+            <div>
+              <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
+                S2
+              </span>
+              <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+                <span className="text-xs font-bold tabular-nums">{prev ? prev.step2 : '–'}</span>
+              </div>
+            </div>
+          )}
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
+              Tot
+            </span>
+            <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content rounded-md">
+              <span className="text-xs font-extrabold tabular-nums">{prev ? prev.total : '–'}</span>
+            </div>
+          </div>
+
+          {/* ── SO SEKARANG (editable) ── */}
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
+              S1
+            </span>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder="0"
+              value={step1Val}
+              onChange={(e) => onChange(item.Item_ID, 'step1', e.target.value)}
+              data-onboard="so-step"
+              aria-label={`Step 1 ${item.Nama_Barang}`}
+              className="w-full min-h-[44px] px-1 text-center text-xs font-bold tabular-nums input input-bordered rounded-md"
+            />
+          </div>
+          {isDual && (
+            <div>
+              <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
+                S2
+              </span>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="0"
+                value={step2Val}
+                onChange={(e) => onChange(item.Item_ID, 'step2', e.target.value)}
+                aria-label={`Step 2 ${item.Nama_Barang}`}
+                className="w-full min-h-[44px] px-1 text-center text-xs font-bold tabular-nums input input-bordered rounded-md"
+              />
+            </div>
+          )}
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/60 text-center">
+              Tot
+            </span>
+            <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-primary/10 border border-primary/30 rounded-md">
+              <span className="text-xs font-extrabold tabular-nums text-primary">
+                {total}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prev session date/shift + Keterangan (Optional Notes) */}
+      <div className="mt-1 flex items-center gap-3 flex-wrap">
+        {hasPrev && (
+          <span className="text-xs text-base-content/50">
+            SO Sebelumnya: {prev?.tanggal} ({prev?.shift})
+          </span>
+        )}
+        <div data-onboard="so-keterangan" className="relative flex-1 min-w-[160px]">
+          <StickyNote
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-base-content/50"
+          />
+          <input
+            type="text"
+            placeholder={prev?.keterangan ? `Default: ${prev.keterangan}` : 'Keterangan (opsional)...'}
+            value={keteranganVal}
+            onChange={(e) => onChange(item.Item_ID, 'keterangan', e.target.value)}
+            aria-label={`Keterangan ${item.Nama_Barang}`}
+            className="w-full pl-8 pr-3 py-2 min-h-[44px] text-xs input input-bordered"
+          />
+        </div>
+      </div>
+      {hasPrev && (
+        <div className="mt-1.5 px-2.5 py-1 rounded-md bg-base-200 border border-base-300/80 flex items-center gap-2 text-xs">
+          <span className="font-semibold text-base-content/60">Keterangan SO Sebelumnya:</span>
+<span className="font-medium text-base-content/90 italic">
+              {prev?.keterangan ? prev.keterangan : '(tidak ada)'}
+            </span>
+        </div>
+      )}
+    </div>
+  );
+});
 
 export default function InputSOPage() {
   const router = useRouter();
@@ -271,7 +580,7 @@ export default function InputSOPage() {
 
   // Form State
   const [tanggalOperasional, setTanggalOperasional] = useState<string>(() => {
-    return new Date().toISOString().split('T')[0];
+    return todayLocalISO();
   });
   const [shift, setShift] = useState<string>('Opening');
 
@@ -299,6 +608,7 @@ export default function InputSOPage() {
 
   // Draft (save sementara) state
   const [pendingDraft, setPendingDraft] = useState<SODraft | null>(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState<boolean>(false);
   const draftTimer = useRef<number | null>(null);
 
   // Petugas = logged-in user name
@@ -429,13 +739,14 @@ export default function InputSOPage() {
           sesiId: sesiIdRef.current,
           tanggalOperasional,
           shift,
+          note,
           updatedAt: Date.now(),
         });
       } else {
         clearDraft(cabangId);
       }
     }, 400);
-  }, [counts, tanggalOperasional, shift, cabangId, items.length, pendingDraft]);
+  }, [counts, tanggalOperasional, shift, note, cabangId, items.length, pendingDraft]);
 
   // Bersihkan timer saat unmount
   useEffect(() => {
@@ -443,6 +754,25 @@ export default function InputSOPage() {
       if (draftTimer.current) window.clearTimeout(draftTimer.current);
     };
   }, []);
+
+  // Peringatkan user jika menutup/me-refresh halaman saat ada data yang belum disubmit
+  const hasDirtyData = useMemo(() => {
+    if (submitting) return false;
+    return countFilled(counts) > 0 || note.trim() !== '';
+  }, [counts, note, submitting]);
+
+  const filledCount = useMemo(() => countFilled(counts), [counts]);
+  const fillPercent = items.length > 0 ? Math.round((filledCount / items.length) * 100) : 0;
+
+  useEffect(() => {
+    if (!hasDirtyData) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasDirtyData]);
 
   // Choose which previous SO session to use as reference (dropdown)
   const handleSelectPrevious = (index: number) => {
@@ -478,6 +808,25 @@ export default function InputSOPage() {
     return map;
   }, [filteredItems]);
 
+  // Stabil via useCallback agar React.memo pada SOItemRow berfungsi.
+  const handleCountChange = useCallback((itemId: string, field: SOField, value: string | undefined) => {
+    const nextValue =
+      field === 'step1' || field === 'step2'
+        ? sanitizeDecimalInput(String(value ?? ''))
+        : value;
+    setCounts((prev) => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        [field]: nextValue,
+      },
+    }));
+    if (field !== 'keterangan') {
+      setLastEditedItemId(itemId);
+    }
+    setErrorMsg((m) => (m ? '' : m));
+  }, []);
+
   if (cabangLoading || loadingData) {
     return <QuantumLoaderFull text="Menyiapkan formulir SO" />;
   }
@@ -500,28 +849,11 @@ export default function InputSOPage() {
     return acc;
   }, {} as Record<string, MasterItem[]>);
 
-  const handleCountChange = (itemId: string, field: 'step1' | 'step2' | 'keterangan' | 'statusIsi' | 'tglRefill' | 'tglPakai', value: string | undefined) => {
-    const nextValue =
-      field === 'step1' || field === 'step2'
-        ? sanitizeDecimalInput(String(value ?? ''))
-        : value;
-    setCounts((prev) => ({
-      ...prev,
-      [itemId]: {
-        ...prev[itemId],
-        [field]: nextValue,
-      },
-    }));
-    if (field !== 'keterangan') {
-      setLastEditedItemId(itemId);
-    }
-    if (errorMsg) setErrorMsg('');
-  };
-
   const handleRestoreDraft = (draft: SODraft) => {
     if (draft.sesiId) sesiIdRef.current = draft.sesiId;
     if (draft.tanggalOperasional) setTanggalOperasional(draft.tanggalOperasional);
     if (draft.shift) setShift(draft.shift);
+    if (draft.note) setNote(draft.note);
     setCounts((prev) => {
       const merged = { ...prev };
       Object.keys(draft.counts).forEach((k) => {
@@ -546,46 +878,8 @@ export default function InputSOPage() {
   const handleDiscardDraft = () => {
     if (selectedCabang) clearDraft(selectedCabang.Cabang_ID);
     setPendingDraft(null);
-  };
-
-  const getStatusBadge = (total: number, thresholdRaw: unknown) => {
-    let threshold: number | null = null;
-    if (thresholdRaw !== undefined && thresholdRaw !== null && String(thresholdRaw).trim() !== '') {
-      const s = String(thresholdRaw).replace(',', '.').trim();
-      const n = parseFloat(s);
-      if (!isNaN(n)) threshold = n;
-    }
-
-    if (threshold === null || threshold < 0) {
-      return (
-        <span className="badge badge-ghost text-[11px] font-medium gap-1">
-          <HelpCircle className="w-3 h-3" />
-          <span>Tidak Dipantau</span>
-        </span>
-      );
-    }
-    if (total <= threshold) {
-      return (
-        <span className="badge badge-error text-[11px] font-bold gap-1">
-          <AlertCircle className="w-3 h-3" />
-          <span>Kritis</span>
-        </span>
-      );
-    }
-    if (threshold > 0 && total <= threshold * 2) {
-      return (
-        <span className="badge badge-warning text-[11px] font-bold gap-1">
-          <AlertCircle className="w-3 h-3" />
-          <span>Hampir Habis</span>
-        </span>
-      );
-    }
-    return (
-      <span className="badge badge-success text-[11px] font-bold gap-1">
-        <CheckCircle2 className="w-3 h-3" />
-        <span>Aman</span>
-      </span>
-    );
+    setNote('');
+    setShowDiscardConfirm(false);
   };
 
   const buildPayloadItems = (): SOItemPayload[] => {
@@ -759,11 +1053,8 @@ export default function InputSOPage() {
         });
         
         // PENTING: Tunggu XLSX benar-benar selesai di-generate dan di-upload
-        const xlsxBlob = await xlsxRes.blob();
-        console.log('✅ XLSX berhasil di-generate:', xlsxBlob.size, 'bytes');
-        
-      } catch (xlsxErr) {
-        console.error('❌ XLSX generation gagal:', xlsxErr);
+        await xlsxRes.blob();
+      } catch {
         // Tetap lanjut ke halaman konfirmasi meski XLSX gagal (non-critical)
       }
 
@@ -776,9 +1067,8 @@ export default function InputSOPage() {
         );
         setGenStep('selesai');
         router.push(`/so/konfirmasi/${verifiedLaporanId}`);
-      } catch (verifyErr) {
+      } catch {
         // Verification failed, but still redirect - UI will show error badge
-        console.warn('Link_XLSX verification failed, redirecting anyway:', verifyErr);
         setGenStep('selesai');
         router.push(`/so/konfirmasi/${laporanId || formState.sesiId}`);
       }
@@ -830,7 +1120,20 @@ export default function InputSOPage() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto px-4 py-6 pb-20 md:pb-6">
+      <form
+        onSubmit={handleSubmit}
+        onKeyDown={(e) => {
+          // Cegah Enter mengirim form dari input/textarea/select biasa
+          // (search, keterangan, dsb). Tombol submit tetap berfungsi normal.
+          if (e.key === 'Enter') {
+            const tag = (e.target as HTMLElement).tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+              e.preventDefault();
+            }
+          }
+        }}
+        className="space-y-6 max-w-5xl mx-auto px-4 py-6 pb-20 md:pb-6"
+      >
         {/* Draft restore banner */}
         {pendingDraft && (
           <motion.div
@@ -859,8 +1162,8 @@ export default function InputSOPage() {
               </button>
               <button
                 type="button"
-                onClick={handleDiscardDraft}
-                className="btn btn-sm btn-ghost"
+                onClick={() => setShowDiscardConfirm(true)}
+                className="btn btn-sm btn-ghost min-h-[44px]"
               >
                 Buang & Mulai Baru
               </button>
@@ -877,6 +1180,14 @@ export default function InputSOPage() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-base-300">
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="flex-shrink-0 p-2 -ml-1 rounded-lg text-base-content/50 hover:text-base-content hover:bg-base-200 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Kembali ke halaman sebelumnya"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                 <ClipboardCheck className="w-6 h-6" />
               </div>
@@ -902,6 +1213,20 @@ export default function InputSOPage() {
                 <Hash className="w-3.5 h-3.5" />
                 <span>{filteredItems.length} / {items.length} Item</span>
               </div>
+            </div>
+          </div>
+
+          {/* Progres pengisian item */}
+          <div className="space-y-1" role="progressbar" aria-label="Progres pengisian item" aria-valuemin={0} aria-valuemax={items.length} aria-valuenow={filledCount} aria-valuetext={`${filledCount} dari ${items.length} item terisi`}>
+            <div className="flex items-center justify-between text-xs font-medium text-base-content/60">
+              <span>{filledCount} dari {items.length} item terisi</span>
+              <span className="tabular-nums">{fillPercent}%</span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-base-200 overflow-hidden">
+              <div
+                className="h-2 rounded-full bg-primary transition-all duration-300"
+                style={{ width: `${fillPercent}%` }}
+              />
             </div>
           </div>
 
@@ -944,6 +1269,7 @@ export default function InputSOPage() {
                 value={tanggalOperasional}
                 onChange={(e) => setTanggalOperasional(e.target.value)}
                 required
+                aria-label="Tanggal Operasional"
                 className="w-full px-3 py-2.5 text-sm font-medium tabular-nums input input-bordered"
               />
             </div>
@@ -957,6 +1283,7 @@ export default function InputSOPage() {
               <select
                 value={shift}
                 onChange={(e) => setShift(e.target.value)}
+                aria-label="Shift Kerja"
                 className="w-full px-3 py-2.5 text-sm font-medium cursor-pointer select select-bordered"
               >
                 <option value="Opening">Opening</option>
@@ -973,7 +1300,7 @@ export default function InputSOPage() {
               <div className="w-full px-3 py-2.5 text-sm font-semibold flex items-center gap-2 min-h-[42px] bg-base-200 border border-base-300 text-base-content">
                 <BadgeCheck className="w-4 h-4 flex-shrink-0 text-success" />
                 <span>{petugas}</span>
-                <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-md badge badge-success">
+                <span className="ml-auto text-xs font-semibold px-1.5 py-0.5 rounded-md badge badge-success">
                   Login
                 </span>
               </div>
@@ -987,7 +1314,7 @@ export default function InputSOPage() {
                 <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                 <span>Acuan SO Sebelumnya</span>
               </label>
-              <span className="text-[10px] font-medium text-base-content/40">
+              <span className="text-xs font-medium text-base-content/40">
                 (dipakai sebagai pembanding stok)
               </span>
             </div>
@@ -1015,7 +1342,7 @@ export default function InputSOPage() {
             )}
 
             {previousSOInfo && previousSOHistory.length > 0 && (
-              <p className="text-[11px] text-base-content/50">
+              <p className="text-xs text-base-content/50">
                 Acuan aktif: <strong>{previousSOInfo.tanggal}</strong> · Shift{' '}
                 <strong>{previousSOInfo.shift}</strong>
               </p>
@@ -1039,7 +1366,8 @@ export default function InputSOPage() {
                 placeholder="Cari barang..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2.5 text-sm min-h-[42px] input input-bordered"
+                aria-label="Cari barang"
+                className="w-full pl-9 pr-10 py-2.5 text-sm min-h-[44px] input input-bordered"
               />
               <AnimatePresence>
                 {searchQuery && (
@@ -1049,7 +1377,8 @@ export default function InputSOPage() {
                     exit={{ opacity: 0, scale: 0.7 }}
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-base-content/50 hover:text-base-content transition-colors"
+                    aria-label="Hapus pencarian"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 text-base-content/50 hover:text-base-content transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                   >
                     <X className="w-3.5 h-3.5" />
                   </motion.button>
@@ -1063,7 +1392,8 @@ export default function InputSOPage() {
               <select
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="pl-9 pr-8 py-2.5 text-sm font-medium cursor-pointer min-h-[42px] select select-bordered"
+                aria-label="Filter area"
+                className="pl-9 pr-8 py-2.5 text-sm font-medium cursor-pointer min-h-[44px] select select-bordered"
               >
                 <option value="Semua">Semua Area</option>
                 {areas.map(area => (
@@ -1082,21 +1412,31 @@ export default function InputSOPage() {
                 exit={{ opacity: 0, height: 0 }}
                 className="flex items-center gap-2 flex-wrap"
               >
-                <span className="text-[11px] font-semibold text-base-content/60">Filter aktif:</span>
+                <span className="text-xs font-semibold text-base-content/60">Filter aktif:</span>
                 {selectedArea !== 'Semua' && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md badge badge-primary">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-md badge badge-primary">
                     <Layers className="w-3 h-3" />
                     {selectedArea}
-                    <button type="button" onClick={() => setSelectedArea('Semua')}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedArea('Semua')}
+                      aria-label={`Hapus filter area ${selectedArea}`}
+                      className="p-1.5 -m-1.5 flex items-center justify-center min-h-[24px] min-w-[24px]"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </span>
                 )}
                 {searchQuery && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md badge badge-primary">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-md badge badge-primary">
                     <Search className="w-3 h-3" />
                     &quot;{searchQuery}&quot;
-                    <button type="button" onClick={() => setSearchQuery('')}>
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      aria-label="Hapus pencarian"
+                      className="p-1.5 -m-1.5 flex items-center justify-center min-h-[24px] min-w-[24px]"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -1104,7 +1444,7 @@ export default function InputSOPage() {
                 <button
                   type="button"
                   onClick={() => { setSelectedArea('Semua'); setSearchQuery(''); }}
-                  className="text-[11px] font-medium underline text-base-content/50"
+                  className="text-xs font-medium underline text-base-content/50"
                 >
                   Hapus semua
                 </button>
@@ -1129,7 +1469,7 @@ export default function InputSOPage() {
             variants={staggerContainer}
             initial="hidden"
             animate="show"
-            className="space-y-4"
+            className="space-y-4 sm:pr-16 sm:ml-auto"
           >
             {Object.entries(groupedItems).map(([area, areaItems]) => (
               <motion.div key={area} variants={staggerItem} className="card bg-base-100 border border-base-300 overflow-hidden">
@@ -1146,241 +1486,16 @@ export default function InputSOPage() {
                 </div>
 
                 <div className="border-t border-base-300">
-                  {areaItems.map((item) => {
-                    const step1Val = counts[item.Item_ID]?.step1 || '';
-                    const step2Val = counts[item.Item_ID]?.step2 || '';
-                    const keteranganVal = counts[item.Item_ID]?.keterangan || '';
-                    const statusIsiVal = counts[item.Item_ID]?.statusIsi;
-                    const total = (Number(step1Val) || 0) + (Number(step2Val) || 0);
-                    const prev = previousSO[item.Item_ID] || previousSO[item.Nama_Barang] || previousSO[item.Nama_Barang.trim()];
-
-                    const hasPrev = Boolean(prev);
-                    const tipeInput: InputTipe[] = parseTipeInput(item.Tipe_Input);
-                    const isDual = hasTipe(tipeInput, 'dual');
-                    const isBoolean = hasTipe(tipeInput, 'boolean');
-                    const isDate = hasTipe(tipeInput, 'date');
-
-                    // Nilai efektif: input user kalau disentuh, else auto-carry dari prev.
-                    const effStatus = statusIsiVal !== undefined ? statusIsiVal : (prev?.statusIsi || '');
-                    const statusSel = statusIsiVal !== undefined ? statusIsiVal : (prev?.statusIsi || '');
-                    const effRefill = (counts[item.Item_ID]?.tglRefill || '') || (prev?.tglRefill || '');
-                    const effPakai = (counts[item.Item_ID]?.tglPakai || '') || (prev?.tglPakai || '');
-
-                    return (
-                      <div
-                        key={item.Item_ID}
-                        data-item-id={item.Item_ID}
-                        className="px-3 sm:px-4 py-2 transition-colors border-b border-base-300 hover:bg-base-200"
-                      >
-                        {/* Item header: name, satuan, threshold, status */}
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                            {globalIndexMap[item.Item_ID]}
-                          </span>
-                          <span className="font-extrabold text-[13px] text-base-content">
-                            {item.Nama_Barang}
-                          </span>
-                          <span className="text-[10px] font-mono text-base-content/50">
-                            ({item.Satuan})
-                          </span>
-                          <span className="ml-auto flex items-center gap-3 flex-wrap">
-                            {isBoolean ? (
-                              effStatus === 'Penuh'
-                                ? <span className="badge badge-success text-[11px] font-bold gap-1"><CheckCircle2 className="w-3 h-3" /><span>Penuh</span></span>
-                                : effStatus === 'Dipakai'
-                                  ? <span className="badge badge-warning text-[11px] font-bold gap-1"><AlertTriangle className="w-3 h-3" /><span>Dipakai</span></span>
-                                  : effStatus === 'Habis'
-                                    ? <span className="badge badge-error text-[11px] font-bold gap-1"><AlertCircle className="w-3 h-3" /><span>Habis</span></span>
-                                    : <span className="badge badge-ghost text-[11px] font-bold gap-1"><HelpCircle className="w-3 h-3" /><span>Pilih...</span></span>
-                            ) : (
-                              <>
-                                <span className="text-[10px] tabular-nums text-base-content/60">
-                                  Batas Min: <span className="font-bold text-base-content">{item.Threshold}</span>
-                                </span>
-                                {getStatusBadge(total, item.Threshold)}
-                              </>
-                            )}
-                          </span>
-                        </div>
-
-                        {(isBoolean || isDate) && (
-                          <div className={`grid grid-cols-2 gap-1 ${(isBoolean && isDate) ? 'sm:grid-cols-6' : (isBoolean ? 'sm:grid-cols-2' : 'sm:grid-cols-4')}`}>
-                            {isBoolean && (
-                              <>
-                                <div>
-                                   <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                                    Status Sebelumnya
-                                  </span>
-                                  <div className="w-full h-8 px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
-                                    <span className="text-[11px] font-bold tabular-nums">{hasPrev && prev.statusIsi ? prev.statusIsi : '–'}</span>
-                                  </div>
-                                </div>
-                                <div>
-                                   <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                                    Nilai Saat Ini
-                                  </span>
-                                  <select
-                                    value={statusSel}
-                                    onChange={(e) => handleCountChange(item.Item_ID, 'statusIsi', e.target.value || '')}
-                                    className="w-full h-8 px-1 text-center text-[11px] font-semibold cursor-pointer select select-bordered rounded-md"
-                                  >
-                                    <option value="">Pilih...</option>
-                                    <option value="Penuh">Penuh</option>
-                                    <option value="Dipakai">Dipakai</option>
-                                    <option value="Habis">Habis</option>
-                                  </select>
-                                </div>
-                              </>
-                            )}
-                            {isDate && (
-                              <>
-                                <div>
-                                  <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                                    Refill Sebelumnya
-                                  </span>
-                                  <div className="w-full h-8 px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
-                                    <span className="text-[11px] font-bold tabular-nums">{prev?.tglRefill ? prev.tglRefill : '–'}</span>
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                                    Tgl Refill
-                                  </span>
-                                  <input
-                                    type="date"
-                                    value={effRefill}
-                                    onChange={(e) => handleCountChange(item.Item_ID, 'tglRefill', e.target.value)}
-                                    className="w-full h-8 px-1 text-center text-[11px] font-semibold tabular-nums input input-bordered rounded-md"
-                                  />
-                                </div>
-                                <div>
-                                  <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                                    Pakai Sebelumnya
-                                  </span>
-                                  <div className="w-full h-8 px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
-                                    <span className="text-[11px] font-bold tabular-nums">{prev?.tglPakai ? prev.tglPakai : '–'}</span>
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                                    Tgl Pakai
-                                  </span>
-                                  <input
-                                    type="date"
-                                    value={effPakai}
-                                    onChange={(e) => handleCountChange(item.Item_ID, 'tglPakai', e.target.value)}
-                                    className="w-full h-8 px-1 text-center text-[11px] font-semibold tabular-nums input input-bordered rounded-md"
-                                  />
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        )}
-
-                        {!isBoolean && !isDate && (
-                          <div className={`grid gap-1 ${isDual ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-2 sm:grid-cols-4'}`}>
-                            {/* ── SO SEBELUMNYA (read-only) ── */}
-                            <div>
-                              <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                                S1
-                              </span>
-                              <div className="w-full h-8 px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
-                                <span className="text-[11px] font-bold tabular-nums">{hasPrev ? prev.step1 : '–'}</span>
-                              </div>
-                            </div>
-                            {isDual && (
-                              <div>
-                                <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                                  S2
-                                </span>
-                                <div className="w-full h-8 px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
-                                  <span className="text-[11px] font-bold tabular-nums">{hasPrev ? prev.step2 : '–'}</span>
-                                </div>
-                              </div>
-                            )}
-                            <div>
-                              <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                                Tot
-                              </span>
-                              <div className="w-full h-8 px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content rounded-md">
-                                <span className="text-[11px] font-extrabold tabular-nums">{hasPrev ? prev.total : '–'}</span>
-                              </div>
-                            </div>
-
-                            {/* ── SO SEKARANG (editable) ── */}
-                            <div>
-                              <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                                S1
-                              </span>
-                              <input
-                                type="text"
-                                inputMode="decimal"
-                                placeholder="0"
-                                value={step1Val}
-                                onChange={(e) => handleCountChange(item.Item_ID, 'step1', e.target.value)}
-                                data-onboard="so-step"
-                                className="w-full h-8 px-1 text-center text-[11px] font-bold tabular-nums input input-bordered rounded-md"
-                              />
-                            </div>
-                            {isDual && (
-                              <div>
-                                <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                                  S2
-                                </span>
-                                <input
-                                  type="text"
-                                  inputMode="decimal"
-                                  placeholder="0"
-                                  value={step2Val}
-                                  onChange={(e) => handleCountChange(item.Item_ID, 'step2', e.target.value)}
-                                  className="w-full h-8 px-1 text-center text-[11px] font-bold tabular-nums input input-bordered rounded-md"
-                                />
-                              </div>
-                            )}
-                            <div>
-                              <span className="block text-[10px] mb-0 font-semibold uppercase tracking-wide text-base-content/60 text-center">
-                                Tot
-                              </span>
-                              <div className="w-full h-8 px-1 text-center flex items-center justify-center bg-primary/10 border border-primary/30 rounded-md">
-                                <span className="text-[11px] font-extrabold tabular-nums text-primary">
-                                  {total}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Prev session date/shift + Keterangan (Optional Notes) */}
-                        <div className="mt-1 flex items-center gap-3 flex-wrap">
-                          {hasPrev && (
-                            <span className="text-[10px] text-base-content/50">
-                              SO Sebelumnya: {prev.tanggal} ({prev.shift})
-                            </span>
-                          )}
-                          <div data-onboard="so-keterangan" className="relative flex-1 min-w-[160px]">
-                            <StickyNote
-                              className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-base-content/50"
-                            />
-                            <input
-                              type="text"
-                              placeholder={hasPrev && prev.keterangan ? `Default: ${prev.keterangan}` : 'Keterangan (opsional)...'}
-                              value={keteranganVal}
-                              onChange={(e) => handleCountChange(item.Item_ID, 'keterangan', e.target.value)}
-                              className="w-full pl-8 pr-3 py-1.5 text-xs input input-bordered"
-                            />
-                          </div>
-                        </div>
-                        {hasPrev && (
-                          <div className="mt-1.5 px-2.5 py-1 rounded-md bg-base-200 border border-base-300/80 flex items-center gap-2 text-[11px]">
-                            <span className="font-semibold text-base-content/60">Keterangan SO Sebelumnya:</span>
-                            <span className="font-medium text-base-content/90 italic">
-                              {prev.keterangan ? prev.keterangan : '(tidak ada)'}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {areaItems.map((item) => (
+                    <SOItemRow
+                      key={item.Item_ID}
+                      item={item}
+                      indexLabel={globalIndexMap[item.Item_ID]}
+                      count={counts[item.Item_ID]}
+                      prev={previousSO[item.Item_ID] || previousSO[item.Nama_Barang] || previousSO[item.Nama_Barang.trim()]}
+                      onChange={handleCountChange}
+                    />
+                  ))}
                 </div>
               </motion.div>
             ))}
@@ -1392,19 +1507,20 @@ export default function InputSOPage() {
           <label className="flex items-center gap-2 text-sm font-semibold text-base-content mb-1.5">
             <StickyNote className="w-4 h-4 text-base-content/50" />
             Catatan Laporan
-            <span className="text-[10px] font-normal text-base-content/40">(opsional)</span>
+            <span className="text-xs font-normal text-base-content/40">(opsional)</span>
           </label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Tulis catatan untuk laporan ini, mis. kondisi terakhir, hal yang perlu ditindaklanjuti, dsb..."
             rows={3}
+            aria-label="Catatan laporan"
             className="w-full textarea textarea-bordered resize-y text-sm"
           />
         </div>
 
         {/* Floating Action Bar */}
-        <div data-onboard="so-submit" className="card bg-base-100 border border-base-300 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+        <div data-onboard="so-submit" className="card bg-base-100 border border-base-300 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md sticky bottom-24 md:bottom-4 z-30 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="space-y-0.5">
             <span className="text-xs font-medium text-base-content/60">
               Selesaikan sesi pencatatan
@@ -1434,12 +1550,12 @@ export default function InputSOPage() {
         </div>
       </form>
 
-      {/* Floating navigation rail */}
-      <div data-onboard="so-navrail" className="fixed right-3 sm:right-4 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3">
+      {/* Floating navigation rail — hanya desktop/tablet; mobile pakai submit sticky */}
+      <div data-onboard="so-navrail" className="hidden sm:flex fixed right-4 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-3 pb-[env(safe-area-inset-bottom)]">
         <button
           type="button"
           onClick={scrollToFirstItem}
-          className="w-9 h-9 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors"
+          className="w-11 h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-sm"
           title="Ke item paling atas"
           aria-label="Ke item paling atas"
         >
@@ -1448,7 +1564,7 @@ export default function InputSOPage() {
         <button
           type="button"
           onClick={scrollToLastEditedItem}
-          className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${lastEditedItemId ? 'bg-warning hover:bg-warning/80' : 'bg-primary hover:bg-primary/80'}`}
+          className={`w-11 h-11 flex items-center justify-center rounded-full hover:opacity-90 transition-opacity shadow-sm ${lastEditedItemId ? 'bg-warning' : 'bg-primary'}`}
           title="Ke item terakhir yang diisi"
           aria-label="Ke item terakhir yang diisi"
         >
@@ -1457,7 +1573,7 @@ export default function InputSOPage() {
         <button
           type="button"
           onClick={scrollToLastItem}
-          className="w-9 h-9 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors"
+          className="w-11 h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-sm"
           title="Ke item paling bawah"
           aria-label="Ke item paling bawah"
         >
@@ -1492,6 +1608,55 @@ export default function InputSOPage() {
           onConfirm={handleGateConfirm}
         />
       )}
+      {/* Discard confirmation dialog */}
+      <AnimatePresence>
+        {showDiscardConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="discard-title"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 8 }}
+              className="card bg-base-100 border border-base-300 shadow-2xl p-6 w-full max-w-sm space-y-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-error/10 text-error flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 id="discard-title" className="font-bold text-base text-base-content">Hapus draft ini?</h2>
+                  <p className="text-sm text-base-content/60 mt-1">
+                    Semua data yang belum di-submit akan dihapus permanen dari penyimpanan sementara.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowDiscardConfirm(false)}
+                  className="btn min-h-[44px]"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDiscardDraft}
+                  className="btn btn-error min-h-[44px]"
+                >
+                  Ya, Hapus
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -1541,7 +1706,7 @@ function SOSummaryModalInline({
               <p className="text-xs text-base-content/60">Periksa sebelum mengirimkan data</p>
             </div>
           </div>
-          <button onClick={onCancel} className="p-1.5 text-base-content/40 hover:text-base-content hover:bg-base-200 rounded transition-colors">
+          <button onClick={onCancel} className="p-1.5 text-base-content/40 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1550,19 +1715,19 @@ function SOSummaryModalInline({
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="space-y-0.5">
-              <span className="text-[11px] text-base-content/60 font-semibold uppercase tracking-wide">Cabang</span>
+              <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Cabang</span>
               <p className="font-semibold text-base-content">{formState.cabangNama}</p>
             </div>
             <div className="space-y-0.5">
-              <span className="text-[11px] text-base-content/60 font-semibold uppercase tracking-wide">Petugas</span>
+              <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Petugas</span>
               <p className="font-semibold text-base-content">{formState.petugas}</p>
             </div>
             <div className="space-y-0.5">
-              <span className="text-[11px] text-base-content/60 font-semibold uppercase tracking-wide">Tanggal</span>
+              <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Tanggal</span>
               <p className="font-semibold text-base-content tabular-nums">{formState.tanggalOperasional}</p>
             </div>
             <div className="space-y-0.5">
-              <span className="text-[11px] text-base-content/60 font-semibold uppercase tracking-wide">Shift</span>
+              <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Shift</span>
               <p className="font-semibold text-base-content">{formState.shift}</p>
             </div>
           </div>
@@ -1571,19 +1736,19 @@ function SOSummaryModalInline({
           <div className="grid grid-cols-4 gap-2">
             <div className="text-center p-3 rounded-lg bg-error/10 border border-error/30">
               <span className="block text-2xl font-extrabold text-error tabular-nums">{kritis.length}</span>
-              <span className="text-[10px] font-bold text-error uppercase">Kritis</span>
+              <span className="text-xs font-bold text-error uppercase">Kritis</span>
             </div>
             <div className="text-center p-3 rounded-lg bg-warning/10 border border-warning/30">
               <span className="block text-2xl font-extrabold text-warning tabular-nums">{hampirHabis.length}</span>
-              <span className="text-[10px] font-bold text-warning uppercase tracking-wide">H. Habis</span>
+              <span className="text-xs font-bold text-warning uppercase tracking-wide">H. Habis</span>
             </div>
             <div className="text-center p-3 rounded-lg bg-success/10 border border-success/30">
               <span className="block text-2xl font-extrabold text-success tabular-nums">{aman.length}</span>
-              <span className="text-[10px] font-bold text-success uppercase">Aman</span>
+              <span className="text-xs font-bold text-success uppercase">Aman</span>
             </div>
             <div className="text-center p-3 rounded-lg bg-base-200 border border-base-300">
               <span className="block text-2xl font-extrabold text-base-content/60 tabular-nums">{tidakDipantau.length}</span>
-              <span className="text-[10px] font-bold text-base-content/60 uppercase">N/A</span>
+              <span className="text-xs font-bold text-base-content/60 uppercase">N/A</span>
             </div>
           </div>
 
@@ -1596,7 +1761,7 @@ function SOSummaryModalInline({
               </span>
               <div className="space-y-1 max-h-36 overflow-y-auto">
                 {kritis.map(item => (
-                  <div key={item.itemId} className="flex items-center justify-between px-3 py-1.5 bg-error/10 rounded text-xs border border-error/30">
+                  <div key={item.itemId} className="flex items-center justify-between px-3 py-1.5 bg-error/10 rounded-lg text-xs border border-error/30">
                     <span className="font-medium text-base-content">{item.namaBarang}</span>
                     <span className="font-bold text-error tabular-nums">
                       {item.step1 + item.step2} / {item.threshold}
@@ -1616,7 +1781,7 @@ function SOSummaryModalInline({
               </span>
               <div className="space-y-1 max-h-28 overflow-y-auto">
                 {formState.items.filter(i => i.keterangan).map(item => (
-                  <div key={item.itemId} className="flex items-start justify-between px-3 py-1.5 bg-base-200 rounded text-xs border border-base-300 gap-2">
+                  <div key={item.itemId} className="flex items-start justify-between px-3 py-1.5 bg-base-200 rounded-lg text-xs border border-base-300 gap-2">
                     <span className="font-medium text-base-content flex-shrink-0">{item.namaBarang}:</span>
                     <span className="text-base-content/60 text-right">{item.keterangan}</span>
                   </div>
@@ -1632,7 +1797,7 @@ function SOSummaryModalInline({
                 <StickyNote className="w-3.5 h-3.5" />
                 Catatan Laporan
               </span>
-              <div className="px-3 py-2 bg-base-200 rounded text-xs border border-base-300 whitespace-pre-wrap">
+              <div className="px-3 py-2 bg-base-200 rounded-lg text-xs border border-base-300 whitespace-pre-wrap">
                 {formState.note}
               </div>
             </div>
@@ -1643,13 +1808,13 @@ function SOSummaryModalInline({
         <div className="flex gap-3 p-5 pt-0">
           <button
             onClick={onCancel}
-            className="flex-1 btn px-4 py-2.5 text-sm font-medium min-h-[42px]"
+            className="flex-1 btn px-4 py-2.5 text-sm font-medium min-h-[44px]"
           >
             Kembali & Edit
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 btn btn-primary px-4 py-2.5 text-sm font-semibold min-h-[42px] flex items-center justify-center gap-2"
+            className="flex-1 btn btn-primary px-4 py-2.5 text-sm font-semibold min-h-[44px] flex items-center justify-center gap-2"
           >
             <Send className="w-4 h-4" />
             Konfirmasi & Submit

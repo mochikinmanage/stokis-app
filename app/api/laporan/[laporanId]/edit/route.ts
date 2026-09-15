@@ -244,7 +244,7 @@ export const POST = withAuth(async (req: NextRequest, { params }, session) => {
 
   if (!xlsxLink) {
     const origin = req.nextUrl?.origin || process.env.APP_URL || '';
-    xlsxLink = `${origin}/api/so/${encodeURIComponent(laporanId)}/xlsx-file?cabang=${encodeURIComponent(cabangId)}`;
+    xlsxLink = `${origin}/laporan/view/${encodeURIComponent(laporanId)}?cabang=${encodeURIComponent(cabangId)}`;
   }
 
   // 7. Save link + fileId

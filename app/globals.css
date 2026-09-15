@@ -160,6 +160,19 @@
 }
 
 /* =============================================
+   PRINT STYLES
+   ============================================= */
+@media print {
+  body { background: white !important; color: oklch(0.18 0.03 260) !important; }
+  .no-print, nav, .navbar, .btn, .badge-outline { display: none !important; }
+  .card { box-shadow: none !important; border: 1px solid oklch(0.90 0.004 260) !important; }
+  .table-xs { font-size: 11px !important; }
+  .overflow-x-auto { overflow: visible !important; }
+  tr, section, .card-body { page-break-inside: avoid; }
+  a[href]::after { content: none !important; }
+}
+
+/* =============================================
    REDUCED MOTION
    ============================================= */
 @media (prefers-reduced-motion: reduce) {
