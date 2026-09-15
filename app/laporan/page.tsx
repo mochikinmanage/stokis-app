@@ -262,7 +262,7 @@ export default function LaporanPage() {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
           <div>
-            <h1 className="text-xl sm:text-2xl font-semibold flex items-center gap-2 text-base-content">
+            <h1 data-onboard="laporan-heading" className="text-xl sm:text-2xl font-semibold flex items-center gap-2 text-base-content">
               <FileText className="w-6 h-6 text-primary" />
               <span>Riwayat Laporan Stock Opname</span>
             </h1>

@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import {
   type TourStep,
   ONBOARDING_TOUR,
@@ -19,8 +18,8 @@ interface Rect {
   right: number;
 }
 
-const PADDING = 10;
-const POPOVER_GAP = 14;
+const PADDING = 8;
+const POPOVER_GAP = 12;
 
 function scrollIntoViewIfNeeded(el: Element) {
   const r = el.getBoundingClientRect();
@@ -33,10 +32,42 @@ function scrollIntoViewIfNeeded(el: Element) {
   }
 }
 
+// Inline SVG icons (no external icon library)
+function IconX({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+function IconChevronLeft({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  );
+}
+
+function IconChevronRight({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+function IconCheck({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
 /**
  * Tur onboarding dengan efek "spotlight": menyorot satu elemen pada satu
- * waktu dan menampilkan popover penjelasan. Komponen hanya dirender ketika
- * sedang aktif (dikelola oleh TourProvider), jadi state selalu segar.
+ * waktu dan menampilkan popover penjelasan. Desain premium minimalis.
  */
 export function OnboardingTour({
   onClose,
@@ -51,20 +82,16 @@ export function OnboardingTour({
   const [stepIndex, setStepIndex] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const [probe, setProbe] = useState(0);
-  // Hitungan gagal menemukan elemen target; dipakai untuk auto-skip step
-  // yang elemennya tidak ada (mis. cabang belum dipilih, atau role admin-only).
   const [missCount, setMissCount] = useState(0);
 
   const step = steps[stepIndex];
   const total = steps.length;
   const isLast = stepIndex === total - 1;
 
-  // Tidak ada langkah yang sesuai untuk role user → tutup tur.
   useEffect(() => {
     if (total === 0) onClose();
   }, [total, onClose]);
 
-  // Apakah langkah ini membutuhkan pindah halaman yang belum aktif?
   const needsNav = Boolean(step.path && step.path !== pathname);
 
   const measure = useCallback(() => {
@@ -87,7 +114,6 @@ export function OnboardingTour({
     }
   }, [step]);
 
-  // Navigasi ke halaman yang dibutuhkan langkah ini.
   useEffect(() => {
     if (needsNav && step.path) {
       router.push(step.path);
@@ -95,11 +121,8 @@ export function OnboardingTour({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needsNav, stepIndex]);
 
-  // Ukur elemen target setelah halaman/path sudah sesuai. SetState dipanggil
-  // dari dalam timer, sehingga tidak berbeda dengan event callback.
   useEffect(() => {
     if (needsNav) {
-      // Jangan ukur selama menunggu navigasi; cek ulang sebentar lagi.
       const t = window.setTimeout(() => setProbe((p) => p + 1), 300);
       return () => window.clearTimeout(t);
     }
@@ -114,9 +137,6 @@ export function OnboardingTour({
     }, 0);
     const t1 = window.setTimeout(measure, 250);
     const t2 = window.setTimeout(() => {
-      // Elemen target tidak kunjung muncul (mis. belum pilih cabang, atau
-      // selector ini di halaman admin-only) → skor miss. Setelah beberapa
-      // kali, langkah dilewati otomatis agar tur tidak macet.
       if (step.selector && step.placement !== "center") {
         const el = document.querySelector(step.selector);
         if (!el) {
@@ -134,7 +154,6 @@ export function OnboardingTour({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepIndex, pathname, probe, needsNav]);
 
-  // Refresh posisi saat scroll/resize.
   useEffect(() => {
     if (step.placement === "center" || !step.selector || needsNav) return;
     window.addEventListener("scroll", measure, true);
@@ -156,7 +175,6 @@ export function OnboardingTour({
     onClose();
   };
 
-  // Lewati langkah yang elemennya tidak ditemukan (mis. cabang belum dipilih).
   useEffect(() => {
     if (missCount < 2) return;
     setMissCount(0);
@@ -166,31 +184,43 @@ export function OnboardingTour({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missCount, stepIndex, total]);
 
-  // Tutup tur dengan tombol Escape (aksesibilitas keyboard).
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") finish();
+      if (e.key === "ArrowRight" && !isLast) goTo(stepIndex + 1);
+      if (e.key === "ArrowLeft" && stepIndex > 0) goTo(stepIndex - 1);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [stepIndex, isLast]);
 
   const isCenter = step.placement === "center" || (!step.selector && !needsNav);
 
   return (
-    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={step.title}>
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 100 }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={step.title}
+    >
+      {/* Overlay */}
       {isCenter ? (
-        <div className="absolute inset-0 bg-black/70" />
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)" }} />
       ) : (
         rect && (
           <div
-            className="absolute rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.72)] ring-2 ring-primary"
             style={{
+              position: "absolute",
+              borderRadius: 8,
+              boxShadow: "0 0 0 9999px rgba(0,0,0,0.55)",
+              outline: "2px solid #111111",
+              outlineOffset: 2,
               left: rect.left - PADDING,
               top: rect.top - PADDING,
               width: rect.width + PADDING * 2,
               height: rect.height + PADDING * 2,
+              transition: "all 200ms ease",
             }}
           />
         )
@@ -199,74 +229,167 @@ export function OnboardingTour({
       <AnimatePresence mode="wait">
         <motion.div
           key={step.id}
-          initial={{ opacity: 0, y: 10, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8, scale: 0.97 }}
-          transition={{ duration: 0.18 }}
-          className={`fixed z-[101] ${
-            isCenter ? "inset-0 flex items-center justify-center" : ""
-          }`}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: "fixed",
+            zIndex: 101,
+            ...(isCenter
+              ? { inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }
+              : {}),
+          }}
         >
           <div
-            className={isCenter ? "" : "relative"}
             style={isCenter ? undefined : positionFor(step, rect)}
           >
-            <div className="card bg-base-100 border border-base-300 shadow-2xl max-w-[320px] sm:max-w-sm w-full p-5">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <span className="badge badge-primary badge-sm font-bold">
-                  {stepIndex + 1}/{total}
+            <div style={{
+              background: "#FFFFFF",
+              border: "1px solid #EAEAEA",
+              borderRadius: 10,
+              maxWidth: isCenter ? 360 : 340,
+              width: "calc(100vw - 32px)",
+              padding: "20px 22px",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
+            }}>
+              {/* Header */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.06em",
+                  color: "#9B9A97",
+                  background: "#F7F6F3",
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  textTransform: "uppercase",
+                }}>
+                  {stepIndex + 1} / {total}
                 </span>
                 <button
                   onClick={finish}
-                  className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content"
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    width: 28, height: 28, borderRadius: 6,
+                    background: "transparent", border: "none",
+                    color: "#9B9A97", cursor: "pointer",
+                    transition: "color 150ms ease, background 150ms ease",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#111111"; e.currentTarget.style.background = "#F7F6F3"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#9B9A97"; e.currentTarget.style.background = "transparent"; }}
                   aria-label="Tutup tutorial"
                 >
-                  <X className="w-4 h-4" />
+                  <IconX size={14} />
                 </button>
               </div>
 
-              <h3 className="text-base font-bold text-base-content mb-1.5">{step.title}</h3>
-              <p className="text-sm text-base-content/70 leading-relaxed">{step.description}</p>
+              {/* Title */}
+              <h3 style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#111111",
+                letterSpacing: "-0.01em",
+                lineHeight: 1.3,
+                margin: 0,
+                marginBottom: 6,
+              }}>
+                {step.title}
+              </h3>
 
-              <div className="flex items-center gap-1 mt-4">
+              {/* Description */}
+              <p style={{
+                fontSize: 13,
+                color: "#787774",
+                lineHeight: 1.65,
+                margin: 0,
+              }}>
+                {step.description}
+              </p>
+
+              {/* Dots */}
+              <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 16 }}>
                 {steps.map((s, i) => (
                   <button
                     key={s.id}
                     onClick={() => goTo(i)}
                     aria-label={`Langkah ${i + 1}`}
                     aria-current={i === stepIndex ? "step" : undefined}
-                    className="flex items-center justify-center p-2 -my-2 min-h-[24px] min-w-[24px]"
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      padding: 4, background: "transparent", border: "none", cursor: "pointer",
+                      minWidth: 20, minHeight: 20,
+                    }}
                   >
-                    <span
-                      className={`h-1.5 rounded-full transition-all ${
-                        i === stepIndex ? "w-5 bg-primary" : "w-1.5 bg-base-300"
-                      }`}
-                    />
+                    <span style={{
+                      display: "block",
+                      height: 4,
+                      borderRadius: 9999,
+                      transition: "all 200ms ease",
+                      width: i === stepIndex ? 20 : 4,
+                      background: i === stepIndex ? "#111111" : "#D5D3CF",
+                    }} />
                   </button>
                 ))}
               </div>
 
-              <div className="flex items-center justify-between gap-2 mt-4">
+              {/* Buttons */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, gap: 8 }}>
                 {stepIndex > 0 ? (
-                  <button onClick={() => goTo(stepIndex - 1)} className="btn btn-ghost btn-sm">
-                    <ChevronLeft className="w-4 h-4" />
+                  <button
+                    onClick={() => goTo(stepIndex - 1)}
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "6px 12px", fontSize: 12, fontWeight: 500,
+                      color: "#787774", background: "transparent",
+                      border: "1px solid #EAEAEA", borderRadius: 6,
+                      cursor: "pointer", transition: "all 150ms ease",
+                    }}
+                  >
+                    <IconChevronLeft size={14} />
                     Kembali
                   </button>
-                ) : (
-                  <span />
-                )}
-                <button onClick={finish} className="btn btn-ghost btn-sm text-base-content/50">
+                ) : <span />}
+
+                <button
+                  onClick={finish}
+                  style={{
+                    padding: "6px 12px", fontSize: 12, fontWeight: 500,
+                    color: "#9B9A97", background: "transparent",
+                    border: "none", borderRadius: 6,
+                    cursor: "pointer", transition: "color 150ms ease",
+                  }}
+                >
                   Lewati
                 </button>
+
                 {isLast ? (
-                  <button onClick={finish} className="btn btn-primary btn-sm">
-                    <Check className="w-4 h-4" />
+                  <button
+                    onClick={finish}
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "6px 14px", fontSize: 12, fontWeight: 600,
+                      color: "#FFFFFF", background: "#111111",
+                      border: "none", borderRadius: 6,
+                      cursor: "pointer", transition: "background 150ms ease",
+                    }}
+                  >
+                    <IconCheck size={14} />
                     Selesai
                   </button>
                 ) : (
-                  <button onClick={() => goTo(stepIndex + 1)} className="btn btn-primary btn-sm">
+                  <button
+                    onClick={() => goTo(stepIndex + 1)}
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "6px 14px", fontSize: 12, fontWeight: 600,
+                      color: "#FFFFFF", background: "#111111",
+                      border: "none", borderRadius: 6,
+                      cursor: "pointer", transition: "background 150ms ease",
+                    }}
+                  >
                     Berikutnya
-                    <ChevronRight className="w-4 h-4" />
+                    <IconChevronRight size={14} />
                   </button>
                 )}
               </div>
@@ -278,21 +401,31 @@ export function OnboardingTour({
   );
 }
 
-function positionFor(step: TourStep, rect: Rect | null) {
+function positionFor(step: TourStep, rect: Rect | null): React.CSSProperties {
   if (!rect) return {};
   switch (step.placement) {
     case "left":
-      return { right: window.innerWidth - (rect.left - PADDING) + POPOVER_GAP, top: Math.max(8, rect.top) };
+      return {
+        position: "fixed" as const,
+        right: window.innerWidth - (rect.left - PADDING) + POPOVER_GAP,
+        top: Math.max(8, rect.top),
+      };
     case "right":
-      return { left: rect.right + PADDING + POPOVER_GAP, top: Math.max(8, rect.top) };
+      return {
+        position: "fixed" as const,
+        left: rect.right + PADDING + POPOVER_GAP,
+        top: Math.max(8, rect.top),
+      };
     case "top":
       return {
-        left: Math.max(8, rect.left + rect.width / 2 - 160),
+        position: "fixed" as const,
+        left: Math.max(8, rect.left + rect.width / 2 - 170),
         bottom: window.innerHeight - (rect.top - PADDING) + POPOVER_GAP,
       };
     default:
       return {
-        left: Math.max(8, rect.left + rect.width / 2 - 160),
+        position: "fixed" as const,
+        left: Math.max(8, rect.left + rect.width / 2 - 170),
         top: rect.bottom + PADDING + POPOVER_GAP,
       };
   }

@@ -164,7 +164,7 @@ export default function CabangAdminPage() {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-base-content flex items-center gap-2">
+          <h1 data-onboard="cabang-heading" className="text-xl sm:text-2xl font-semibold text-base-content flex items-center gap-2">
             <Building2 className="w-6 h-6 text-primary" />
             <span>Administrasi Cabang Operasional</span>
           </h1>

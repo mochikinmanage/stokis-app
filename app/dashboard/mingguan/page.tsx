@@ -274,7 +274,7 @@ export default function DashboardMingguanPage() {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-base-content flex items-center gap-2">
+          <h1 data-onboard="dashboard-mingguan-heading" className="text-xl sm:text-2xl font-semibold text-base-content flex items-center gap-2">
             <TrendingUp className="w-6 h-6 text-primary" />
             <span>Dashboard Tren Mingguan</span>
           </h1>
