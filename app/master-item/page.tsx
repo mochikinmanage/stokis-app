@@ -165,18 +165,30 @@ function TipeInputDropdown({
           {/* Options */}
           <div className="py-1">
             {TIPE_TYPES.map((t) => {
-              const isRadio = t === 'dual' || t === 'single';
               const isSelected = draft.has(t);
+              const handleToggle = () => {
+                setDraft(prev => {
+                  const next = new Set(prev);
+                  if (t === 'dual' || t === 'single') {
+                    next.delete('dual');
+                    next.delete('single');
+                    next.add(t);
+                  } else {
+                    if (next.has(t)) next.delete(t);
+                    else next.add(t);
+                  }
+                  return next;
+                });
+              };
               return (
-                <label
+                <div
                   key={t}
+                  onClick={handleToggle}
                   className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-base-200/50 transition-colors"
                 >
                   <div className={`flex-shrink-0 w-4 h-4 rounded flex items-center justify-center border-2 ${
                     isSelected
-                      ? isRadio
-                        ? 'border-primary bg-primary'
-                        : 'border-primary bg-primary'
+                      ? 'border-primary bg-primary'
                       : 'border-base-300 bg-base-100'
                   }`}>
                     {isSelected && (
@@ -191,7 +203,7 @@ function TipeInputDropdown({
                   {t === 'dual' && (
                     <span className="flex-shrink-0 text-[9px] font-bold text-primary/50">Default</span>
                   )}
-                </label>
+                </div>
               );
             })}
           </div>
