@@ -58,6 +58,10 @@ const INPUT_TEXT = `${INPUT_BASE} w-full`;
 
 // ── Tipe Input helpers ──────────────────────────────────────
 
+function haptic(ms = 10) {
+  try { navigator.vibrate?.(ms); } catch {}
+}
+
 const TIPE_TYPES = ['dual', 'single', 'boolean', 'date', 'expiry', 'text'] as const;
 
 function parseTipeSelection(val: string): Set<string> {
@@ -140,7 +144,7 @@ function TipeInputDropdown({
       <button
         type="button"
         onClick={handleOpen}
-        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold bg-base-100 border border-base-300 hover:border-base-content/30 transition-all cursor-pointer"
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-md text-[11px] font-bold bg-base-100 border border-base-300 hover:border-base-content/30 active:bg-base-200 transition-all cursor-pointer"
       >
         <span className={tipeBadgeColor(displayValue)}>
           {displayLabel}
@@ -213,7 +217,7 @@ function TipeInputDropdown({
             <button
               type="button"
               onClick={handleReset}
-              className="text-[10px] font-semibold text-base-content/40 hover:text-base-content/60 transition-colors"
+              className="text-[11px] font-semibold text-base-content/40 hover:text-base-content/60 min-h-[36px] px-2 transition-colors"
             >
               Reset
             </button>
@@ -221,14 +225,14 @@ function TipeInputDropdown({
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-2.5 py-1 rounded-md text-[10px] font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
+                className="px-3 py-1.5 min-h-[36px] rounded-md text-[11px] font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-2.5 py-1 rounded-md text-[10px] font-bold text-primary-content bg-primary hover:bg-primary/90 transition-all"
+                className="px-3 py-1.5 min-h-[36px] rounded-md text-[11px] font-bold text-primary-content bg-primary hover:bg-primary/90 transition-all"
               >
                 Simpan
               </button>
@@ -358,6 +362,7 @@ export default function MasterItemPage() {
 
   const handleSaveBatch = async () => {
     if (!selectedCabang || draftItems.size === 0) return;
+    haptic(15);
     try {
       setSavingBatch(true);
       const updates = [...draftItems.values()].map((d) => ({
@@ -387,6 +392,7 @@ export default function MasterItemPage() {
   };
 
   const handleCancelEdit = () => {
+    haptic();
     setIsEditing(false);
     setDraftItems(new Map());
   };
@@ -427,6 +433,7 @@ export default function MasterItemPage() {
   };
 
   const applyBottomSheet = () => {
+    haptic();
     if (bottomSheetItemId && bottomSheetDraft.size > 0) {
       updateDraft(bottomSheetItemId, 'Tipe_Input', tipeSelectionToComma(bottomSheetDraft));
     }
@@ -480,6 +487,7 @@ export default function MasterItemPage() {
 
   const handleToggleActive = async (itemId: string, currentAktif: boolean) => {
     if (!selectedCabang) return;
+    haptic();
     try {
       const res = await fetch(`/api/master-item/${itemId}/status`, {
         method: 'PATCH',
@@ -1119,14 +1127,14 @@ export default function MasterItemPage() {
                 <button
                   onClick={handleCancelEdit}
                   disabled={savingBatch}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
+                  className="px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
                 >
                   Batal
                 </button>
                 <button
                   onClick={handleSaveBatch}
                   disabled={savingBatch}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-primary-content bg-primary shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2 min-h-[44px] rounded-lg text-sm font-bold text-primary-content bg-primary shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
                 >
                   {savingBatch ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Simpan Perubahan
@@ -1146,7 +1154,7 @@ export default function MasterItemPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => window.history.back()}
-                  className="p-1.5 -ml-1.5 rounded-lg hover:bg-base-200 transition-colors"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center -ml-1 rounded-lg hover:bg-base-200 transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5 text-base-content/60" />
                 </button>
@@ -1155,18 +1163,18 @@ export default function MasterItemPage() {
                   <p className="text-[10px] text-base-content/40">{activeItemCount} aktif / {items.length} total</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {isAdmin && !isEditing && (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="p-2 rounded-lg bg-base-200 text-base-content/60 border border-base-300"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-base-200 text-base-content/60 border border-base-300"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
                 )}
                 <button
                   onClick={() => setShowModal(true)}
-                  className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20"
                 >
                   <PlusCircle className="w-4 h-4" />
                 </button>
@@ -1180,18 +1188,26 @@ export default function MasterItemPage() {
                 placeholder="Cari barang..."
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-base-300 text-sm bg-base-200/30 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-base-100 transition-all"
+                className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-base-300 text-sm bg-base-200/30 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-base-100 transition-all"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => { setSearchQuery(''); setCurrentPage(1); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg text-base-content/30 hover:text-base-content active:bg-base-200 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
           {/* Category pills */}
-          <div className="px-4 pb-3 flex items-center gap-1.5 overflow-x-auto hide-scrollbar">
+          <div className="px-4 pb-3 flex items-center gap-2 overflow-x-auto hide-scrollbar">
             <button
               onClick={() => { setSelectedArea('Semua'); setCurrentPage(1); }}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${
+              className={`flex-shrink-0 px-4 py-2.5 min-h-[44px] rounded-full text-xs font-bold transition-all ${
                 selectedArea === 'Semua'
                   ? 'bg-primary text-primary-content shadow-sm'
-                  : 'bg-base-200 text-base-content/60 border border-base-300'
+                  : 'bg-base-200 text-base-content/60 border border-base-300 active:bg-base-300'
               }`}
             >
               Semua
@@ -1201,10 +1217,10 @@ export default function MasterItemPage() {
               <button
                 key={area}
                 onClick={() => { setSelectedArea(area); setCurrentPage(1); }}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all whitespace-nowrap ${
+                className={`flex-shrink-0 px-4 py-2.5 min-h-[44px] rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
                   selectedArea === area
                     ? 'bg-primary text-primary-content shadow-sm'
-                    : 'bg-base-200 text-base-content/60 border border-base-300'
+                    : 'bg-base-200 text-base-content/60 border border-base-300 active:bg-base-300'
                 }`}
               >
                 {area}
@@ -1212,14 +1228,75 @@ export default function MasterItemPage() {
               </button>
             ))}
           </div>
+          {/* Status & Tipe filters */}
+          <div className="px-4 pb-3 flex items-center gap-2 overflow-x-auto hide-scrollbar">
+            <span className="flex-shrink-0 text-[10px] font-bold text-base-content/30 uppercase tracking-wider">Status:</span>
+            {['Semua', 'Aktif', 'Nonaktif'].map(s => (
+              <button
+                key={s}
+                onClick={() => { setSelectedStatus(s); setCurrentPage(1); }}
+                className={`flex-shrink-0 px-3 py-1.5 min-h-[36px] rounded-lg text-[10px] font-semibold transition-all ${
+                  selectedStatus === s
+                    ? 'bg-base-content text-base-100'
+                    : 'bg-base-200/50 text-base-content/50 border border-base-300 active:bg-base-300'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+            <span className="flex-shrink-0 w-px h-4 bg-base-300 mx-0.5" />
+            <span className="flex-shrink-0 text-[10px] font-bold text-base-content/30 uppercase tracking-wider">Tipe:</span>
+            {['Semua', 'dual', 'single', 'boolean'].map(t => (
+              <button
+                key={t}
+                onClick={() => { setSelectedTipe(t); setCurrentPage(1); }}
+                className={`flex-shrink-0 px-3 py-1.5 min-h-[36px] rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap ${
+                  selectedTipe === t
+                    ? 'bg-base-content text-base-100'
+                    : 'bg-base-200/50 text-base-content/50 border border-base-300 active:bg-base-300'
+                }`}
+              >
+                {t === 'Semua' ? 'Semua' : t === 'dual' ? 'Dual' : t === 'single' ? 'Single' : 'Boolean'}
+              </button>
+            ))}
+            {(selectedStatus !== 'Semua' || selectedTipe !== 'Semua') && (
+              <button
+                onClick={() => { setSelectedStatus('Semua'); setSelectedTipe('Semua'); setCurrentPage(1); }}
+                className="flex-shrink-0 px-2 py-1.5 min-h-[36px] rounded-lg text-[10px] font-bold text-error active:bg-error/10 transition-colors"
+              >
+                Reset
+              </button>
+            )}
+          </div>
         </header>
 
         {/* ─── CARD LIST ─── */}
         <main className="px-4 py-3 pb-24 space-y-3">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <Loader2 className="w-7 h-7 animate-spin text-primary" />
-              <p className="text-sm text-base-content/50">Memuat data barang...</p>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-base-100 rounded-xl border border-base-300 p-4 animate-pulse">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-md bg-base-200" />
+                      <div>
+                        <div className="h-4 w-32 bg-base-200 rounded mb-1" />
+                        <div className="flex gap-1.5">
+                          <div className="h-3 w-12 bg-base-200 rounded" />
+                          <div className="h-3 w-8 bg-base-200 rounded" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-2 h-2 rounded-full bg-base-200" />
+                  </div>
+                  <div className="h-9 w-full bg-base-200/50 rounded-lg mb-3" />
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="h-9 bg-base-200/50 rounded-lg" />
+                    <div className="h-9 bg-base-200/50 rounded-lg" />
+                  </div>
+                  <div className="h-9 bg-base-200/50 rounded-lg" />
+                </div>
+              ))}
             </div>
           ) : filteredItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -1246,11 +1323,11 @@ export default function MasterItemPage() {
                   <React.Fragment key={group.area}>
                     {/* Area group header */}
                     <div
-                      className="flex items-center gap-2 px-1 cursor-pointer"
+                      className="flex items-center gap-2 px-2 py-3 min-h-[44px] cursor-pointer active:bg-base-200/50 transition-colors"
                       onClick={() => toggleAreaCollapse(group.area)}
                     >
-                      <ChevronDown className={`w-3 h-3 text-base-content/40 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
-                      <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{group.area}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 text-base-content/40 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+                      <span className="text-xs font-bold text-primary uppercase tracking-wider">{group.area}</span>
                       <span className="text-[10px] text-base-content/30">({totalInGroup})</span>
                     </div>
 
@@ -1364,21 +1441,21 @@ export default function MasterItemPage() {
                   <span className="text-[10px] text-base-content/40">
                     {(currentPage - 1) * PAGE_SIZE + 1}-{Math.min(currentPage * PAGE_SIZE, filteredItems.length)} / {filteredItems.length}
                   </span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="w-7 h-7 rounded-md flex items-center justify-center text-base-content/40 bg-base-200 border border-base-300 disabled:opacity-30"
+                      className="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-base-content/40 bg-base-200 border border-base-300 disabled:opacity-30 active:bg-base-300 transition-colors"
                     >
-                      <ChevronLeft className="w-3.5 h-3.5" />
+                      <ChevronLeft className="w-4 h-4" />
                     </button>
                     <span className="text-xs font-bold text-base-content/60 px-2">{currentPage}/{totalPages}</span>
                     <button
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      className="w-7 h-7 rounded-md flex items-center justify-center text-base-content/40 bg-base-200 border border-base-300 disabled:opacity-30"
+                      className="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-base-content/40 bg-base-200 border border-base-300 disabled:opacity-30 active:bg-base-300 transition-colors"
                     >
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1389,7 +1466,7 @@ export default function MasterItemPage() {
 
         {/* ─── MOBILE FLOATING SAVE BAR ─── */}
         {isAdmin && isEditing && draftItems.size > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-base-100 border-t border-base-300 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-base-100 border-t border-base-300 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
             <div className="px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />
@@ -1399,14 +1476,14 @@ export default function MasterItemPage() {
                 <button
                   onClick={handleCancelEdit}
                   disabled={savingBatch}
-                  className="px-3 py-2 rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300"
+                  className="px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300 active:bg-base-200 transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   onClick={handleSaveBatch}
                   disabled={savingBatch}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-primary-content bg-primary shadow-lg shadow-primary/20"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 min-h-[44px] rounded-lg text-xs font-bold text-primary-content bg-primary shadow-lg shadow-primary/20 active:bg-primary/90 transition-colors"
                 >
                   {savingBatch ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                   Simpan
@@ -1437,7 +1514,7 @@ export default function MasterItemPage() {
             >
               {/* Drag handle */}
               <div className="flex justify-center pt-3 pb-2">
-                <div className="w-10 h-1 rounded-full bg-base-300" />
+                <div className="w-12 h-1.5 rounded-full bg-base-300" />
               </div>
 
               {/* Header */}
@@ -1460,20 +1537,35 @@ export default function MasterItemPage() {
               <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
                 {(['dual', 'single', 'boolean', 'date', 'expiry', 'text'] as const).map((t) => {
                   const isSelected = bottomSheetDraft.has(t);
-                  const isRadio = t === 'dual' || t === 'single';
+                  const isDualOrSingle = t === 'dual' || t === 'single';
+                  const handleToggle = () => {
+                    setBottomSheetDraft(prev => {
+                      const next = new Set(prev);
+                      if (t === 'dual' || t === 'single') {
+                        next.delete('dual');
+                        next.delete('single');
+                        next.add(t);
+                      } else {
+                        if (next.has(t)) next.delete(t);
+                        else next.add(t);
+                      }
+                      return next;
+                    });
+                  };
                   return (
-                    <label
+                    <div
                       key={t}
-                      className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                      onClick={handleToggle}
+                      className={`flex items-center gap-3 p-3 min-h-[48px] rounded-xl cursor-pointer transition-all ${
                         isSelected
                           ? 'border-2 border-primary/30 bg-primary/5'
-                          : 'border border-base-300 bg-base-100 hover:bg-base-200/30'
+                          : 'border border-base-300 bg-base-100 active:bg-base-200/50'
                       }`}
                     >
-                      <div className={`flex-shrink-0 ${
-                        isRadio
-                          ? `w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-primary bg-primary' : 'border-base-300 bg-white'}`
-                          : `w-5 h-5 rounded-md border-2 flex items-center justify-center ${isSelected ? 'border-primary bg-primary' : 'border-base-300 bg-white'}`
+                      <div className={`flex-shrink-0 w-5 h-5 rounded-${
+                        isDualOrSingle ? 'full' : 'md'
+                      } border-2 flex items-center justify-center ${
+                        isSelected ? 'border-primary bg-primary' : 'border-base-300 bg-white'
                       }`}>
                         {isSelected && (
                           <Check className="w-3 h-3 text-white" />
@@ -1493,7 +1585,7 @@ export default function MasterItemPage() {
                       {t === 'dual' && (
                         <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">Default</span>
                       )}
-                    </label>
+                    </div>
                   );
                 })}
               </div>
@@ -1502,18 +1594,18 @@ export default function MasterItemPage() {
               <div className="px-5 py-3 border-t border-base-300 flex items-center justify-between">
                 <button
                   onClick={() => setBottomSheetDraft(new Set(['dual']))}
-                  className="text-xs font-medium text-base-content/50 hover:text-base-content/70 transition-colors"
+                  className="text-xs font-medium text-base-content/50 hover:text-base-content/70 min-h-[44px] px-2 transition-colors"
                 >
                   Reset ke Default
                 </button>
                 <div className="flex items-center gap-2">
-                  <button onClick={closeBottomSheet} className="px-4 py-2 rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all">
+                  <button onClick={closeBottomSheet} className="px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all">
                     Batal
                   </button>
-                  <button onClick={applyBottomSheet} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold text-primary-content bg-primary shadow-lg shadow-primary/20 transition-all">
+                  <button onClick={applyBottomSheet} className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-bold text-primary-content bg-primary shadow-lg shadow-primary/20 transition-all">
                     <Check className="w-3.5 h-3.5" />
                     Terapkan
-                    <span className="ml-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-white/20">{bottomSheetDraft.size}</span>
+                    <span className="ml-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20">{bottomSheetDraft.size}</span>
                   </button>
                 </div>
               </div>
@@ -1550,7 +1642,7 @@ export default function MasterItemPage() {
               </div>
 
               {/* Modal body */}
-              <form onSubmit={handleAddItem} className="px-6 py-5 space-y-4">
+              <form onSubmit={handleAddItem} className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
                     Nama Barang <span className="text-error">*</span>
@@ -1565,7 +1657,7 @@ export default function MasterItemPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
                       Area <span className="text-error">*</span>
