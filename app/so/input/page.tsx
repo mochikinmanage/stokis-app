@@ -584,6 +584,32 @@ export default function InputSOPage() {
     }
   });
 
+  const handleRestoreDraft = (draft: SODraft) => {
+    if (draft.sesiId) sesiIdRef.current = draft.sesiId;
+    if (draft.tanggalOperasional) setTanggalOperasional(draft.tanggalOperasional);
+    if (draft.shift) setShift(draft.shift);
+    if (draft.note) setNote(draft.note);
+    setCounts((prev) => {
+      const merged = { ...prev };
+      Object.keys(draft.counts).forEach((k) => {
+        const dc = draft.counts[k];
+        if (
+          dc &&
+          (String(dc.step1).trim() !== '' ||
+            String(dc.step2).trim() !== '' ||
+            String(dc.keterangan).trim() !== '' ||
+            dc.statusIsi !== undefined ||
+            String(dc.tglRefill ?? '').trim() !== '' ||
+            String(dc.tglPakai ?? '').trim() !== '')
+        ) {
+          merged[k] = { ...dc };
+        }
+      });
+      return merged;
+    });
+    setPendingDraft(null);
+  };
+
   useEffect(() => {
     if (!selectedCabang) {
       setLoadingData(false);
@@ -614,7 +640,8 @@ export default function InputSOPage() {
 
           const cached = loadDraft(selectedCabang.Cabang_ID);
           if (cached && countFilled(cached.counts) > 0) {
-            setPendingDraft(cached);
+            // Auto-restore draft instead of showing banner
+            handleRestoreDraft(cached);
           }
         }
 
@@ -797,32 +824,6 @@ export default function InputSOPage() {
     acc[area].push(item);
     return acc;
   }, {} as Record<string, MasterItem[]>);
-
-  const handleRestoreDraft = (draft: SODraft) => {
-    if (draft.sesiId) sesiIdRef.current = draft.sesiId;
-    if (draft.tanggalOperasional) setTanggalOperasional(draft.tanggalOperasional);
-    if (draft.shift) setShift(draft.shift);
-    if (draft.note) setNote(draft.note);
-    setCounts((prev) => {
-      const merged = { ...prev };
-      Object.keys(draft.counts).forEach((k) => {
-        const dc = draft.counts[k];
-        if (
-          dc &&
-          (String(dc.step1).trim() !== '' ||
-            String(dc.step2).trim() !== '' ||
-            String(dc.keterangan).trim() !== '' ||
-            dc.statusIsi !== undefined ||
-            String(dc.tglRefill ?? '').trim() !== '' ||
-            String(dc.tglPakai ?? '').trim() !== '')
-        ) {
-          merged[k] = { ...dc };
-        }
-      });
-      return merged;
-    });
-    setPendingDraft(null);
-  };
 
   const handleDiscardDraft = () => {
     if (selectedCabang) clearDraft(selectedCabang.Cabang_ID);
