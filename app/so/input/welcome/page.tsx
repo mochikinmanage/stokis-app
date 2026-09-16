@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
@@ -13,6 +13,7 @@ import {
   HardDrive,
   ArrowLeft,
 } from 'lucide-react';
+import { ShiftCabangGate } from '@/components/ShiftCabangGate';
 
 const DRAFT_PREFIX = 'stokis_so_draft_';
 
@@ -63,10 +64,11 @@ function clearDraft(cabangId: string): void {
 
 export default function WelcomeSOPage() {
   const router = useRouter();
-  const { selectedCabang, cabangList, loading: cabangLoading } = useCabang();
+  const { selectedCabang, setSelectedCabang, cabangList, loading: cabangLoading } = useCabang();
   const { user } = useAuth();
   const [pendingDraft, setPendingDraft] = useState<SODraft | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showShiftGate, setShowShiftGate] = useState(false);
 
   useEffect(() => {
     if (cabangLoading || !user) return;
@@ -83,20 +85,57 @@ export default function WelcomeSOPage() {
 
   const handleLanjutkan = () => {
     // Draft is already in localStorage, just navigate to input page
+    // The input page will automatically load the draft
     router.push('/so/input');
   };
 
   const handleMulaiBaru = () => {
-    // Clear draft and navigate to input page
+    // Clear draft and show ShiftCabangGate first
     if (selectedCabang?.Cabang_ID) {
       clearDraft(selectedCabang.Cabang_ID);
     }
+    setShowShiftGate(true);
+  };
+
+  const handleGateConfirm = (cabangId: string, shift: string) => {
+    // Set selected cabang and shift, then navigate to input page
+    const target = cabangList.find((c) => c.Cabang_ID === cabangId) || null;
+    if (target) {
+      setSelectedCabang(target);
+    }
+    try {
+      sessionStorage.setItem('stokis_so_last_shift', shift);
+    } catch {
+      // ignore
+    }
+    setShowShiftGate(false);
     router.push('/so/input');
   };
 
   const handleBatal = () => {
     router.back();
   };
+
+  // ShiftCabangGate variables
+  const gateInitialCabangId = selectedCabang?.Cabang_ID ?? null;
+  const gateInitialShift = (() => {
+    if (selectedCabang) {
+      const draft = loadDraft(selectedCabang.Cabang_ID);
+      if (draft?.shift) return draft.shift;
+    }
+    try {
+      const stored = sessionStorage.getItem('stokis_so_last_shift');
+      if (stored) return stored;
+    } catch {
+      // ignore
+    }
+    return 'Opening';
+  })();
+
+  const getDraftShiftForGate = useCallback((cabangId: string): string | null => {
+    const draft = loadDraft(cabangId);
+    return draft?.shift ?? null;
+  }, []);
 
   if (isLoading || cabangLoading) {
     return (
@@ -218,6 +257,16 @@ export default function WelcomeSOPage() {
           </button>
         </div>
       </motion.div>
+
+      {/* ShiftCabangGate - shown when user selects "Mulai Baru" */}
+      <ShiftCabangGate
+        open={showShiftGate}
+        cabangList={cabangList ?? []}
+        initialCabangId={gateInitialCabangId}
+        initialShift={gateInitialShift}
+        getDraftShift={getDraftShiftForGate}
+        onConfirm={handleGateConfirm}
+      />
     </div>
   );
 }
