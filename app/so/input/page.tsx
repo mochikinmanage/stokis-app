@@ -572,7 +572,7 @@ export default function InputSOPage() {
   // Draft (save sementara) state
   const [pendingDraft, setPendingDraft] = useState<SODraft | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState<boolean>(false);
-  const [showDraftModal, setShowDraftModal] = useState<boolean>(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState<boolean>(false);
   const draftTimer = useRef<number | null>(null);
 
   // Petugas = logged-in user name
@@ -650,7 +650,7 @@ export default function InputSOPage() {
           const cached = loadDraft(selectedCabang.Cabang_ID);
           if (cached && countFilled(cached.counts) > 0) {
             setPendingDraft(cached);
-            setShowDraftModal(true);
+            setShowWelcomeModal(true);
           }
         }
 
@@ -1363,9 +1363,9 @@ export default function InputSOPage() {
                   </motion.button>
         )}
 
-        {/* Draft Restore Modal - detailed popup */}
+        {/* Welcome Modal - choice for continuing or starting new */}
         <AnimatePresence>
-          {showDraftModal && pendingDraft && (
+          {showWelcomeModal && pendingDraft && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1373,8 +1373,7 @@ export default function InputSOPage() {
               className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
               role="dialog"
               aria-modal="true"
-              aria-labelledby="draft-title"
-              onClick={() => setShowDraftModal(false)}
+              aria-labelledby="welcome-title"
             >
               <motion.div
                 initial={{ opacity: 0, y: 40, scale: 0.97 }}
@@ -1391,13 +1390,10 @@ export default function InputSOPage() {
                       <AlertTriangle className="w-5 h-5 text-warning" />
                     </div>
                     <div>
-                      <h2 id="draft-title" className="font-semibold text-base-content text-base">Sesi Belum Selesai</h2>
+                      <h2 id="welcome-title" className="font-semibold text-base-content text-base">Sesi Belum Selesai</h2>
                       <p className="text-xs text-base-content/60">Ditemukan data yang belum di-submit</p>
                     </div>
                   </div>
-                  <button onClick={() => setShowDraftModal(false)} className="p-1.5 text-base-content/40 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors">
-                    <X className="w-5 h-5" />
-                  </button>
                 </div>
 
                 {/* Session Info */}
@@ -1452,7 +1448,7 @@ export default function InputSOPage() {
                     type="button"
                     onClick={() => {
                       handleRestoreDraft(pendingDraft);
-                      setShowDraftModal(false);
+                      setShowWelcomeModal(false);
                     }}
                     className="btn btn-primary min-h-[48px] text-base"
                   >
@@ -1462,13 +1458,23 @@ export default function InputSOPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setShowDraftModal(false);
-                      setShowDiscardConfirm(true);
+                      handleDiscardDraft();
+                      setShowWelcomeModal(false);
+                      setGateOpen(true);
                     }}
                     className="btn btn-ghost min-h-[44px]"
                   >
                     <Plus className="w-4 h-4" />
                     Mulai Sesi Baru
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowWelcomeModal(false);
+                    }}
+                    className="btn btn-ghost min-h-[44px] text-base-content/60"
+                  >
+                    Batal
                   </button>
                 </div>
               </motion.div>
