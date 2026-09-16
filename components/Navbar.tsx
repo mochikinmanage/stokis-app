@@ -19,7 +19,6 @@ import {
   Home,
   LogOut,
   HelpCircle,
-  Globe,
   Menu,
   X,
   BookOpen,
@@ -217,16 +216,6 @@ export function Navbar() {
 
             {/* Right side */}
             <div className="flex items-center gap-2">
-              {/* Language Switcher */}
-              <button
-                onClick={toggleLang}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-md transition-colors duration-150 text-base-content/80 bg-base-200 hover:bg-base-300 font-mono text-xs font-bold border border-base-300"
-                title={lang === 'id' ? 'Switch to English' : 'Ubah ke Bahasa Indonesia'}
-              >
-                <Globe className="w-3.5 h-3.5 text-primary" />
-                <span>{lang.toUpperCase()}</span>
-              </button>
-
               {/* Branch Selector */}
               <div data-onboard="cabang" className="flex items-center rounded-md px-2.5 py-1.5 bg-base-200 border border-base-300 max-w-[160px] sm:max-w-none" title={selectedCabang?.Nama_Cabang}>
                 <Store className="w-3.5 h-3.5 mr-1.5 flex-shrink-0 text-primary" />

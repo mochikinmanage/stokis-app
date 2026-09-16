@@ -499,7 +499,7 @@ const SOItemRow = React.memo(function SOItemRow({
             value={keteranganVal}
             onChange={(e) => onChange(item.Item_ID, 'keterangan', e.target.value)}
             aria-label={`Keterangan ${item.Nama_Barang}`}
-            className="w-full pl-8 pr-3 py-2 min-h-[44px] text-xs input input-bordered"
+            className="w-full pl-8 pr-3 py-2 min-h-[44px] text-xs text-center input input-bordered"
           />
         </div>
       </div>
@@ -1277,7 +1277,7 @@ export default function InputSOPage() {
                 onChange={(e) => setTanggalOperasional(e.target.value)}
                 required
                 aria-label="Tanggal Operasional"
-                className="w-full px-3 py-2.5 text-sm font-medium tabular-nums input input-bordered"
+                className="w-full px-3 py-2.5 text-sm font-medium tabular-nums text-center input input-bordered"
               />
             </div>
 
@@ -1291,7 +1291,7 @@ export default function InputSOPage() {
                 value={shift}
                 onChange={(e) => setShift(e.target.value)}
                 aria-label="Shift Kerja"
-                className="w-full px-3 py-2.5 text-sm font-medium cursor-pointer select select-bordered"
+                className="w-full px-3 py-2.5 text-sm font-medium cursor-pointer text-center select select-bordered"
               >
                 <option value="Opening">Opening</option>
                 <option value="Closing">Closing</option>
@@ -1330,7 +1330,7 @@ export default function InputSOPage() {
               <select
                 value={selectedPrevIndex}
                 onChange={(e) => handleSelectPrevious(Number(e.target.value))}
-                className="w-full px-3 py-2.5 text-sm font-medium cursor-pointer select select-bordered"
+                className="w-full px-3 py-2.5 text-sm font-medium cursor-pointer text-center select select-bordered"
                 aria-label="Pilih sesi SO sebelumnya sebagai acuan"
               >
                 {previousSOHistory.map((s, i) => (
@@ -1560,33 +1560,33 @@ export default function InputSOPage() {
       </form>
 
       {/* Floating navigation rail — vertical, right-center */}
-      <div data-onboard="so-navrail" className="flex fixed right-4 top-1/2 -translate-y-1/2 z-50 flex-col gap-2">
+      <div data-onboard="so-navrail" className="flex fixed right-4 top-1/2 -translate-y-1/2 z-50 flex-col gap-1.5">
         <button
           type="button"
           onClick={scrollToFirstItem}
-          className="w-11 h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-lg"
+          className="w-9 h-9 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow"
           title="Ke item paling atas"
           aria-label="Ke item paling atas"
         >
-          <ArrowUp className="w-5 h-5 text-white" />
+          <ArrowUp className="w-4 h-4 text-white" />
         </button>
         <button
           type="button"
           onClick={scrollToLastEditedItem}
-          className={`w-11 h-11 flex items-center justify-center rounded-full hover:opacity-90 transition-opacity shadow-lg ${lastEditedItemId ? 'bg-warning' : 'bg-primary'}`}
+          className={`w-9 h-9 flex items-center justify-center rounded-full hover:opacity-90 transition-opacity shadow ${lastEditedItemId ? 'bg-warning' : 'bg-primary'}`}
           title="Ke item terakhir yang diisi"
           aria-label="Ke item terakhir yang diisi"
         >
-          <Pencil className="w-4 h-4 text-white" />
+          <Pencil className="w-3.5 h-3.5 text-white" />
         </button>
         <button
           type="button"
           onClick={scrollToLastItem}
-          className="w-11 h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-lg"
+          className="w-9 h-9 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow"
           title="Ke item paling bawah"
           aria-label="Ke item paling bawah"
         >
-          <ArrowDown className="w-5 h-5 text-white" />
+          <ArrowDown className="w-4 h-4 text-white" />
         </button>
       </div>
 
