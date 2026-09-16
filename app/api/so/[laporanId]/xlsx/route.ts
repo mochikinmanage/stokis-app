@@ -5,6 +5,7 @@ import { resolveCabang } from '@/lib/google/registry';
 import { updateLaporanXlsxLink, getUrutanLaporan } from '@/lib/domain/laporan-service';
 import { uploadFileToGASDrive } from '@/lib/appsscript';
 import { generateXlsxReport } from '@/lib/domain/xlsx-report';
+import { generateXlsxFromTemplate } from '@/lib/google/template-xlsx';
 
 /**
  * Retry wrapper for uploadFileToGASDrive with exponential backoff.
@@ -101,7 +102,7 @@ export const POST = withAuth(async (req: NextRequest, { params }, session) => {
   const { spreadsheetId } = await resolveCabang(cabangId);
   const urutanLaporan = await getUrutanLaporan(spreadsheetId);
 
-  const { buffer, fileName } = await generateXlsxReport({
+  const xlsxInput = {
     laporanId,
     cabangNama,
     cabangKode,
@@ -112,7 +113,20 @@ export const POST = withAuth(async (req: NextRequest, { params }, session) => {
     groupMode: urutanLaporan,
     previousSOInfo,
     note,
-  });
+  };
+
+  let buffer: Buffer;
+  let fileName: string;
+  try {
+    const templateResult = await generateXlsxFromTemplate(xlsxInput);
+    buffer = templateResult.buffer;
+    fileName = templateResult.fileName;
+  } catch (templateErr) {
+    console.warn('[XLSX] Template approach gagal, fallback ExcelJS:', templateErr);
+    const fallback = await generateXlsxReport(xlsxInput);
+    buffer = fallback.buffer;
+    fileName = fallback.fileName;
+  }
 
   // Upload to Drive via GAS with retry logic
   const keySesi = typeof sesiId === 'string' && sesiId ? sesiId : laporanId;
