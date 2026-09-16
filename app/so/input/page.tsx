@@ -1139,7 +1139,7 @@ export default function InputSOPage() {
             }
           }
         }}
-        className="space-y-6 max-w-5xl mx-auto px-4 py-6 pb-6"
+        className="space-y-6 max-w-5xl mx-auto px-4 py-6 pb-24 md:pb-6"
       >
         {/* Draft restore banner */}
         {pendingDraft && (
@@ -1528,7 +1528,7 @@ export default function InputSOPage() {
 
         {/* Floating Action Bar — only show when at bottom of items */}
         {isAtBottom && (
-          <div data-onboard="so-submit" className="card bg-base-100 border border-base-300 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+          <div data-onboard="so-submit" className="card bg-base-100 border border-base-300 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md pb-[calc(72px+env(safe-area-inset-bottom))]">
             <div className="space-y-0.5">
               <span className="text-xs font-medium text-base-content/60">
                 Selesaikan sesi pencatatan

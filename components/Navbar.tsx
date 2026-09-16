@@ -98,10 +98,6 @@ export function Navbar() {
 
   const isAdminMenuActive = adminMenuItems.some((item) => isActive(item.href));
 
-  // Hide nav on landing/login when not authenticated (after all hooks)
-  const publicPages = ["/", "/login"];
-  const isPublicPage = publicPages.includes(pathname);
-
   useEffect(() => {
     if (!adminMenuOpen && !moreMenuOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
