@@ -124,9 +124,7 @@ function TipeInputDropdown({
   };
 
   const handleSave = () => {
-    if (draft.size > 0) {
-      onChange(tipeSelectionToComma(draft));
-    }
+    onChange(tipeSelectionToComma(draft));
     setOpen(false);
   };
 
@@ -177,9 +175,13 @@ function TipeInputDropdown({
                 setDraft(prev => {
                   const next = new Set(prev);
                   if (t === 'dual' || t === 'single') {
-                    next.delete('dual');
-                    next.delete('single');
-                    next.add(t);
+                    if (next.has(t)) {
+                      next.delete(t);
+                    } else {
+                      next.delete('dual');
+                      next.delete('single');
+                      next.add(t);
+                    }
                   } else {
                     if (next.has(t)) next.delete(t);
                     else next.add(t);
@@ -448,7 +450,7 @@ export default function MasterItemPage() {
 
   const applyBottomSheet = () => {
     haptic();
-    if (bottomSheetItemId && bottomSheetDraft.size > 0) {
+    if (bottomSheetItemId) {
       updateDraft(bottomSheetItemId, 'Tipe_Input', tipeSelectionToComma(bottomSheetDraft));
     }
     closeBottomSheet();
@@ -1579,9 +1581,13 @@ export default function MasterItemPage() {
                     setBottomSheetDraft(prev => {
                       const next = new Set(prev);
                       if (t === 'dual' || t === 'single') {
-                        next.delete('dual');
-                        next.delete('single');
-                        next.add(t);
+                        if (next.has(t)) {
+                          next.delete(t);
+                        } else {
+                          next.delete('dual');
+                          next.delete('single');
+                          next.add(t);
+                        }
                       } else {
                         if (next.has(t)) next.delete(t);
                         else next.add(t);
