@@ -1118,7 +1118,7 @@ export default function InputSOPage() {
             }
           }
         }}
-        className="space-y-6 max-w-5xl mx-auto px-4 py-6 pb-20 md:pb-6"
+        className="space-y-6 max-w-5xl mx-auto px-4 py-6 md:pb-6"
       >
         {/* Draft restore banner */}
         {pendingDraft && (
@@ -1506,7 +1506,7 @@ export default function InputSOPage() {
         </div>
 
         {/* Floating Action Bar */}
-        <div data-onboard="so-submit" className="card bg-base-100 border border-base-300 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md sticky bottom-24 md:bottom-4 z-30 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div data-onboard="so-submit" className="card bg-base-100 border border-base-300 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md md:sticky md:bottom-4 z-30 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="space-y-0.5">
             <span className="text-xs font-medium text-base-content/60">
               Selesaikan sesi pencatatan
@@ -1536,12 +1536,12 @@ export default function InputSOPage() {
         </div>
       </form>
 
-      {/* Floating navigation rail — hanya desktop/tablet; mobile pakai submit sticky */}
-      <div data-onboard="so-navrail" className="hidden sm:flex fixed right-4 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-3 pb-[env(safe-area-inset-bottom)]">
+      {/* Floating navigation rail — mobile: bottom-right horizontal; desktop: right-side vertical */}
+      <div data-onboard="so-navrail" className="flex fixed bottom-28 right-4 z-40 flex-row gap-2 md:top-1/2 md:-translate-y-1/2 md:flex-col md:gap-3 md:bottom-auto md:right-4 pb-[env(safe-area-inset-bottom)]">
         <button
           type="button"
           onClick={scrollToFirstItem}
-          className="w-11 h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-sm"
+          className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-sm"
           title="Ke item paling atas"
           aria-label="Ke item paling atas"
         >
@@ -1550,7 +1550,7 @@ export default function InputSOPage() {
         <button
           type="button"
           onClick={scrollToLastEditedItem}
-          className={`w-11 h-11 flex items-center justify-center rounded-full hover:opacity-90 transition-opacity shadow-sm ${lastEditedItemId ? 'bg-warning' : 'bg-primary'}`}
+          className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-full hover:opacity-90 transition-opacity shadow-sm ${lastEditedItemId ? 'bg-warning' : 'bg-primary'}`}
           title="Ke item terakhir yang diisi"
           aria-label="Ke item terakhir yang diisi"
         >
@@ -1559,7 +1559,7 @@ export default function InputSOPage() {
         <button
           type="button"
           onClick={scrollToLastItem}
-          className="w-11 h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-sm"
+          className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-sm"
           title="Ke item paling bawah"
           aria-label="Ke item paling bawah"
         >
