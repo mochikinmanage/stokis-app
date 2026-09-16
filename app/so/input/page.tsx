@@ -27,6 +27,11 @@ import {
   Pencil,
   AlertTriangle,
   ArrowLeft,
+  Package,
+  History,
+  HardDrive,
+  RotateCcw,
+  Plus,
 } from 'lucide-react';
 import { QuantumLoaderFull, QuantumLoaderMini } from '@/components/ui/QuantumLoader';
 import { SOGeneratingOverlay, type SOGerStep } from '@/components/SOGeneratingOverlay';
@@ -567,6 +572,7 @@ export default function InputSOPage() {
   // Draft (save sementara) state
   const [pendingDraft, setPendingDraft] = useState<SODraft | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState<boolean>(false);
+  const [showDraftModal, setShowDraftModal] = useState<boolean>(false);
   const draftTimer = useRef<number | null>(null);
 
   // Petugas = logged-in user name
@@ -644,6 +650,7 @@ export default function InputSOPage() {
           const cached = loadDraft(selectedCabang.Cabang_ID);
           if (cached && countFilled(cached.counts) > 0) {
             setPendingDraft(cached);
+            setShowDraftModal(true);
           }
         }
 
@@ -1141,42 +1148,7 @@ export default function InputSOPage() {
         }}
         className="space-y-6 max-w-5xl mx-auto px-4 py-6 pb-24 md:pb-6"
       >
-        {/* Draft restore banner */}
-        {pendingDraft && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="alert alert-warning shadow-lg"
-          >
-            <AlertTriangle className="w-5 h-5 shrink-0" />
-            <div className="flex-1">
-              <h3 className="font-bold text-sm">Ada draft tersimpan yang belum di-submit</h3>
-              <p className="text-xs">
-                {countFilled(pendingDraft.counts)} item sudah diisi{' '}
-                {pendingDraft.updatedAt
-                  ? `pada ${new Date(pendingDraft.updatedAt).toLocaleString('id-ID')}. `
-                  : ''}
-                Lanjutkan dari posisi terakhir?
-              </p>
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => handleRestoreDraft(pendingDraft)}
-                className="btn btn-sm btn-primary"
-              >
-                Lanjutkan
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowDiscardConfirm(true)}
-                className="btn btn-sm btn-ghost min-h-[44px]"
-              >
-                Buang & Mulai Baru
-              </button>
-            </div>
-          </motion.div>
-        )}
+        {/* Draft restore banner - hidden since we now use modal */}
 
         {/* Session Metadata Card */}
         <motion.div
@@ -1389,8 +1361,117 @@ export default function InputSOPage() {
                   >
                     <X className="w-3.5 h-3.5" />
                   </motion.button>
+        )}
+
+        {/* Draft Restore Modal - detailed popup */}
+        <AnimatePresence>
+          {showDraftModal && pendingDraft && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="draft-title"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                className="card bg-base-100 border border-base-300 shadow-2xl p-6 w-full max-w-md space-y-5"
+              >
+                {/* Header with icon */}
+                <div className="flex items-start gap-3">
+                  <div className="p-3 rounded-full bg-warning/10">
+                    <AlertTriangle className="w-6 h-6 text-warning" />
+                  </div>
+                  <div>
+                    <h2 id="draft-title" className="font-bold text-lg text-base-content">Sesi Belum Selesai</h2>
+                    <p className="text-sm text-base-content/60 mt-1">Ditemukan data yang belum di-submit</p>
+                  </div>
+                </div>
+
+                {/* Session Info */}
+                <div className="space-y-3 bg-base-200/50 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="w-4 h-4 text-base-content/50" />
+                    <span className="text-base-content/60">Tanggal:</span>
+                    <span className="font-semibold">{pendingDraft.tanggalOperasional || 'Tidak tersedia'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4 h-4 text-base-content/50" />
+                    <span className="text-base-content/60">Shift:</span>
+                    <span className="font-semibold">{pendingDraft.shift || 'Tidak tersedia'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Package className="w-4 h-4 text-base-content/50" />
+                    <span className="text-base-content/60">Progress:</span>
+                    <span className="font-semibold">
+                      {countFilled(pendingDraft.counts)} item terisi
+                    </span>
+                  </div>
+                  {pendingDraft.updatedAt && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <History className="w-4 h-4 text-base-content/50" />
+                      <span className="text-base-content/60">Terakhir diedit:</span>
+                      <span className="font-semibold text-xs">
+                        {new Date(pendingDraft.updatedAt).toLocaleString('id-ID', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Note preview */}
+                {pendingDraft.note && (
+                  <div className="bg-base-200/50 rounded-lg p-3">
+                    <p className="text-xs text-base-content/50 mb-1">Catatan:</p>
+                    <p className="text-sm text-base-content/80 line-clamp-2">{pendingDraft.note}</p>
+                  </div>
                 )}
-              </AnimatePresence>
+
+                {/* Storage info */}
+                <div className="flex items-center gap-2 text-xs text-base-content/40">
+                  <HardDrive className="w-3.5 h-3.5" />
+                  <span>Data tersimpan di penyimpanan sementara browser</span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleRestoreDraft(pendingDraft);
+                      setShowDraftModal(false);
+                    }}
+                    className="btn btn-primary min-h-[48px] text-base"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Lanjutkan Sesi Sebelumnya
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDraftModal(false);
+                      setShowDiscardConfirm(true);
+                    }}
+                    className="btn btn-ghost min-h-[44px]"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Mulai Sesi Baru
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </AnimatePresence>
             </div>
 
             {/* Area Filter */}
