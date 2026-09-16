@@ -572,7 +572,6 @@ export default function InputSOPage() {
   // Draft (save sementara) state
   const [pendingDraft, setPendingDraft] = useState<SODraft | null>(null);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState<boolean>(false);
-  const [showWelcomeModal, setShowWelcomeModal] = useState<boolean>(false);
   const draftTimer = useRef<number | null>(null);
 
   // Petugas = logged-in user name
@@ -650,9 +649,10 @@ export default function InputSOPage() {
           const cached = loadDraft(selectedCabang.Cabang_ID);
           if (cached && countFilled(cached.counts) > 0) {
             setPendingDraft(cached);
+          } else {
+            // No draft - show ShiftCabangGate
+            setGateOpen(true);
           }
-          // Always show welcome modal first
-          setShowWelcomeModal(true);
         }
 
         if (dataPrevious.success && dataPrevious.data) {
@@ -1362,144 +1362,8 @@ export default function InputSOPage() {
                   >
                     <X className="w-3.5 h-3.5" />
                   </motion.button>
-        )}
-
-        {/* Welcome Modal - centered sticky with blur backdrop */}
-        <AnimatePresence>
-          {showWelcomeModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="welcome-title"
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="bg-base-100 rounded-xl border border-base-300 shadow-2xl w-full max-w-md sticky top-[20%] max-h-[80vh] overflow-y-auto"
-                onClick={e => e.stopPropagation()}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-base-300">
-                  <div className="flex items-center gap-3">
-                    {pendingDraft ? (
-                      <div className="p-2 rounded-lg bg-warning/10">
-                        <AlertTriangle className="w-5 h-5 text-warning" />
-                      </div>
-                    ) : (
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <ClipboardCheck className="w-5 h-5 text-primary" />
-                      </div>
-                    )}
-                    <div>
-                      <h2 id="welcome-title" className="font-semibold text-base-content text-base">
-                        {pendingDraft ? 'Sesi Belum Selesai' : 'Stock Opname'}
-                      </h2>
-                      <p className="text-xs text-base-content/60">
-                        {pendingDraft ? 'Ditemukan data yang belum di-submit' : 'Mulai sesi stock opname baru'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Session Info - only show if draft exists */}
-                {pendingDraft ? (
-                  <div className="p-5 space-y-4">
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="space-y-0.5">
-                        <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Tanggal</span>
-                        <p className="font-semibold text-base-content">{pendingDraft.tanggalOperasional || 'Tidak tersedia'}</p>
-                      </div>
-                      <div className="space-y-0.5">
-                        <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Shift</span>
-                        <p className="font-semibold text-base-content">{pendingDraft.shift || 'Tidak tersedia'}</p>
-                      </div>
-                      <div className="space-y-0.5">
-                        <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Progress</span>
-                        <p className="font-semibold text-base-content">{countFilled(pendingDraft.counts)} item terisi</p>
-                      </div>
-                      {pendingDraft.updatedAt && (
-                        <div className="space-y-0.5">
-                          <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Terakhir Diedit</span>
-                          <p className="font-semibold text-base-content text-xs">
-                            {new Date(pendingDraft.updatedAt).toLocaleString('id-ID', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Note preview */}
-                    {pendingDraft.note && (
-                      <div className="bg-base-200/50 rounded-lg p-3">
-                        <p className="text-xs text-base-content/50 mb-1">Catatan:</p>
-                        <p className="text-sm text-base-content/80 line-clamp-2">{pendingDraft.note}</p>
-                      </div>
-                    )}
-
-                    {/* Storage info */}
-                    <div className="flex items-center gap-2 text-xs text-base-content/40">
-                      <HardDrive className="w-3.5 h-3.5" />
-                      <span>Data tersimpan di penyimpanan sementara browser</span>
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-2 p-5 pt-0">
-                  {pendingDraft && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleRestoreDraft(pendingDraft);
-                        setShowWelcomeModal(false);
-                      }}
-                      className="btn btn-primary min-h-[48px] text-base"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      Lanjutkan Sesi Sebelumnya
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (pendingDraft) {
-                        handleDiscardDraft();
-                      }
-                      setShowWelcomeModal(false);
-                      setGateOpen(true);
-                    }}
-                    className="btn btn-ghost min-h-[44px]"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Mulai Sesi Baru
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowWelcomeModal(false);
-                      router.back();
-                    }}
-                    className="btn btn-ghost min-h-[44px] text-base-content/60"
-                  >
-                    Batal
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </AnimatePresence>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Area Filter */}
