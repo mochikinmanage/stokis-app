@@ -290,14 +290,14 @@ export default function CabangAdminPage() {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleOpenEdit(c)}
-                        className="btn btn-ghost btn-xs text-base-content/60 hover:text-primary"
+                        className="btn btn-ghost btn-sm min-h-[44px] min-w-[44px] text-base-content/60 hover:text-primary"
                         title="Edit Data Cabang"
                       >
                         <Edit2 className="w-4 h-4" />
                       </motion.button>
                       <button
                         onClick={() => handleToggleActive(c)}
-                        className="btn btn-ghost btn-xs text-error hover:bg-error/10"
+                        className="btn btn-ghost btn-sm min-h-[44px] text-error hover:bg-error/10"
                         title={c.Aktif ? "Nonaktifkan" : "Aktifkan"}
                       >
                         {c.Aktif ? "Nonaktifkan" : "Aktifkan"}

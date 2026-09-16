@@ -189,12 +189,12 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
       <motion.div 
         initial={{ opacity: 0, y: -8 }} 
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-6"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6"
       >
         <div className="flex items-center gap-3">
           <button 
             onClick={() => router.back()}
-            className="btn btn-ghost btn-sm btn-circle"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-base-200 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -213,7 +213,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
         <button
           onClick={handleSave}
           disabled={saving}
-          className="btn btn-primary gap-2"
+          className="btn btn-primary gap-2 min-h-[44px]"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -285,7 +285,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
                             inputMode="decimal"
                             value={it.Step1}
                             onChange={(e) => handleCountChange(it.Item_ID, 'Step1', e.target.value)}
-                            className="input input-bordered input-sm w-20 text-center tabular-nums"
+                            className="input input-bordered w-20 text-center tabular-nums min-h-[44px]"
                           />
                         </div>
                         {dual && (
@@ -296,7 +296,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
                               inputMode="decimal"
                               value={it.Step2}
                               onChange={(e) => handleCountChange(it.Item_ID, 'Step2', e.target.value)}
-                              className="input input-bordered input-sm w-20 text-center tabular-nums"
+                            className="input input-bordered w-20 text-center tabular-nums min-h-[44px]"
                             />
                           </div>
                         )}
@@ -313,7 +313,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
                       <select
                         value={it.Status_Isi || ''}
                         onChange={(e) => handleStatusChange(it.Item_ID, e.target.value)}
-                        className="select select-bordered select-sm"
+                        className="select select-bordered min-h-[44px]"
                       >
                         <option value="">--</option>
                         <option value="Penuh">Penuh</option>
@@ -328,7 +328,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
                         type="date"
                         value={it.Tgl_Refill || ''}
                         onChange={(e) => handleDateChange(it.Item_ID, 'Tgl_Refill', e.target.value)}
-                        className="input input-bordered input-sm"
+                        className="input input-bordered min-h-[44px]"
                       />
                     )}
 
@@ -338,7 +338,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
                         type="date"
                         value={it.Tgl_Kedaluwarsa || ''}
                         onChange={(e) => handleDateChange(it.Item_ID, 'Tgl_Kedaluwarsa', e.target.value)}
-                        className="input input-bordered input-sm"
+                        className="input input-bordered min-h-[44px]"
                       />
                     )}
 
@@ -350,7 +350,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
                       placeholder="Keterangan..."
                       value={it.Keterangan || ''}
                       onChange={(e) => handleCountChange(it.Item_ID, 'Keterangan', e.target.value)}
-                      className="input input-bordered input-sm flex-1 min-w-[120px]"
+                      className="input input-bordered flex-1 min-w-[120px] min-h-[44px]"
                     />
                   </div>
                 );

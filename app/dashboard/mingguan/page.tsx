@@ -298,7 +298,7 @@ export default function DashboardMingguanPage() {
               onChange={(e) => setDari(e.target.value)}
               disabled={datesLoading}
               aria-label="Dari tanggal"
-              className="input input-bordered px-3 py-1.5 text-sm tabular-nums"
+              className="input input-bordered px-3 py-1.5 text-sm tabular-nums min-h-[44px]"
             />
             <span>sampai</span>
             <input
@@ -307,7 +307,7 @@ export default function DashboardMingguanPage() {
               onChange={(e) => setSampai(e.target.value)}
               disabled={datesLoading}
               aria-label="Sampai tanggal"
-              className="input input-bordered px-3 py-1.5 text-sm tabular-nums"
+              className="input input-bordered px-3 py-1.5 text-sm tabular-nums min-h-[44px]"
             />
           </div>
 

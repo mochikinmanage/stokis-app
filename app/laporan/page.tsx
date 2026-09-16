@@ -67,7 +67,7 @@ function SquareAction({ href, target, onClick, disabled, loading, title, label, 
   const inner = (
     <>
       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="scale-100">{icon}</span>}
-      <span className="text-[9px] leading-none tracking-wide">{label}</span>
+      <span className="text-[10px] leading-none tracking-wide">{label}</span>
     </>
   );
 

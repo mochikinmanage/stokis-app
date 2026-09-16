@@ -319,14 +319,14 @@ export default function PetugasPage() {
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleOpenEdit(u)}
-                          className="btn btn-ghost btn-xs text-base-content/60 hover:text-primary"
+                          className="btn btn-ghost btn-sm min-h-[44px] min-w-[44px] text-base-content/60 hover:text-primary"
                           title="Edit Pengguna"
                         >
                           <Edit2 className="w-4 h-4" />
                         </motion.button>
                         <button
                           onClick={() => handleToggleActive(u)}
-                          className="btn btn-ghost btn-xs text-warning hover:bg-warning/10"
+                          className="btn btn-ghost btn-sm min-h-[44px] text-warning hover:bg-warning/10"
                           title={u.Aktif === true ? 'Nonaktifkan' : 'Aktifkan'}
                         >
                           <RefreshCw className="w-4 h-4" />
@@ -337,7 +337,7 @@ export default function PetugasPage() {
                         <button
                           onClick={() => setDeleteTarget(u)}
                           disabled={own}
-                          className="btn btn-ghost btn-xs text-error hover:bg-error/10 disabled:text-base-content/30 disabled:cursor-not-allowed"
+                          className="btn btn-ghost btn-sm min-h-[44px] min-w-[44px] text-error hover:bg-error/10 disabled:text-base-content/30 disabled:cursor-not-allowed"
                           title={own ? 'Tidak bisa menghapus akun sendiri' : 'Hapus Pengguna'}
                         >
                           <Trash2 className="w-4 h-4" />

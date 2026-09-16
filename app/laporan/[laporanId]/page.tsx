@@ -388,7 +388,7 @@ export default function LaporanViewerPage({ params }: { params: Promise<{ lapora
         {/* Top Row: Back button + Title + Actions */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <button onClick={() => router.back()} className="btn btn-ghost btn-sm btn-circle mt-1">
+            <button onClick={() => router.back()} className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-base-200 transition-colors mt-1">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>

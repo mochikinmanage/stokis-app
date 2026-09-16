@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronLeft,
+  ArrowLeft,
   Tags,
   Plus,
   Power,
@@ -1156,7 +1157,7 @@ export default function MasterItemPage() {
                   onClick={() => window.history.back()}
                   className="min-w-[44px] min-h-[44px] flex items-center justify-center -ml-1 rounded-lg hover:bg-base-200 transition-colors"
                 >
-                  <ChevronLeft className="w-5 h-5 text-base-content/60" />
+                  <ArrowLeft className="w-5 h-5 text-base-content/60" />
                 </button>
                 <div>
                   <h1 data-onboard="master-heading" className="text-base font-bold text-base-content">Master Item</h1>
@@ -1164,6 +1165,22 @@ export default function MasterItemPage() {
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
+                <a
+                  href="/docs/user-guide/master-item"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-base-content/40 hover:text-primary hover:bg-base-200 transition-colors"
+                  title="Panduan Master Item"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </a>
+                {isAdmin && !isEditing && (
+                  <button
+                    onClick={() => setShowKategoriModal(true)}
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-base-content/60 bg-base-200 border border-base-300"
+                    title="Kelola Kategori"
+                  >
+                    <Tags className="w-4 h-4" />
+                  </button>
+                )}
                 {isAdmin && !isEditing && (
                   <button
                     onClick={() => setIsEditing(true)}
@@ -1246,7 +1263,7 @@ export default function MasterItemPage() {
             ))}
             <span className="flex-shrink-0 w-px h-4 bg-base-300 mx-0.5" />
             <span className="flex-shrink-0 text-[10px] font-bold text-base-content/30 uppercase tracking-wider">Tipe:</span>
-            {['Semua', 'dual', 'single', 'boolean'].map(t => (
+            {['Semua', 'dual', 'single', 'boolean', 'date', 'expiry', 'text'].map(t => (
               <button
                 key={t}
                 onClick={() => { setSelectedTipe(t); setCurrentPage(1); }}
@@ -1358,7 +1375,14 @@ export default function MasterItemPage() {
                                   </div>
                                 </div>
                               </div>
-                              <span className={`flex-shrink-0 w-2 h-2 rounded-full mt-1.5 ${item.Aktif ? 'bg-success' : 'bg-base-content/20'}`} />
+                              <span className={`flex-shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                item.Aktif
+                                  ? 'bg-success/10 text-success border border-success/20'
+                                  : 'bg-base-200 text-base-content/40'
+                              }`}>
+                                {item.Aktif && <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />}
+                                {item.Aktif ? 'Aktif' : 'Nonaktif'}
+                              </span>
                             </div>
 
                             {/* Tipe Input trigger */}
