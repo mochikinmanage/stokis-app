@@ -18,10 +18,10 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const pinRef = useRef<HTMLInputElement>(null);
+  const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    if (!loading) pinRef.current?.focus();
+    if (!loading) pinRefs.current[0]?.focus();
   }, [loading]);
 
   if (loading) {
@@ -110,32 +110,61 @@ export default function LoginPage() {
               <label className="block text-xs font-semibold mb-1.5 text-base-content/70">
                 PIN (6 Digit)
               </label>
-              <div className="relative">
-                <input
-                  ref={pinRef}
-                  type={showPin ? "text" : "password"}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={PIN_LENGTH}
-                  value={pin}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, "").slice(0, PIN_LENGTH);
-                    setPin(val);
-                  }}
-                  placeholder="Masukkan 6 digit PIN"
-                  autoComplete="current-password"
-                  className={`input input-bordered w-full min-h-[44px] text-lg font-bold font-mono tabular-nums tracking-[0.3em] text-center pr-12 ${error ? 'border-error' : ''}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPin(!showPin)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-base-content/40 hover:text-base-content/60 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
-                  tabIndex={-1}
-                >
-                  {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+              <div className="flex gap-2 justify-center">
+                {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+                  <input
+                    key={i}
+                    ref={(el) => {
+                      if (el) pinRefs.current[i] = el;
+                    }}
+                    type={showPin ? "text" : "password"}
+                    inputMode="numeric"
+                    pattern="[0-9]"
+                    maxLength={1}
+                    value={pin[i] || ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      if (val) {
+                        const newPin = pin.split('');
+                        newPin[i] = val;
+                        setPin(newPin.join(''));
+                        // Auto focus next box
+                        if (i < PIN_LENGTH - 1) {
+                          pinRefs.current[i + 1]?.focus();
+                        }
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Backspace') {
+                        if (pin[i]) {
+                          const newPin = pin.split('');
+                          newPin[i] = '';
+                          setPin(newPin.join(''));
+                        } else if (i > 0) {
+                          // Go to previous box if current is empty
+                          pinRefs.current[i - 1]?.focus();
+                        }
+                      } else if (e.key === 'ArrowLeft' && i > 0) {
+                        pinRefs.current[i - 1]?.focus();
+                      } else if (e.key === 'ArrowRight' && i < PIN_LENGTH - 1) {
+                        pinRefs.current[i + 1]?.focus();
+                      }
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const pastedData = e.clipboardData.getData('text').replace(/\D/g, "").slice(0, PIN_LENGTH);
+                      if (pastedData) {
+                        setPin(pastedData);
+                        // Focus last filled or first empty
+                        const nextIndex = Math.min(pastedData.length, PIN_LENGTH - 1);
+                        pinRefs.current[nextIndex]?.focus();
+                      }
+                    }}
+                    className={`w-11 h-12 text-center text-xl font-bold font-mono tabular-nums input input-bordered ${error ? 'border-error' : ''}`}
+                  />
+                ))}
               </div>
-              <p className="text-[10px] text-base-content/40 mt-1 text-center">
+              <p className="text-[10px] text-base-content/40 mt-2 text-center">
                 {pin.length}/{PIN_LENGTH} digit
               </p>
             </motion.div>
