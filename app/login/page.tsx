@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import { useRouter } from "next/navigation";
-import { LogIn } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 import { QuantumLoaderMini } from "@/components/ui/QuantumLoader";
 
 const PIN_LENGTH = 6;
@@ -13,10 +13,16 @@ export default function LoginPage() {
   const { login, loading } = useAuth();
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const [digits, setDigits] = useState<string[]>(Array(PIN_LENGTH).fill(""));
+  const [pin, setPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState("");
+  const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const pinRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!loading) pinRef.current?.focus();
+  }, [loading]);
 
   if (loading) {
     return (
@@ -27,42 +33,7 @@ export default function LoginPage() {
     );
   }
 
-  const pin = digits.join("");
-
-  const handleDigitChange = (index: number, value: string) => {
-    if (value.length > 1) value = value.slice(-1);
-    if (!/^\d*$/.test(value)) return;
-
-    const next = [...digits];
-    next[index] = value;
-    setDigits(next);
-
-    if (value && index < PIN_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !digits[index] && index > 0) {
-      const next = [...digits];
-      next[index - 1] = "";
-      setDigits(next);
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, PIN_LENGTH);
-    if (!pasted) return;
-    const next = [...digits];
-    for (let i = 0; i < pasted.length; i++) {
-      next[i] = pasted[i];
-    }
-    setDigits(next);
-    const focusIdx = Math.min(pasted.length, PIN_LENGTH - 1);
-    inputRefs.current[focusIdx]?.focus();
-  };
+  const canSubmit = username.trim().length > 0 && pin.length === PIN_LENGTH;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,8 +49,9 @@ export default function LoginPage() {
       router.push("/so/input");
     } else {
       setError(result.error || "Login gagal");
-      setDigits(Array(PIN_LENGTH).fill(""));
-      setTimeout(() => inputRefs.current[0]?.focus(), 100);
+      setPin("");
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
     }
   };
 
@@ -125,38 +97,47 @@ export default function LoginPage() {
                 placeholder="Masukkan username"
                 autoComplete="username"
                 autoFocus
-                className="input input-bordered w-full min-h-[42px] text-sm"
+                className="input input-bordered w-full min-h-[44px] text-sm"
               />
             </motion.div>
 
             <motion.div
-              key={error ? 'shake' : 'idle'}
+              key={shake ? 'shake' : 'idle'}
               initial={{ opacity: 0, x: -8 }}
-              animate={error ? { x: [-8, 8, -6, 6, -3, 3, 0], opacity: 1 } : { opacity: 1, x: 0 }}
+              animate={shake ? { x: [-8, 8, -6, 6, -3, 3, 0], opacity: 1 } : { opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <label className="block text-xs font-semibold mb-2 text-base-content/70">
+              <label className="block text-xs font-semibold mb-1.5 text-base-content/70">
                 PIN (6 Digit)
               </label>
-              <div
-                className="flex items-center justify-center gap-2"
-                onPaste={handlePaste}
-              >
-                {digits.map((d, i) => (
-                  <input
-                    key={i}
-                    ref={(el) => { inputRefs.current[i] = el; }}
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={d}
-                    onChange={(e) => handleDigitChange(i, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(i, e)}
-                    aria-label={`PIN digit ${i + 1}`}
-                    className="input input-bordered w-12 h-13 text-center text-lg font-bold font-mono tabular-nums px-0"
-                  />
-                ))}
+              <div className="relative">
+                <input
+                  ref={pinRef}
+                  type={showPin ? "text" : "password"}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={PIN_LENGTH}
+                  value={pin}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, PIN_LENGTH);
+                    setPin(val);
+                  }}
+                  placeholder="Masukkan 6 digit PIN"
+                  autoComplete="current-password"
+                  className={`input input-bordered w-full min-h-[44px] text-lg font-bold font-mono tabular-nums tracking-[0.3em] text-center pr-12 ${error ? 'border-error' : ''}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPin(!showPin)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-base-content/40 hover:text-base-content/60 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+                  tabIndex={-1}
+                >
+                  {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
+              <p className="text-[10px] text-base-content/40 mt-1 text-center">
+                {pin.length}/{PIN_LENGTH} digit
+              </p>
             </motion.div>
 
             <AnimatePresence>
@@ -175,10 +156,10 @@ export default function LoginPage() {
 
             <motion.button
               type="submit"
-              disabled={submitting || loading}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              className="btn btn-primary w-full min-h-[42px] text-sm gap-2"
+              disabled={submitting || loading || !canSubmit}
+              whileHover={canSubmit ? { scale: 1.01 } : undefined}
+              whileTap={canSubmit ? { scale: 0.98 } : undefined}
+              className={`btn btn-primary w-full min-h-[44px] text-sm gap-2 ${!canSubmit ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {submitting ? (
                 <>

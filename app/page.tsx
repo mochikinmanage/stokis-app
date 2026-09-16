@@ -106,7 +106,7 @@ function MarketingLanding() {
               className="inline-flex items-center justify-center transition-all duration-200 focus:ring-2 focus:outline-none text-primary bg-primary/10 hover:bg-primary/20 focus:ring-primary/50 h-10 px-6 text-sm font-semibold rounded-lg gap-2"
             >
               <BookOpen className="w-4 h-4" />
-              <span>{t('Learn how to use', 'Learn how to use')}</span>
+              <span>{t('Pelajari Cara Pakai', 'Learn how to use')}</span>
             </Link>
             <a
               href="#fitur"
@@ -219,9 +219,9 @@ function MarketingLanding() {
 
       {/* Marquee - Fitur Tags */}
       <section className="py-16 overflow-hidden">
-        <div className="relative">
-          <div className="absolute inset-0 left-0 z-10 from-base-100 via-transparent w-32 bg-gradient-to-r" />
-          <div className="absolute inset-0 right-0 z-10 from-base-100 via-transparent w-32 bg-gradient-to-l" />
+        <div className="relative px-8">
+          <div className="absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-base-100 to-transparent" />
+          <div className="absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-base-100 to-transparent" />
           <div className="flex items-center gap-2 whitespace-nowrap animate-marquee">
             {[
               "Input Cepat",
@@ -535,7 +535,7 @@ function MarketingLanding() {
                 Dokumentasi
               </Link>
             </div>
-            <p className="text-xs text-base-content/40">
+            <p className="text-xs text-base-content/60">
               &copy; {new Date().getFullYear()} Stokis. Hak cipta dilindungi.
             </p>
           </div>

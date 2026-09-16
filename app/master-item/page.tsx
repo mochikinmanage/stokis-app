@@ -661,14 +661,18 @@ export default function MasterItemPage() {
   }, [filteredItems, currentPage]);
 
   const groupedPaginated = useMemo(() => {
-    const groups: Array<{ area: string; items: MasterItem[] }> = [];
+    const groups: Array<{ area: string; items: MasterItem[]; startIndex: number }> = [];
     const byArea = new Map<string, MasterItem[]>();
     paginatedItems.forEach((it) => {
       const key = it.Area || 'Area Umum';
       if (!byArea.has(key)) byArea.set(key, []);
       byArea.get(key)!.push(it);
     });
-    byArea.forEach((items, area) => groups.push({ area, items }));
+    let runningIndex = 0;
+    byArea.forEach((items, area) => {
+      groups.push({ area, items, startIndex: runningIndex });
+      runningIndex += items.length;
+    });
     return groups;
   }, [paginatedItems]);
 
@@ -948,19 +952,19 @@ export default function MasterItemPage() {
                             </td>
                           </tr>
                           {/* Items */}
-                          {!isCollapsed && group.items.map((item, idx) => {
-                            const draft = isEditing ? (draftItems.get(item.Item_ID) || item) : item;
-                            const isDirty = draftItems.has(item.Item_ID);
-                            return (
-                              <tr
-                                key={item.Item_ID}
-                                className={`h-14 transition-colors group/row border-b border-base-200 ${
-                                  isDirty ? 'bg-primary/5' : 'hover:bg-base-200/30'
-                                }`}
-                              >
-                                <td className="px-3 text-center text-base-content/40 text-xs tabular-nums">
-                                  {(currentPage - 1) * PAGE_SIZE + idx + 1}
-                                </td>
+                    {!isCollapsed && group.items.map((item, idx) => {
+                      const draft = isEditing ? (draftItems.get(item.Item_ID) || item) : item;
+                      const isDirty = draftItems.has(item.Item_ID);
+                      return (
+                        <tr
+                          key={item.Item_ID}
+                          className={`h-14 transition-colors group/row border-b border-base-200 ${
+                            isDirty ? 'bg-primary/5' : 'hover:bg-base-200/30'
+                          }`}
+                        >
+                          <td className="px-3 text-center text-base-content/40 text-xs tabular-nums">
+                            {group.startIndex + idx + 1}
+                          </td>
                                 <td className="px-3 py-2.5">
                                   <span className="text-sm font-medium text-base-content">{item.Nama_Barang}</span>
                                 </td>
@@ -1035,23 +1039,17 @@ export default function MasterItemPage() {
                                 </td>
                                 {/* Aksi */}
                                 <td className="px-3 text-center">
-                                  {item.Aktif ? (
-                                    <button
-                                      onClick={() => handleToggleActive(item.Item_ID, item.Aktif)}
-                                      title="Nonaktifkan item"
-                                      className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold border border-error/30 text-error bg-transparent hover:bg-error/5 transition-colors cursor-pointer"
-                                    >
-                                      Nonaktifkan
-                                    </button>
-                                  ) : (
-                                    <button
-                                      onClick={() => handleToggleActive(item.Item_ID, item.Aktif)}
-                                      title="Aktifkan item"
-                                      className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold border border-success/30 text-success bg-transparent hover:bg-success/5 transition-colors cursor-pointer"
-                                    >
-                                      Aktifkan
-                                    </button>
-                                  )}
+                                  <button
+                                    onClick={() => handleToggleActive(item.Item_ID, item.Aktif)}
+                                    title={item.Aktif ? "Nonaktifkan item" : "Aktifkan item"}
+                                    className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors cursor-pointer ${
+                                      item.Aktif
+                                        ? 'text-error hover:bg-error/10'
+                                        : 'text-success hover:bg-success/10'
+                                    }`}
+                                  >
+                                    <Power className="w-4 h-4" />
+                                  </button>
                                 </td>
                               </tr>
                             );
@@ -1365,7 +1363,7 @@ export default function MasterItemPage() {
                                 <span className={`flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold ${
                                   isDirty ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-base-200 text-base-content/50'
                                 }`}>
-                                  {(currentPage - 1) * PAGE_SIZE + idx + 1}
+                                  {group.startIndex + idx + 1}
                                 </span>
                                 <div className="min-w-0">
                                   <h3 className="text-sm font-semibold text-base-content truncate">{item.Nama_Barang}</h3>
@@ -1443,12 +1441,14 @@ export default function MasterItemPage() {
                             {/* Action */}
                             <button
                               onClick={() => handleToggleActive(item.Item_ID, item.Aktif)}
+                              title={item.Aktif ? 'Nonaktifkan' : 'Aktifkan'}
                               className={`w-full h-9 flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold transition-colors ${
                                 item.Aktif
                                   ? 'border border-error/30 text-error hover:bg-error/5'
                                   : 'border border-success/30 text-success hover:bg-success/5'
                               }`}
                             >
+                              <Power className="w-3.5 h-3.5" />
                               {item.Aktif ? 'Nonaktifkan' : 'Aktifkan'}
                             </button>
                           </div>

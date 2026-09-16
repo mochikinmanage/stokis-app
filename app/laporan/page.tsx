@@ -421,7 +421,8 @@ export default function LaporanPage() {
                       </td>
                       <td className="px-5 py-4" data-label="Tanggal">
                         <span className="font-semibold tabular-nums text-base-content">{row.Tanggal_Operasional}</span>
-                        <span className="ml-2 font-medium text-xs px-2 py-0.5 rounded-md bg-base-200 text-base-content/60 border border-base-300">
+                        <span className="mx-1.5 text-base-content/30">&middot;</span>
+                        <span className="font-medium text-xs px-2 py-0.5 rounded-md bg-base-200 text-base-content/60 border border-base-300">
                           {row.Shift}
                         </span>
                       </td>

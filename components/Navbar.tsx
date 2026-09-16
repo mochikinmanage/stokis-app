@@ -41,6 +41,7 @@ const bottomNavItems: NavItem[] = [
   { name: "Beranda", nameEn: "Home", href: "/", icon: Home },
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
+  { name: "Dashboard", nameEn: "Dashboard", href: "/dashboard/harian", icon: BarChart3, roles: ["admin"] },
   { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
 ];
 
@@ -68,7 +69,7 @@ const adminMenuItems: NavItem[] = [
 export function Navbar() {
   const pathname = usePathname();
   const { selectedCabang, cabangList, setSelectedCabang } = useCabang();
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const { openTour } = useTour();
   const { lang, toggleLang } = useLanguage();
   const role = user?.role || "petugas";
@@ -97,6 +98,10 @@ export function Navbar() {
 
   const isAdminMenuActive = adminMenuItems.some((item) => isActive(item.href));
 
+  // Hide nav on landing/login when not authenticated (after all hooks)
+  const publicPages = ["/", "/login"];
+  const isPublicPage = publicPages.includes(pathname);
+
   useEffect(() => {
     if (!adminMenuOpen && !moreMenuOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
@@ -110,6 +115,11 @@ export function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [adminMenuOpen, moreMenuOpen]);
+
+  // Hide nav on landing/login when not authenticated (after all hooks)
+  const publicPages = ["/", "/login"];
+  const isPublicPage = publicPages.includes(pathname);
+  if (!loading && !user && isPublicPage) return null;
 
   return (
     <>

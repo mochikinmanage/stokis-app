@@ -24,9 +24,9 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const closeTour = useCallback(() => setOpen(false), []);
 
   // Muncul otomatis pada login pertama pengguna (disimpan di localStorage).
+  // Hanya auto-open sekali — setelah itu user harus klik tombol Tutorial manual.
   useEffect(() => {
     if (user && !isTourDone()) {
-      // Beri sedikit jeda agar halaman selesai dirender.
       const t = window.setTimeout(() => setOpen(true), 800);
       return () => window.clearTimeout(t);
     }
