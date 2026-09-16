@@ -1559,34 +1559,34 @@ export default function InputSOPage() {
         )}
       </form>
 
-      {/* Floating navigation rail — mobile: bottom-right horizontal; desktop: right-side vertical */}
-      <div data-onboard="so-navrail" className="flex fixed bottom-40 right-4 z-50 flex-row gap-2 md:top-1/2 md:-translate-y-1/2 md:flex-col md:gap-3 md:bottom-auto md:right-4 pb-[env(safe-area-inset-bottom)]">
+      {/* Floating navigation rail — vertical, right-center */}
+      <div data-onboard="so-navrail" className="flex fixed right-4 top-1/2 -translate-y-1/2 z-50 flex-col gap-2">
         <button
           type="button"
           onClick={scrollToFirstItem}
-          className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-lg"
+          className="w-11 h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-lg"
           title="Ke item paling atas"
           aria-label="Ke item paling atas"
         >
-          <ArrowUp className="w-4 h-4 text-white" />
+          <ArrowUp className="w-5 h-5 text-white" />
         </button>
         <button
           type="button"
           onClick={scrollToLastEditedItem}
-          className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-full hover:opacity-90 transition-opacity shadow-lg ${lastEditedItemId ? 'bg-warning' : 'bg-primary'}`}
+          className={`w-11 h-11 flex items-center justify-center rounded-full hover:opacity-90 transition-opacity shadow-lg ${lastEditedItemId ? 'bg-warning' : 'bg-primary'}`}
           title="Ke item terakhir yang diisi"
           aria-label="Ke item terakhir yang diisi"
         >
-          <Pencil className="w-3.5 h-3.5 text-white" />
+          <Pencil className="w-4 h-4 text-white" />
         </button>
         <button
           type="button"
           onClick={scrollToLastItem}
-          className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-lg"
+          className="w-11 h-11 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 transition-colors shadow-lg"
           title="Ke item paling bawah"
           aria-label="Ke item paling bawah"
         >
-          <ArrowDown className="w-4 h-4 text-white" />
+          <ArrowDown className="w-5 h-5 text-white" />
         </button>
       </div>
 
