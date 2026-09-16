@@ -530,6 +530,8 @@ export default function LaporanPage() {
             totalItem={totalMasterItems}
             jumlahKritis={selectedLaporan.Jumlah_Kritis}
             jumlahHampirHabis={selectedLaporan.Jumlah_Hampir_Habis}
+            laporanId={selectedLaporan.Laporan_ID}
+            cabangId={selectedCabang.Cabang_ID}
             linkXLSX={selectedLaporan.Link_XLSX || ''}
           />
         )}

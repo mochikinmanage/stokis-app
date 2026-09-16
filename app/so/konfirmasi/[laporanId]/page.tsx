@@ -14,7 +14,9 @@ import {
   RefreshCcw,
   Loader2,
   AlertTriangle,
-  Table
+  Table,
+  Eye,
+  Pencil,
 } from 'lucide-react';
 import { WATemplateModal } from '@/components/WATemplateModal';
 
@@ -281,45 +283,55 @@ const [errorMsg, setErrorMsg] = useState<string>('');
               </div>
             </div>
 
-            {/* Receipt Footer Actions */}
+            {/* Receipt Footer Actions - Grid 3x2 */}
             <div className="bg-base-200/40 p-6 border-t border-base-300 space-y-3">
-              <div className="flex flex-col gap-2.5">
+              <div className="grid grid-cols-3 gap-2.5">
+                {/* (1,1) Lihat */}
+                <Link
+                  href={`/laporan/view/${laporanId}?cabang=${selectedCabang?.Cabang_ID || ''}`}
+                  target="_blank"
+                  className="btn btn-outline btn-primary flex flex-col items-center justify-center min-h-[52px] p-2 gap-1 text-xs"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>Lihat</span>
+                </Link>
+
+                {/* (2,1) Edit */}
+                <Link
+                  href={`/laporan/${laporanId}/edit?cabang=${selectedCabang?.Cabang_ID || ''}`}
+                  className="btn btn-outline flex flex-col items-center justify-center min-h-[52px] p-2 gap-1 text-xs"
+                >
+                  <Pencil className="w-4 h-4" />
+                  <span>Edit</span>
+                </Link>
+
+                {/* (3,1) Spreadsheet/Excel */}
                 {hasXlsxLink ? (
                   <a
                     href={xlsxLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-primary w-full gap-2 min-h-[44px] shadow-sm"
+                    className="btn btn-outline btn-info flex flex-col items-center justify-center min-h-[52px] p-2 gap-1 text-xs"
                   >
                     <Table className="w-4 h-4" />
-                    <span>Buka File XLSX</span>
-                    <ExternalLink className="w-4 h-4" />
+                    <span className="truncate max-w-full">Excel</span>
                   </a>
                 ) : (
                   <button
                     disabled
-                    className="btn btn-ghost w-full gap-2 min-h-[44px] cursor-not-allowed opacity-50 border border-base-300"
+                    className="btn btn-ghost border border-base-300 flex flex-col items-center justify-center min-h-[52px] p-2 gap-1 text-xs opacity-50 cursor-not-allowed"
                     title="File XLSX belum tersedia di Google Drive"
                   >
                     <Table className="w-4 h-4" />
-                    <span>File XLSX Belum Tersedia</span>
+                    <span className="truncate max-w-full">Excel</span>
                   </button>
                 )}
 
-                {/* Always enabled Share WA button */}
-                <button
-                  onClick={handleShareWhatsApp}
-                  className="btn btn-success w-full gap-2 min-h-[44px] shadow-sm"
-                >
-                  <Share2 className="w-4 h-4" />
-                  <span>{waSent ? 'Kirim Ulang ke WhatsApp' : 'Siapkan Pesan WhatsApp'}</span>
-                </button>
-
-                {/* Regenerate button always shown, disabled when link is ready or loading */}
+                {/* (1,2) Regenerate Laporan */}
                 <button
                   onClick={triggerRegenerate}
                   disabled={hasXlsxLink || isRegenerating}
-                  className={`btn btn-warning w-full gap-2 min-h-[44px] ${
+                  className={`btn btn-warning flex flex-col items-center justify-center min-h-[52px] p-2 gap-1 text-xs ${
                     hasXlsxLink ? 'btn-ghost opacity-50 cursor-not-allowed border border-base-300' : ''
                   }`}
                 >
@@ -328,7 +340,16 @@ const [errorMsg, setErrorMsg] = useState<string>('');
                   ) : (
                     <RefreshCcw className="w-4 h-4" />
                   )}
-                  <span>Regenerate Spreadsheet</span>
+                  <span className="truncate max-w-full">Regenerate</span>
+                </button>
+
+                {/* (2,2 & 3,2) Share WhatsApp - Span 2 Kolom (Paling Besar) */}
+                <button
+                  onClick={handleShareWhatsApp}
+                  className="col-span-2 btn btn-success min-h-[52px] text-sm font-bold shadow-sm gap-2"
+                >
+                  <Share2 className="w-5 h-5 shrink-0" />
+                  <span className="truncate">{waSent ? 'Kirim Ulang WA' : 'Share WhatsApp'}</span>
                 </button>
               </div>
 
@@ -383,6 +404,8 @@ const [errorMsg, setErrorMsg] = useState<string>('');
             totalItem={totalItem}
             jumlahKritis={laporan.Jumlah_Kritis}
             jumlahHampirHabis={laporan.Jumlah_Hampir_Habis}
+            laporanId={laporanId}
+            cabangId={selectedCabang?.Cabang_ID || ''}
             linkXLSX={xlsxLink}
           />
         )}

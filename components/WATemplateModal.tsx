@@ -15,16 +15,23 @@ interface WATemplateModalProps {
   totalItem: number;
   jumlahKritis: number;
   jumlahHampirHabis: number;
+  laporanId?: string;
+  cabangId?: string;
   linkXLSX?: string;
+  linkView?: string;
 }
 
 export function WATemplateModal({ isOpen, onClose, onSent, ...data }: WATemplateModalProps) {
   const [copied, setCopied] = React.useState(false);
 
-  const activeLink = data.linkXLSX || '';
-  const fallbackLink = typeof window !== 'undefined' ? 
-    `${window.location.origin}/api/so/[LAPORAN_ID]/xlsx-file?cabang=[CABANG_ID]` : 
-    '';
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+  const activeViewLink = data.linkView ||
+    (data.laporanId && data.cabangId
+      ? `${origin}/laporan/view/${encodeURIComponent(data.laporanId)}?cabang=${encodeURIComponent(data.cabangId)}`
+      : data.linkXLSX && data.linkXLSX.includes('/laporan/view/')
+        ? data.linkXLSX
+        : `${origin}/laporan/view/${data.laporanId || '[ID_LAPORAN]'}?cabang=${data.cabangId || '[ID_CABANG]'}`);
 
   const totalItemNum = Number(data.totalItem) || 0;
   const kritisNum = Number(data.jumlahKritis) || 0;
@@ -43,8 +50,8 @@ Total Item       : ${totalItemNum}
 Status Kritis    : ${kritisNum}
 Status Hampir Habis : ${hampirNum}
 
-Laporan XLSX:
-${activeLink || fallbackLink.replace('[LAPORAN_ID]', '[ID_LAPORAN]').replace('[CABANG_ID]', '[ID_CABANG]')}
+Lihat Laporan:
+${activeViewLink}
 `.trim();
 
   const handleCopy = () => {

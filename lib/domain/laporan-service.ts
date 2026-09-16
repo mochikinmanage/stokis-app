@@ -235,7 +235,9 @@ export async function getShareWhatsAppLink(
   const laporan = rows.find((r) => String(r['Laporan_ID']) === laporanId) as LaporanRow | undefined;
   if (!laporan) throw new ApiError('not_found', 'Laporan ' + laporanId + ' tidak ditemukan');
   const nomorWA = String(cabang['Nomor_WA_Cabang'] || '').replace(/\D/g, '');
-  const teks = `Laporan SO ${cabang['Nama_Cabang'] || ''} - ${formatDate(laporan['Tanggal_Operasional'])} ${laporan['Shift']}\n${laporan['Link_XLSX'] || ''}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+  const viewLink = `${baseUrl}/laporan/view/${encodeURIComponent(laporanId)}?cabang=${encodeURIComponent(cabangId)}`;
+  const teks = `Laporan SO ${cabang['Nama_Cabang'] || ''} - ${formatDate(laporan['Tanggal_Operasional'])} ${laporan['Shift']}\nLihat Laporan: ${viewLink}`;
   return { waLink: `https://wa.me/${nomorWA}?text=${encodeURIComponent(teks)}`, laporan };
 }
 
