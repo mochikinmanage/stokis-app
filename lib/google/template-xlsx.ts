@@ -54,14 +54,11 @@ function normalizeDate(date: string | number | null | undefined): Date | null {
 // ── Type detection (replaces heuristic isUtilitasBoolean/isUtilitasNumeric/isMinyak) ──
 
 /**
- * Returns the single primary ReportItemType for this item.
- * For items with compound tipeInput (e.g. 'boolean,date'), only the first
- * relevant type is returned — compound items are already handled by
- * getReportTypes() at the grouping level.
+ * Returns all ReportItemType for this item.
+ * For compound tipeInput (e.g. 'dual,boolean'), the item appears in multiple sub-tables.
  */
-function getItemType(it: XlsxItem): ReportItemType {
-  const types = getReportTypes(it.tipeInput);
-  return types[0];
+function getItemTypes(it: XlsxItem): ReportItemType[] {
+  return getReportTypes(it.tipeInput);
 }
 
 // ── Status helpers ────────────────────────────────────────────────────────────
@@ -301,20 +298,21 @@ export async function generateXlsxFromTemplate(
     const ensureSub = (k: SubKey) => { if (!subGroups.has(k)) subGroups.set(k, []); };
 
     areaItems.forEach((it) => {
-      const primary = getItemType(it);
-      if (primary === 'dual' || primary === 'single') {
-        ensureSub('regular'); subGroups.get('regular')!.push(it);
-      } else if (primary === 'boolean') {
-        ensureSub('utilgas'); subGroups.get('utilgas')!.push(it);
-      } else if (primary === 'date') {
-        ensureSub('date'); subGroups.get('date')!.push(it);
-      } else if (primary === 'text') {
-        ensureSub('text'); subGroups.get('text')!.push(it);
-      } else if (primary === 'expiry') {
-        ensureSub('expiry'); subGroups.get('expiry')!.push(it);
-      } else {
-        // fallback: treat as regular
-        ensureSub('regular'); subGroups.get('regular')!.push(it);
+      const types = getItemTypes(it);
+      for (const primary of types) {
+        if (primary === 'dual' || primary === 'single') {
+          ensureSub('regular'); subGroups.get('regular')!.push(it);
+        } else if (primary === 'boolean') {
+          ensureSub('utilgas'); subGroups.get('utilgas')!.push(it);
+        } else if (primary === 'date') {
+          ensureSub('date'); subGroups.get('date')!.push(it);
+        } else if (primary === 'text') {
+          ensureSub('text'); subGroups.get('text')!.push(it);
+        } else if (primary === 'expiry') {
+          ensureSub('expiry'); subGroups.get('expiry')!.push(it);
+        } else {
+          ensureSub('regular'); subGroups.get('regular')!.push(it);
+        }
       }
     });
 
@@ -339,7 +337,7 @@ export async function generateXlsxFromTemplate(
         });
         sorted.forEach((it) => {
           globalNo++;
-          const primary = getItemType(it);
+          const primary = getItemTypes(it)[0] || 'dual';
           const s1 = Number(it.step1) || 0;
           const s2 = Number(it.step2) || 0;
           const threshold = parseThreshold(it.threshold);

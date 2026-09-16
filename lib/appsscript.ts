@@ -24,6 +24,7 @@ import {
   setItemActive,
   updateTipeInput,
   updateKeterangan,
+  batchUpdate,
 } from '@/lib/domain/master-item-service';
 import {
   getPetugasList,
@@ -95,6 +96,7 @@ export async function callAppsScript<T = any>(
       case 'setItemActive':        return ok<T>(await setItemActive(cabangId!, String(p.itemId), p.aktif) as T);
       case 'updateTipeInput':      return ok<T>(await updateTipeInput(cabangId!, String(p.itemId), p.tipeInput) as T);
       case 'updateKeterangan':     return ok<T>(await updateKeterangan(cabangId!, String(p.itemId), p.keterangan) as T);
+      case 'batchUpdate':          return ok<T>(await batchUpdate(cabangId!, p.updates as Parameters<typeof batchUpdate>[1]) as T);
       // Petugas
       case 'getPetugasList':       return ok<T>(await getPetugasList(cabangId!) as T);
       case 'addPetugas':           return ok<T>(await addPetugas(cabangId!, p as never) as T);

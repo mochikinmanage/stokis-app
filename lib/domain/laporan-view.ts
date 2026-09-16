@@ -80,6 +80,13 @@ function getGroup(tipeInput: string): InputTypeGroup {
   return 'dual';
 }
 
+function getGroups(tipeInput: string): InputTypeGroup[] {
+  const parts = (tipeInput || '').toLowerCase().split(',').map((t) => t.trim()).filter(Boolean);
+  const unique = [...new Set(parts)];
+  if (unique.length === 0) return ['dual'];
+  return unique as InputTypeGroup[];
+}
+
 // ── Types ──────────────────────────────────────────────────────
 
 export interface ViewMeta {
@@ -106,7 +113,8 @@ export interface ViewItem {
   satuan: string;
   threshold: number | null;
   tipeInput: string;
-  group: InputTypeGroup;
+  group: InputTypeGroup; // primary type (status computation)
+  groups: InputTypeGroup[]; // all types (multi-group assignment)
   step1: number;
   step2: number;
   total: number;
@@ -194,6 +202,7 @@ export async function buildLaporanView(
     const fb = live.byItemId[itemId] || {};
     const tipeInput = tipeInputMap.get(itemId) || '';
     const group = getGroup(tipeInput);
+    const groups = getGroups(tipeInput);
 
     const step1 = Number(r['Step1']) || 0;
     const step2 = Number(r['Step2']) || 0;
@@ -245,6 +254,7 @@ export async function buildLaporanView(
       threshold,
       tipeInput,
       group,
+      groups,
       step1,
       step2,
       total,

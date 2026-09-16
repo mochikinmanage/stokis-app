@@ -301,15 +301,13 @@
   z-index: 5;
 }
 
-.rv-th-sticky {
-  position: sticky;
-  left: 0;
-  z-index: 10;
-  background: #F7F6F3;
-}
-
 .rv-th-group { background: #F0EFED; }
 .rv-th-current { background: #EDF3EC; }
+
+/* Freeze columns — horizontal sticky with layered z-index */
+.rv-th-freeze-1 { position: sticky; left: 0; z-index: 15; background: #F7F6F3; }
+.rv-th-freeze-2 { position: sticky; left: 36px; z-index: 14; background: #F7F6F3; }
+.rv-th-freeze-3 { position: sticky; left: 190px; z-index: 13; background: #F7F6F3; border-right: 1px solid #EAEAEA; }
 
 .rv-td-center { text-align: center; }
 
@@ -323,14 +321,13 @@
   color: #2F3437;
 }
 
-.rv-td-sticky {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: #FFFFFF;
-}
+.rv-td-freeze-1 { position: sticky; left: 0; z-index: 12; background: #FFFFFF; }
+.rv-td-freeze-2 { position: sticky; left: 36px; z-index: 11; background: #FFFFFF; }
+.rv-td-freeze-3 { position: sticky; left: 190px; z-index: 10; background: #FFFFFF; border-right: 1px solid #EAEAEA; }
 
-.rv-tr:hover .rv-td-sticky { background: #FBFBFA; }
+.rv-tr:hover .rv-td-freeze-1,
+.rv-tr:hover .rv-td-freeze-2,
+.rv-tr:hover .rv-td-freeze-3 { background: #FBFBFA; }
 
 .rv-td-muted { color: #787774; }
 .rv-td-mono { font-family: 'SF Mono', 'JetBrains Mono', 'Consolas', monospace; font-size: 11px; }

@@ -63,8 +63,10 @@ function subGroupItems(items: ViewItem[]): SubGroup[] {
   const typeOrder: InputTypeGroup[] = ['dual', 'single', 'boolean', 'date', 'expiry', 'text'];
   const map = new Map<InputTypeGroup, ViewItem[]>();
   for (const it of items) {
-    if (!map.has(it.group)) map.set(it.group, []);
-    map.get(it.group)!.push(it);
+    for (const g of it.groups) {
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(it);
+    }
   }
   return typeOrder.filter((t) => map.has(t)).map((t) => ({ type: t, items: map.get(t)! }));
 }
@@ -214,10 +216,10 @@ export default async function LaporanViewPage({
                         {isRegular(sg.type) ? (
                           <>
                             <tr>
-                              <th rowSpan={2} className="rv-th rv-th-sticky" style={{ width: 36 }}>No</th>
-                              <th rowSpan={2} className="rv-th rv-th-sticky" style={{ minWidth: 150 }}>Nama Barang</th>
-                              <th rowSpan={2} className="rv-th rv-th-sticky" style={{ width: 56 }}>Satuan</th>
-                              <th rowSpan={2} className="rv-th rv-th-sticky" style={{ width: 60 }}>Thresh.</th>
+                              <th rowSpan={2} className="rv-th rv-th-freeze-1" style={{ width: 36 }}>No</th>
+                              <th rowSpan={2} className="rv-th rv-th-freeze-2" style={{ minWidth: 150 }}>Nama Barang</th>
+                              <th rowSpan={2} className="rv-th rv-th-freeze-3" style={{ width: 56 }}>Satuan</th>
+                              <th rowSpan={2} className="rv-th" style={{ width: 60 }}>Thresh.</th>
                               <th colSpan={3} className="rv-th rv-th-group">SO Sebelumnya</th>
                               <th colSpan={3} className="rv-th rv-th-group rv-th-current">SO Sekarang</th>
                               <th rowSpan={2} className="rv-th" style={{ width: 72 }}>Pakai</th>
@@ -235,10 +237,10 @@ export default async function LaporanViewPage({
                           </>
                         ) : sg.type === 'boolean' ? (
                           <tr>
-                            <th className="rv-th rv-th-sticky" style={{ width: 36 }}>No</th>
-                            <th className="rv-th rv-th-sticky" style={{ minWidth: 150 }}>Nama Barang</th>
-                            <th className="rv-th rv-th-sticky" style={{ width: 56 }}>Satuan</th>
-                            <th className="rv-th rv-th-sticky" style={{ width: 60 }}>Thresh.</th>
+                            <th className="rv-th rv-th-freeze-1" style={{ width: 36 }}>No</th>
+                            <th className="rv-th rv-th-freeze-2" style={{ minWidth: 150 }}>Nama Barang</th>
+                            <th className="rv-th rv-th-freeze-3" style={{ width: 56 }}>Satuan</th>
+                            <th className="rv-th" style={{ width: 60 }}>Thresh.</th>
                             <th className="rv-th" style={{ minWidth: 80 }}>Nilai</th>
                             <th className="rv-th" style={{ minWidth: 76 }}>Tgl Isi</th>
                             <th className="rv-th" style={{ minWidth: 76 }}>Tgl Pakai</th>
@@ -247,10 +249,10 @@ export default async function LaporanViewPage({
                           </tr>
                         ) : sg.type === 'date' ? (
                           <tr>
-                            <th className="rv-th rv-th-sticky" style={{ width: 36 }}>No</th>
-                            <th className="rv-th rv-th-sticky" style={{ minWidth: 150 }}>Nama Barang</th>
-                            <th className="rv-th rv-th-sticky" style={{ width: 56 }}>Satuan</th>
-                            <th className="rv-th rv-th-sticky" style={{ width: 68 }}>Thresh.</th>
+                            <th className="rv-th rv-th-freeze-1" style={{ width: 36 }}>No</th>
+                            <th className="rv-th rv-th-freeze-2" style={{ minWidth: 150 }}>Nama Barang</th>
+                            <th className="rv-th rv-th-freeze-3" style={{ width: 56 }}>Satuan</th>
+                            <th className="rv-th" style={{ width: 68 }}>Thresh.</th>
                             <th className="rv-th" style={{ minWidth: 76 }}>Tgl Catat</th>
                             <th className="rv-th" style={{ minWidth: 56 }}>Hari</th>
                             <th className="rv-th" style={{ minWidth: 100 }}>Status</th>
@@ -258,10 +260,10 @@ export default async function LaporanViewPage({
                           </tr>
                         ) : sg.type === 'expiry' ? (
                           <tr>
-                            <th className="rv-th rv-th-sticky" style={{ width: 36 }}>No</th>
-                            <th className="rv-th rv-th-sticky" style={{ minWidth: 150 }}>Nama Barang</th>
-                            <th className="rv-th rv-th-sticky" style={{ width: 56 }}>Satuan</th>
-                            <th className="rv-th rv-th-sticky" style={{ width: 68 }}>Thresh.</th>
+                            <th className="rv-th rv-th-freeze-1" style={{ width: 36 }}>No</th>
+                            <th className="rv-th rv-th-freeze-2" style={{ minWidth: 150 }}>Nama Barang</th>
+                            <th className="rv-th rv-th-freeze-3" style={{ width: 56 }}>Satuan</th>
+                            <th className="rv-th" style={{ width: 68 }}>Thresh.</th>
                             <th className="rv-th" style={{ minWidth: 76 }}>Tgl Exp</th>
                             <th className="rv-th" style={{ minWidth: 52 }}>Sisa</th>
                             <th className="rv-th" style={{ minWidth: 100 }}>Status</th>
@@ -269,9 +271,9 @@ export default async function LaporanViewPage({
                           </tr>
                         ) : sg.type === 'text' ? (
                           <tr>
-                            <th className="rv-th rv-th-sticky" style={{ width: 36 }}>No</th>
-                            <th className="rv-th rv-th-sticky" style={{ minWidth: 150 }}>Nama Barang</th>
-                            <th className="rv-th rv-th-sticky" style={{ width: 56 }}>Satuan</th>
+                            <th className="rv-th rv-th-freeze-1" style={{ width: 36 }}>No</th>
+                            <th className="rv-th rv-th-freeze-2" style={{ minWidth: 150 }}>Nama Barang</th>
+                            <th className="rv-th rv-th-freeze-3" style={{ width: 56 }}>Satuan</th>
                             <th className="rv-th">Keterangan</th>
                           </tr>
                         ) : null}
@@ -325,13 +327,13 @@ function DesktopRow({ item, no, type }: { item: ViewItem; no: number; type: Inpu
 
   return (
     <tr className="rv-tr">
-      <td className="rv-td rv-td-sticky rv-td-center">{no}</td>
-      <td className="rv-td rv-td-sticky">
+      <td className="rv-td rv-td-freeze-1 rv-td-center">{no}</td>
+      <td className="rv-td rv-td-freeze-2">
         <div className="rv-item-name">{item.namaBarang}</div>
         <div className="rv-item-id">{item.itemId}</div>
       </td>
-      <td className="rv-td rv-td-sticky rv-td-muted">{item.satuan || '-'}</td>
-      <td className="rv-td rv-td-sticky rv-td-center rv-td-mono">{item.threshold ?? '-'}</td>
+      <td className="rv-td rv-td-freeze-3 rv-td-muted">{item.satuan || '-'}</td>
+      <td className="rv-td rv-td-center rv-td-mono">{item.threshold ?? '-'}</td>
 
       {isDual || isSingle ? (
         <>

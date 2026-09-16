@@ -328,14 +328,18 @@ const SOItemRow = React.memo(function SOItemRow({
   const hasPrev = Boolean(prev);
   const tipeInput: InputTipe[] = parseTipeInput(item.Tipe_Input);
   const isDual = hasTipe(tipeInput, 'dual');
+  const isSingle = hasTipe(tipeInput, 'single');
   const isBoolean = hasTipe(tipeInput, 'boolean');
   const isDate = hasTipe(tipeInput, 'date');
+  const isExpiry = hasTipe(tipeInput, 'expiry');
+  const isText = hasTipe(tipeInput, 'text');
+  const primary = tipeInput[0]; // primary type untuk status badge
 
-  // Nilai efektif: input user kalau disentuh, else auto-carry dari prev.
-  const effStatus = statusIsiVal !== undefined ? statusIsiVal : (prev?.statusIsi || '');
-  const statusSel = statusIsiVal !== undefined ? statusIsiVal : (prev?.statusIsi || '');
-  const effRefill = (count?.tglRefill || '') || (prev?.tglRefill || '');
-  const effPakai = (count?.tglPakai || '') || (prev?.tglPakai || '');
+  // Nilai efektif: langsung dari input user (tanpa auto-fill dari prev).
+  const effStatus = statusIsiVal || '';
+  const statusSel = statusIsiVal || '';
+  const effRefill = count?.tglRefill || '';
+  const effPakai = count?.tglPakai || '';
 
   return (
     <div
@@ -354,7 +358,7 @@ const SOItemRow = React.memo(function SOItemRow({
           ({item.Satuan})
         </span>
         <span className="ml-auto flex items-center gap-3 flex-wrap">
-          {isBoolean ? (
+          {primary === 'boolean' ? (
             effStatus === 'Penuh'
               ? <span className="badge badge-success text-xs font-bold gap-1"><CheckCircle2 className="w-3 h-3" /><span>Penuh</span></span>
               : effStatus === 'Dipakai'
@@ -373,154 +377,107 @@ const SOItemRow = React.memo(function SOItemRow({
         </span>
       </div>
 
-      {(isBoolean || isDate) && (
-        <div className={`grid grid-cols-2 gap-1 ${(isBoolean && isDate) ? 'sm:grid-cols-6' : (isBoolean ? 'sm:grid-cols-2' : 'sm:grid-cols-4')}`}>
-          {isBoolean && (
-            <>
-              <div>
-                 <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                  Status Sebelumnya
-                </span>
-                <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
-                  <span className="text-xs font-bold tabular-nums">{prev?.statusIsi ? prev.statusIsi : '–'}</span>
-                </div>
-              </div>
-              <div>
-                 <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                  Nilai Saat Ini
-                </span>
-                <select
-                  value={statusSel}
-                  onChange={(e) => onChange(item.Item_ID, 'statusIsi', e.target.value || '')}
-                  aria-label={`Status ${item.Nama_Barang}`}
-                  className="w-full min-h-[44px] px-1 text-center text-xs font-semibold cursor-pointer select select-bordered rounded-md"
-                >
-                  <option value="">Pilih...</option>
-                  <option value="Penuh">Penuh</option>
-                  <option value="Dipakai">Dipakai</option>
-                  <option value="Habis">Habis</option>
-                </select>
-              </div>
-            </>
-          )}
-          {isDate && (
-            <>
-              <div>
-                <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                  Refill Sebelumnya
-                </span>
-                <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
-                  <span className="text-xs font-bold tabular-nums">{prev?.tglRefill ? prev.tglRefill : '–'}</span>
-                </div>
-              </div>
-              <div>
-                <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                  Tgl Refill
-                </span>
-                <input
-                  type="date"
-                  value={effRefill}
-                  onChange={(e) => onChange(item.Item_ID, 'tglRefill', e.target.value)}
-                  aria-label={`Tanggal refill ${item.Nama_Barang}`}
-                  className="w-full min-h-[44px] px-1 text-center text-xs font-semibold tabular-nums input input-bordered rounded-md"
-                />
-              </div>
-              <div>
-                <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                  Pakai Sebelumnya
-                </span>
-                <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
-                  <span className="text-xs font-bold tabular-nums">{prev?.tglPakai ? prev.tglPakai : '–'}</span>
-                </div>
-              </div>
-              <div>
-                <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                  Tgl Pakai
-                </span>
-                <input
-                  type="date"
-                  value={effPakai}
-                  onChange={(e) => onChange(item.Item_ID, 'tglPakai', e.target.value)}
-                  aria-label={`Tanggal pakai ${item.Nama_Barang}`}
-                  className="w-full min-h-[44px] px-1 text-center text-xs font-semibold tabular-nums input input-bordered rounded-md"
-                />
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {!isBoolean && !isDate && (
+      {/* ── Numeric block: dual/single ── */}
+      {(isDual || isSingle) && (
         <div className={`grid gap-1 ${isDual ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-2 sm:grid-cols-4'}`}>
-          {/* ── SO SEBELUMNYA (read-only) ── */}
           <div>
-            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-              S1
-            </span>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">S1</span>
             <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
               <span className="text-xs font-bold tabular-nums">{prev ? prev.step1 : '–'}</span>
             </div>
           </div>
           {isDual && (
             <div>
-              <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-                S2
-              </span>
+              <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">S2</span>
               <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
                 <span className="text-xs font-bold tabular-nums">{prev ? prev.step2 : '–'}</span>
               </div>
             </div>
           )}
           <div>
-            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">
-              Tot
-            </span>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">Tot</span>
             <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content rounded-md">
               <span className="text-xs font-extrabold tabular-nums">{prev ? prev.total : '–'}</span>
             </div>
           </div>
-
-          {/* ── SO SEKARANG (editable) ── */}
           <div>
-            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-              S1
-            </span>
-            <input
-              type="text"
-              inputMode="decimal"
-              placeholder="0"
-              value={step1Val}
-              onChange={(e) => onChange(item.Item_ID, 'step1', e.target.value)}
-              data-onboard="so-step"
-              aria-label={`Step 1 ${item.Nama_Barang}`}
-              className="w-full min-h-[44px] px-1 text-center text-xs font-bold tabular-nums input input-bordered rounded-md"
-            />
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">S1</span>
+            <input type="text" inputMode="decimal" placeholder="0" value={step1Val} onChange={(e) => onChange(item.Item_ID, 'step1', e.target.value)} data-onboard="so-step" aria-label={`Step 1 ${item.Nama_Barang}`} className="w-full min-h-[44px] px-1 text-center text-xs font-bold tabular-nums input input-bordered rounded-md" />
           </div>
           {isDual && (
             <div>
-              <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">
-                S2
-              </span>
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="0"
-                value={step2Val}
-                onChange={(e) => onChange(item.Item_ID, 'step2', e.target.value)}
-                aria-label={`Step 2 ${item.Nama_Barang}`}
-                className="w-full min-h-[44px] px-1 text-center text-xs font-bold tabular-nums input input-bordered rounded-md"
-              />
+              <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">S2</span>
+              <input type="text" inputMode="decimal" placeholder="0" value={step2Val} onChange={(e) => onChange(item.Item_ID, 'step2', e.target.value)} aria-label={`Step 2 ${item.Nama_Barang}`} className="w-full min-h-[44px] px-1 text-center text-xs font-bold tabular-nums input input-bordered rounded-md" />
             </div>
           )}
           <div>
-            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/60 text-center">
-              Tot
-            </span>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/60 text-center">Tot</span>
             <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-primary/10 border border-primary/30 rounded-md">
-              <span className="text-xs font-extrabold tabular-nums text-primary">
-                {total}
-              </span>
+              <span className="text-xs font-extrabold tabular-nums text-primary">{total}</span>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Boolean block ── */}
+      {isBoolean && (
+        <div className="grid grid-cols-2 gap-1 sm:grid-cols-2">
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">Status Sebelumnya</span>
+            <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+              <span className="text-xs font-bold tabular-nums">{prev?.statusIsi ? prev.statusIsi : '–'}</span>
+            </div>
+          </div>
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">Nilai Saat Ini</span>
+            <select value={statusSel} onChange={(e) => onChange(item.Item_ID, 'statusIsi', e.target.value || '')} aria-label={`Status ${item.Nama_Barang}`} className="w-full min-h-[44px] px-1 text-center text-xs font-semibold cursor-pointer select select-bordered rounded-md">
+              <option value="">Pilih...</option>
+              <option value="Penuh">Penuh</option>
+              <option value="Dipakai">Dipakai</option>
+              <option value="Habis">Habis</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* ── Date block ── */}
+      {isDate && (
+        <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">Refill Sebelumnya</span>
+            <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+              <span className="text-xs font-bold tabular-nums">{prev?.tglRefill ? prev.tglRefill : '–'}</span>
+            </div>
+          </div>
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">Tgl Refill</span>
+            <input type="date" value={effRefill} onChange={(e) => onChange(item.Item_ID, 'tglRefill', e.target.value)} aria-label={`Tanggal refill ${item.Nama_Barang}`} className="w-full min-h-[44px] px-1 text-center text-xs font-semibold tabular-nums input input-bordered rounded-md" />
+          </div>
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">Pakai Sebelumnya</span>
+            <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+              <span className="text-xs font-bold tabular-nums">{prev?.tglPakai ? prev.tglPakai : '–'}</span>
+            </div>
+          </div>
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">Tgl Pakai</span>
+            <input type="date" value={effPakai} onChange={(e) => onChange(item.Item_ID, 'tglPakai', e.target.value)} aria-label={`Tanggal pakai ${item.Nama_Barang}`} className="w-full min-h-[44px] px-1 text-center text-xs font-semibold tabular-nums input input-bordered rounded-md" />
+          </div>
+        </div>
+      )}
+
+      {/* ── Expiry block ── */}
+      {isExpiry && (
+        <div className="grid grid-cols-2 gap-1 sm:grid-cols-2">
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-base-content/50 text-center">Exp Sebelumnya</span>
+            <div className="w-full min-h-[44px] px-1 text-center flex items-center justify-center bg-base-200 border border-base-300 text-base-content/60 rounded-md">
+              <span className="text-xs font-bold tabular-nums">{prev?.tglRefill ? prev.tglRefill : '–'}</span>
+            </div>
+          </div>
+          <div>
+            <span className="block text-xs mb-0 font-semibold uppercase tracking-wide text-primary text-center">Tgl Kedaluwarsa</span>
+            <input type="date" value={effRefill} onChange={(e) => onChange(item.Item_ID, 'tglRefill', e.target.value)} aria-label={`Tanggal kedaluwarsa ${item.Nama_Barang}`} className="w-full min-h-[44px] px-1 text-center text-xs font-semibold tabular-nums input input-bordered rounded-md" />
           </div>
         </div>
       )}
@@ -886,30 +843,30 @@ export default function InputSOPage() {
     return items.map((it) => {
       const c = counts[it.Item_ID] || { step1: '', step2: '', keterangan: '', statusIsi: undefined, tglRefill: '', tglPakai: '' };
       const prev = previousSO[it.Item_ID] || previousSO[it.Nama_Barang] || previousSO[it.Nama_Barang.trim()];
-      // Jika step kosong / belum valid (mis. "." saat mengetik), ambil nilai SO sebelumnya.
       const step1Str = String(c.step1).trim();
       const step2Str = String(c.step2).trim();
       const step1Num = Number(step1Str);
       const step2Num = Number(step2Str);
-      const step1 = step1Str === '' || !Number.isFinite(step1Num) ? (prev?.step1 ?? 0) : step1Num;
-      const step2 = step2Str === '' || !Number.isFinite(step2Num) ? (prev?.step2 ?? 0) : step2Num;
+      // Tidak ada auto-fill: kosong = 0
+      const step1 = step1Str === '' || !Number.isFinite(step1Num) ? 0 : step1Num;
+      const step2 = step2Str === '' || !Number.isFinite(step2Num) ? 0 : step2Num;
       const total = step1 + step2;
       const prevKeterangan = prev?.keterangan || '';
-      const keterangan = c.keterangan.trim() || prevKeterangan;
+      const keterangan = c.keterangan.trim();
 
-      // NEW — boolean/date, independen per item
+      // boolean/date — tanpa auto-fill dari prev
       const tglRefillInput = (c.tglRefill || '').trim();
-      const tglRefill = tglRefillInput || prev?.tglRefill || '';
+      const tglRefill = tglRefillInput || '';
 
       let statusIsi: 'Penuh' | 'Dipakai' | 'Habis' | '';
       if (c.statusIsi !== undefined && c.statusIsi !== '') {
         statusIsi = c.statusIsi as 'Penuh' | 'Dipakai' | 'Habis';
       } else {
-        statusIsi = (prev?.statusIsi as 'Penuh' | 'Dipakai' | 'Habis' | '') ?? '';
+        statusIsi = '';
       }
 
       const tglPakaiInput = (c.tglPakai || '').trim();
-      const tglPakai = tglPakaiInput || prev?.tglPakai || '';
+      const tglPakai = tglPakaiInput || '';
 
       return {
         itemId: it.Item_ID,
@@ -943,6 +900,35 @@ export default function InputSOPage() {
 
     if (!sesiIdRef.current) {
       sesiIdRef.current = generateSesiId();
+    }
+
+    // Validasi: semua field wajib diisi sesuai tipe input
+    const emptyFields: string[] = [];
+    items.forEach((it) => {
+      const c = counts[it.Item_ID];
+      const tipe = parseTipeInput(it.Tipe_Input);
+      const primary = tipe[0];
+
+      if (primary === 'dual' || primary === 'single') {
+        if (!c?.step1?.trim()) emptyFields.push(`${it.Nama_Barang}: S1 kosong`);
+        if (primary === 'dual' && !c?.step2?.trim()) emptyFields.push(`${it.Nama_Barang}: S2 kosong`);
+      }
+      if (tipe.includes('boolean')) {
+        if (!c?.statusIsi) emptyFields.push(`${it.Nama_Barang}: Status Isi belum dipilih`);
+      }
+      if (tipe.includes('date')) {
+        if (!c?.tglRefill?.trim()) emptyFields.push(`${it.Nama_Barang}: Tgl Refill kosong`);
+      }
+      if (tipe.includes('expiry')) {
+        if (!c?.tglRefill?.trim()) emptyFields.push(`${it.Nama_Barang}: Tgl Kedaluwarsa kosong`);
+      }
+    });
+
+    if (emptyFields.length > 0) {
+      const preview = emptyFields.slice(0, 5).join('\n');
+      const more = emptyFields.length > 5 ? `\n... dan ${emptyFields.length - 5} lainnya` : '';
+      setErrorMsg(`Wajib isi semua kolom:\n${preview}${more}`);
+      return;
     }
 
     const payloadItems = buildPayloadItems();
