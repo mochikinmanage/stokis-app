@@ -35,7 +35,6 @@ import {
 } from 'lucide-react';
 import { QuantumLoaderFull, QuantumLoaderMini } from '@/components/ui/QuantumLoader';
 import { SOGeneratingOverlay, type SOGerStep } from '@/components/SOGeneratingOverlay';
-import { ShiftCabangGate } from '@/components/ShiftCabangGate';
 import { staggerContainer, staggerItem } from '@/components/PageTransition';
 import { parseTipeInput, hasTipe, sanitizeDecimalInput, todayLocalISO } from '@/lib/domain/so';
 import type { InputTipe } from '@/lib/domain/so';
@@ -524,7 +523,6 @@ export default function InputSOPage() {
   const router = useRouter();
   const { selectedCabang, setSelectedCabang, cabangList, loading: cabangLoading } = useCabang();
   const { user } = useAuth();
-  const [gateOpen, setGateOpen] = useState<boolean>(false);
 
   const [items, setItems] = useState<MasterItem[]>([]);
   const [previousSO, setPreviousSO] = useState<Record<string, PreviousSO>>({});
@@ -586,38 +584,6 @@ export default function InputSOPage() {
     }
   });
 
-  // <ShiftCabangGate>: minta konfirmasi cabang+shift tiap kali enter /so/input.
-  // Pre-filled: cabang dari context (last used) + shift dari draft (jika ada) atau lastShift.
-  const gateInitialCabangId = selectedCabang?.Cabang_ID ?? null;
-  const gateInitialShift = (() => {
-    if (selectedCabang) {
-      const draft = loadDraft(selectedCabang.Cabang_ID);
-      if (draft?.shift) return draft.shift;
-    }
-    return lastShift;
-  })();
-
-  const getDraftShiftForGate = useCallback((cabangId: string): string | null => {
-    const draft = loadDraft(cabangId);
-    return draft?.shift ?? null;
-  }, []);
-
-  const handleGateConfirm = (cabangId: string, shiftVal: string) => {
-    // Pilih cabang lain (kalau beda dari context) melalui setter resmi context.
-    const target = (cabangList ?? []).find((c) => c.Cabang_ID === cabangId) || null;
-    if (target && target.Cabang_ID !== selectedCabang?.Cabang_ID) {
-      setSelectedCabang(target);
-    }
-    setShift(shiftVal);
-    setLastShift(shiftVal);
-    try {
-      sessionStorage.setItem('stokis_so_last_shift', shiftVal);
-    } catch {
-      // abai
-    }
-    setGateOpen(false);
-  };
-
   useEffect(() => {
     if (!selectedCabang) {
       setLoadingData(false);
@@ -649,9 +615,6 @@ export default function InputSOPage() {
           const cached = loadDraft(selectedCabang.Cabang_ID);
           if (cached && countFilled(cached.counts) > 0) {
             setPendingDraft(cached);
-          } else {
-            // No draft - show ShiftCabangGate
-            setGateOpen(true);
           }
         }
 
@@ -1578,18 +1541,6 @@ export default function InputSOPage() {
       <AnimatePresence>
         {submitting && <SOGeneratingOverlay step={genStep} />}
       </AnimatePresence>
-
-      {/* Gate konfirmasi cabang + shift (muncul tiap enter /so/input) */}
-      {gateOpen && (
-        <ShiftCabangGate
-          open={gateOpen}
-          cabangList={cabangList ?? []}
-          initialCabangId={gateInitialCabangId}
-          initialShift={gateInitialShift}
-          getDraftShift={getDraftShiftForGate}
-          onConfirm={handleGateConfirm}
-        />
-      )}
       {/* Discard confirmation dialog */}
       <AnimatePresence>
         {showDiscardConfirm && (
