@@ -1370,80 +1370,84 @@ export default function InputSOPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
               role="dialog"
               aria-modal="true"
               aria-labelledby="draft-title"
+              onClick={() => setShowDraftModal(false)}
             >
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 8 }}
-                className="card bg-base-100 border border-base-300 shadow-2xl p-6 w-full max-w-md space-y-5"
+                initial={{ opacity: 0, y: 40, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.97 }}
+                transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="bg-base-100 rounded-xl border border-base-300 shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                onClick={e => e.stopPropagation()}
               >
-                {/* Header with icon */}
-                <div className="flex items-start gap-3">
-                  <div className="p-3 rounded-full bg-warning/10">
-                    <AlertTriangle className="w-6 h-6 text-warning" />
+                {/* Header */}
+                <div className="flex items-center justify-between p-5 border-b border-base-300">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-warning/10">
+                      <AlertTriangle className="w-5 h-5 text-warning" />
+                    </div>
+                    <div>
+                      <h2 id="draft-title" className="font-semibold text-base-content text-base">Sesi Belum Selesai</h2>
+                      <p className="text-xs text-base-content/60">Ditemukan data yang belum di-submit</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 id="draft-title" className="font-bold text-lg text-base-content">Sesi Belum Selesai</h2>
-                    <p className="text-sm text-base-content/60 mt-1">Ditemukan data yang belum di-submit</p>
-                  </div>
+                  <button onClick={() => setShowDraftModal(false)} className="p-1.5 text-base-content/40 hover:text-base-content hover:bg-base-200 rounded-lg transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
 
                 {/* Session Info */}
-                <div className="space-y-3 bg-base-200/50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="w-4 h-4 text-base-content/50" />
-                    <span className="text-base-content/60">Tanggal:</span>
-                    <span className="font-semibold">{pendingDraft.tanggalOperasional || 'Tidak tersedia'}</span>
+                <div className="p-5 space-y-4">
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="space-y-0.5">
+                      <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Tanggal</span>
+                      <p className="font-semibold text-base-content">{pendingDraft.tanggalOperasional || 'Tidak tersedia'}</p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Shift</span>
+                      <p className="font-semibold text-base-content">{pendingDraft.shift || 'Tidak tersedia'}</p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Progress</span>
+                      <p className="font-semibold text-base-content">{countFilled(pendingDraft.counts)} item terisi</p>
+                    </div>
+                    {pendingDraft.updatedAt && (
+                      <div className="space-y-0.5">
+                        <span className="text-xs text-base-content/60 font-semibold uppercase tracking-wide">Terakhir Diedit</span>
+                        <p className="font-semibold text-base-content text-xs">
+                          {new Date(pendingDraft.updatedAt).toLocaleString('id-ID', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="w-4 h-4 text-base-content/50" />
-                    <span className="text-base-content/60">Shift:</span>
-                    <span className="font-semibold">{pendingDraft.shift || 'Tidak tersedia'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Package className="w-4 h-4 text-base-content/50" />
-                    <span className="text-base-content/60">Progress:</span>
-                    <span className="font-semibold">
-                      {countFilled(pendingDraft.counts)} item terisi
-                    </span>
-                  </div>
-                  {pendingDraft.updatedAt && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <History className="w-4 h-4 text-base-content/50" />
-                      <span className="text-base-content/60">Terakhir diedit:</span>
-                      <span className="font-semibold text-xs">
-                        {new Date(pendingDraft.updatedAt).toLocaleString('id-ID', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
+
+                  {/* Note preview */}
+                  {pendingDraft.note && (
+                    <div className="bg-base-200/50 rounded-lg p-3">
+                      <p className="text-xs text-base-content/50 mb-1">Catatan:</p>
+                      <p className="text-sm text-base-content/80 line-clamp-2">{pendingDraft.note}</p>
                     </div>
                   )}
-                </div>
 
-                {/* Note preview */}
-                {pendingDraft.note && (
-                  <div className="bg-base-200/50 rounded-lg p-3">
-                    <p className="text-xs text-base-content/50 mb-1">Catatan:</p>
-                    <p className="text-sm text-base-content/80 line-clamp-2">{pendingDraft.note}</p>
+                  {/* Storage info */}
+                  <div className="flex items-center gap-2 text-xs text-base-content/40">
+                    <HardDrive className="w-3.5 h-3.5" />
+                    <span>Data tersimpan di penyimpanan sementara browser</span>
                   </div>
-                )}
-
-                {/* Storage info */}
-                <div className="flex items-center gap-2 text-xs text-base-content/40">
-                  <HardDrive className="w-3.5 h-3.5" />
-                  <span>Data tersimpan di penyimpanan sementara browser</span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-2 pt-2">
+                <div className="flex flex-col gap-2 p-5 pt-0">
                   <button
                     type="button"
                     onClick={() => {
