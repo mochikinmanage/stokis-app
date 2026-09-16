@@ -524,7 +524,7 @@ export default function InputSOPage() {
   const router = useRouter();
   const { selectedCabang, setSelectedCabang, cabangList, loading: cabangLoading } = useCabang();
   const { user } = useAuth();
-  const [gateOpen, setGateOpen] = useState<boolean>(true);
+  const [gateOpen, setGateOpen] = useState<boolean>(false);
 
   const [items, setItems] = useState<MasterItem[]>([]);
   const [previousSO, setPreviousSO] = useState<Record<string, PreviousSO>>({});
@@ -1364,24 +1364,24 @@ export default function InputSOPage() {
                   </motion.button>
         )}
 
-        {/* Welcome Modal - choice for continuing or starting new */}
+        {/* Welcome Modal - centered sticky with blur backdrop */}
         <AnimatePresence>
           {showWelcomeModal && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
               role="dialog"
               aria-modal="true"
               aria-labelledby="welcome-title"
             >
               <motion.div
-                initial={{ opacity: 0, y: 40, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.97 }}
-                transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="bg-base-100 rounded-xl border border-base-300 shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="bg-base-100 rounded-xl border border-base-300 shadow-2xl w-full max-w-md sticky top-[20%] max-h-[80vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
               >
                 {/* Header */}
