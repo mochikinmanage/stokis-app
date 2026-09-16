@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
 import {
@@ -83,61 +83,147 @@ function tipeBadgeColor(t?: string) {
   return 'bg-base-200 text-base-content/60 border border-base-300';
 }
 
-// ── TipeInputCheckbox component ─────────────────────────────
+// ── TipeInputDropdown component ─────────────────────────────
 
-function TipeInputCheckbox({
+function TipeInputDropdown({
   value,
   onChange,
+  itemName,
+  itemId,
 }: {
   value: string;
   onChange: (val: string) => void;
+  itemName?: string;
+  itemId?: string;
 }) {
-  const selected = parseTipeSelection(value);
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<Set<string>>(() => parseTipeSelection(value));
+  const ref = useRef<HTMLDivElement>(null);
 
-  const toggle = (t: string) => {
-    const next = new Set(selected);
-    if (t === 'dual' || t === 'single') {
-      // radio-like: uncheck the other, check this one
-      next.delete('dual');
-      next.delete('single');
-      next.add(t);
-    } else {
-      if (next.has(t)) next.delete(t);
-      else next.add(t);
-    }
-    onChange(tipeSelectionToComma(next));
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  const handleOpen = () => {
+    setDraft(parseTipeSelection(value));
+    setOpen(true);
   };
 
+  const handleSave = () => {
+    if (draft.size > 0) {
+      onChange(tipeSelectionToComma(draft));
+    }
+    setOpen(false);
+  };
+
+  const handleReset = () => {
+    setDraft(parseTipeSelection(value));
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+  };
+
+  const displayValue = value || 'dual';
+  const displayLabel = displayValue.split(',')[0].trim();
+
   return (
-    <div className="flex items-center gap-0.5 flex-wrap justify-center">
-      {TIPE_TYPES.map((t) => (
-        <label
-          key={t}
-          className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold cursor-pointer transition-all select-none border ${
-            selected.has(t)
-              ? 'bg-primary/15 text-primary border-primary/30'
-              : 'bg-base-100 text-base-content/40 border-base-300 hover:border-base-content/30'
-          }`}
-        >
-          <input
-            type="checkbox"
-            className="sr-only"
-            checked={selected.has(t)}
-            onChange={() => toggle(t)}
-          />
-          <span className={`w-2.5 h-2.5 rounded-sm border flex items-center justify-center ${
-            selected.has(t) ? 'bg-primary border-primary' : 'border-base-300'
-          }`}>
-            {selected.has(t) && (
-              <svg className="w-2 h-2 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M2 6l3 3 5-5" />
-              </svg>
+    <div ref={ref} className="relative inline-block">
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={handleOpen}
+        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold bg-base-100 border border-base-300 hover:border-base-content/30 transition-all cursor-pointer"
+      >
+        <span className={tipeBadgeColor(displayValue)}>
+          {displayLabel}
+        </span>
+        <ChevronDown className="w-3 h-3 text-base-content/40" />
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute top-full left-0 mt-1 w-56 bg-base-100 border border-base-300 rounded-xl shadow-lg z-50 overflow-hidden">
+          {/* Header */}
+          <div className="px-3 py-2 border-b border-base-300">
+            <p className="text-[10px] font-bold text-base-content/40 uppercase tracking-wider">Tipe Input</p>
+            {itemName && (
+              <p className="text-xs text-base-content/60 mt-0.5 truncate">{itemName}</p>
             )}
-          </span>
-          <span className="hidden sm:inline">{t === 'dual' ? 'Dual' : t === 'single' ? 'Single' : t === 'boolean' ? 'Bool' : t === 'date' ? 'Date' : t === 'expiry' ? 'Exp' : 'Text'}</span>
-          <span className="sm:hidden">{t === 'dual' ? 'D' : t === 'single' ? 'S' : t === 'boolean' ? 'B' : t === 'date' ? 'Dt' : t === 'expiry' ? 'Ex' : 'Tx'}</span>
-        </label>
-      ))}
+            {itemId && (
+              <p className="text-[10px] text-base-content/30 font-mono">{itemId}</p>
+            )}
+          </div>
+
+          {/* Options */}
+          <div className="py-1">
+            {TIPE_TYPES.map((t) => {
+              const isRadio = t === 'dual' || t === 'single';
+              const isSelected = draft.has(t);
+              return (
+                <label
+                  key={t}
+                  className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-base-200/50 transition-colors"
+                >
+                  <div className={`flex-shrink-0 w-4 h-4 rounded flex items-center justify-center border-2 ${
+                    isSelected
+                      ? isRadio
+                        ? 'border-primary bg-primary'
+                        : 'border-primary bg-primary'
+                      : 'border-base-300 bg-base-100'
+                  }`}>
+                    {isSelected && (
+                      <Check className="w-3 h-3 text-white" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold text-base-content">
+                      {t === 'dual' ? 'Dual' : t === 'single' ? 'Single' : t === 'boolean' ? 'Boolean' : t === 'date' ? 'Date' : t === 'expiry' ? 'Expiry' : 'Text'}
+                    </span>
+                  </div>
+                  {t === 'dual' && (
+                    <span className="flex-shrink-0 text-[9px] font-bold text-primary/50">Default</span>
+                  )}
+                </label>
+              );
+            })}
+          </div>
+
+          {/* Footer */}
+          <div className="px-3 py-2 border-t border-base-300 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="text-[10px] font-semibold text-base-content/40 hover:text-base-content/60 transition-colors"
+            >
+              Reset
+            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-2.5 py-1 rounded-md text-[10px] font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="px-2.5 py-1 rounded-md text-[10px] font-bold text-primary-content bg-primary hover:bg-primary/90 transition-all"
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -865,9 +951,11 @@ export default function MasterItemPage() {
                                 {/* Tipe Input */}
                                 <td className="px-3 text-center">
                                   {isEditing ? (
-                                    <TipeInputCheckbox
+                                    <TipeInputDropdown
                                       value={draft.Tipe_Input || 'dual'}
                                       onChange={(val) => updateDraft(item.Item_ID, 'Tipe_Input', val)}
+                                      itemName={item.Nama_Barang}
+                                      itemId={item.Item_ID}
                                     />
                                   ) : (
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${tipeBadgeColor(item.Tipe_Input)}`}>
@@ -1499,9 +1587,10 @@ export default function MasterItemPage() {
                     <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
                       Tipe Input
                     </label>
-                    <TipeInputCheckbox
+                    <TipeInputDropdown
                       value={newItem.Tipe_Input}
                       onChange={(val) => setNewItem({ ...newItem, Tipe_Input: val })}
+                      itemName={newItem.Nama_Barang || 'Item Baru'}
                     />
                   </div>
                 </div>

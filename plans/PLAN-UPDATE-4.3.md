@@ -195,3 +195,64 @@ New component: `<TipeInputBottomSheet>`
 - [ ] Mobile: tipe input selection works in bottom sheet
 - [ ] Mobile: floating save bar visible at bottom
 - [ ] All existing functionality preserved (add item, kategori modal, batch save, toggle active)
+
+---
+
+### Task 7: TipeInputDropdown — Compact Dropdown with Internal Confirm Flow
+
+**Remove** `TipeInputCheckbox` component. **Add** `TipeInputDropdown` component.
+
+**Trigger button** (compact):
+- Shows current tipe as badge(s) + chevron icon (~80-100px wide)
+- Click opens dropdown panel
+
+**Dropdown panel** (floating, click-outside-to-close):
+```
+┌──────────────────────────────────┐
+│ Tipe Input                       │
+│ Beras Pandan Wangi 5kg            │
+│ ──────────────────────────────── │
+│ [✓] Dual Input          Default  │  ← radio-like
+│ [ ] Single Input                  │
+│ ──────────────────────────────── │
+│ [✓] Boolean                       │  ← additive
+│ [ ] Date                          │
+│ [ ] Expiry                        │
+│ [ ] Text                          │
+│ ──────────────────────────────── │
+│ Reset              [Batal][Simpan]│
+└──────────────────────────────────┘
+```
+
+**Internal state flow:**
+1. Open dropdown → init internal state from current value
+2. User checks/unchecks → only internal state changes (draftItems untouched)
+3. **Simpan** → `onChange(internalState)` → commits to draftItems → closes dropdown
+4. **Reset** → internal state reverts to original item value
+5. **Batal** → closes dropdown, discards internal changes
+
+**Props:**
+```ts
+{
+  value: string;
+  onChange: (val: string) => void;
+  itemName?: string;
+  itemId?: string;
+}
+```
+
+**Replace in 2 places:**
+1. Desktop table edit mode (line ~868)
+2. Add Item modal (line ~1502)
+
+### Task 7 Verification
+
+- [ ] Dropdown opens on trigger click, closes on click-outside
+- [ ] Dual/single are radio-like (only one selected)
+- [ ] Boolean/date/expiry/text are additive checkboxes
+- [ ] Save commits to draftItems, dropdown closes
+- [ ] Reset reverts to original value
+- [ ] Batal closes without saving
+- [ ] Trigger button is compact (~80-100px)
+- [ ] Add Item modal dropdown works the same way
+- [ ] Lint, tests, build pass
