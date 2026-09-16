@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
 import { useAuth } from '@/lib/AuthContext';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
   Users,
   UserPlus,
@@ -353,197 +354,174 @@ export default function PetugasPage() {
       </div>
 
       {/* Form Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <dialog className="modal modal-open">
-            <div className="modal-box">
-              <div className="flex items-center justify-between pb-4 border-b border-base-300">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-base-content" />
-                  <h3 className="text-lg font-semibold text-base-content">
-                    {editingUser ? `Edit Pengguna: ${editingUser.Username}` : 'Tambah Pengguna Baru'}
-                  </h3>
-                </div>
-                <button onClick={() => setShowModal(false)} className="btn btn-ghost btn-sm">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                {!editingUser && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-base-content/70">Username</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Username untuk login"
-                      value={form.username}
-                      onChange={(e) => setForm({ ...form, username: e.target.value })}
-                      className="input input-bordered w-full text-sm"
-                    />
+      <BottomSheet
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingUser ? `Edit Pengguna: ${editingUser.Username}` : 'Tambah Pengguna Baru'}
+        footer={
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all">
+              Batal
+            </button>
+            <motion.button
+              type="submit"
+              form="petugas-form"
+              disabled={saving}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-bold text-primary-content bg-primary shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+            >
+              {saving ? (
+                <>
+                  <div className="quantum-mini-loader">
+                    <span />
+                    <span />
+                    <span />
                   </div>
-                )}
-
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-base-content/70">
-                    {editingUser ? 'PIN Baru (kosongkan jika tidak diubah / reset)' : 'PIN (6 digit)'}
-                  </label>
-                  <input
-                    type="password"
-                    required={!editingUser}
-                    placeholder="123456"
-                    maxLength={6}
-                    value={form.pin}
-                    onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g, '') })}
-                    className="input input-bordered w-full text-sm font-mono"
-                  />
-                  <p className="text-xs text-base-content/50 flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> Jangan gunakan PIN yang mudah ditebak; PIN disimpan apa adanya di spreadsheet.
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-base-content/70">Nama Lengkap</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Nama lengkap"
-                    value={form.nama}
-                    onChange={(e) => setForm({ ...form, nama: e.target.value })}
-                    className="input input-bordered w-full text-sm"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-base-content/70">Role</label>
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="select select-bordered w-full text-sm"
-                  >
-                    <option value="petugas">Petugas</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-base-content/70">
-                    Cabang (boleh pilih lebih dari satu)
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-base-300 rounded-lg p-3">
-                    {allCabangList.length === 0 ? (
-                      <p className="text-sm text-base-content/50 col-span-full">Belum ada cabang terdaftar.</p>
-                    ) : (
-                      allCabangList.map((c) => {
-                        const checked = form.cabangIds.includes(c.Cabang_ID.toUpperCase());
-                        return (
-                          <label
-                            key={c.Cabang_ID}
-                            className={`flex items-center gap-2 p-2 rounded-md cursor-pointer border text-sm transition-colors ${
-                              checked
-                                ? 'border-primary bg-primary/10'
-                                : 'border-base-300 hover:bg-base-200'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleCabang(c.Cabang_ID.toUpperCase())}
-                              className="checkbox checkbox-primary checkbox-sm"
-                            />
-                            <span className="font-medium">{c.Nama_Cabang}</span>
-                          </label>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-
-                {editingUser && isOwnUser(editingUser) && form.role !== 'admin' && (
-                  <div className="alert alert-warning text-sm">
-                    <ShieldAlert className="w-4 h-4" /> Anda sedang mengubah akun sendiri ke role non-admin.
-                  </div>
-                )}
-
-                <div className="flex gap-2 justify-end pt-4 border-t border-base-300">
-                  <button type="button" onClick={() => setShowModal(false)} className="btn btn-ghost">
-                    Batal
-                  </button>
-                  <motion.button
-                    type="submit"
-                    disabled={saving}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    className="btn btn-primary"
-                  >
-                    {saving ? (
-                      <>
-                        <div className="quantum-mini-loader">
-                          <span />
-                          <span />
-                          <span />
-                        </div>
-                        <span>Menyimpan...</span>
-                      </>
-                    ) : editingUser ? (
-                      'Simpan Perubahan'
-                    ) : (
-                      'Tambah Pengguna'
-                    )}
-                  </motion.button>
-                </div>
-              </form>
+                  <span>Menyimpan...</span>
+                </>
+              ) : editingUser ? (
+                'Simpan Perubahan'
+              ) : (
+                'Tambah Pengguna'
+              )}
+            </motion.button>
+          </div>
+        }
+      >
+        <form id="petugas-form" onSubmit={handleSubmit} className="space-y-4">
+          {!editingUser && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Username</label>
+              <input
+                type="text"
+                required
+                placeholder="Username untuk login"
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                className="input input-bordered w-full min-h-[44px] text-sm"
+              />
             </div>
-            <form method="dialog" className="modal-backdrop">
-              <button onClick={() => setShowModal(false)}>close</button>
-            </form>
-          </dialog>
-        )}
-      </AnimatePresence>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+              {editingUser ? 'PIN Baru (kosongkan jika tidak diubah / reset)' : 'PIN (6 digit)'}
+            </label>
+            <input
+              type="password"
+              required={!editingUser}
+              placeholder="123456"
+              maxLength={6}
+              value={form.pin}
+              onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g, '') })}
+              className="input input-bordered w-full min-h-[44px] text-sm font-mono"
+            />
+            <p className="text-[10px] text-base-content/50 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Jangan gunakan PIN yang mudah ditebak; PIN disimpan apa adanya di spreadsheet.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nama Lengkap</label>
+            <input
+              type="text"
+              required
+              placeholder="Nama lengkap"
+              value={form.nama}
+              onChange={(e) => setForm({ ...form, nama: e.target.value })}
+              className="input input-bordered w-full min-h-[44px] text-sm"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Role</label>
+            <select
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              className="select select-bordered w-full min-h-[44px] text-sm"
+            >
+              <option value="petugas">Petugas</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+              Cabang (boleh pilih lebih dari satu)
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-base-300 rounded-lg p-3">
+              {allCabangList.length === 0 ? (
+                <p className="text-sm text-base-content/50 col-span-full">Belum ada cabang terdaftar.</p>
+              ) : (
+                allCabangList.map((c) => {
+                  const checked = form.cabangIds.includes(c.Cabang_ID.toUpperCase());
+                  return (
+                    <label
+                      key={c.Cabang_ID}
+                      className={`flex items-center gap-2 p-2 rounded-md cursor-pointer border text-sm transition-colors ${
+                        checked
+                          ? 'border-primary bg-primary/10'
+                          : 'border-base-300 hover:bg-base-200'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleCabang(c.Cabang_ID.toUpperCase())}
+                        className="checkbox checkbox-primary checkbox-sm"
+                      />
+                      <span className="font-medium">{c.Nama_Cabang}</span>
+                    </label>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {editingUser && isOwnUser(editingUser) && form.role !== 'admin' && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning">
+              <ShieldAlert className="w-4 h-4" /> Anda sedang mengubah akun sendiri ke role non-admin.
+            </div>
+          )}
+        </form>
+      </BottomSheet>
 
       {/* Delete Confirmation */}
-      <AnimatePresence>
-        {deleteTarget && (
-          <dialog className="modal modal-open">
-            <div className="modal-box">
-              <div className="flex items-center justify-between pb-4 border-b border-base-300">
-                <div className="flex items-center gap-2 text-error">
-                  <Trash2 className="w-5 h-5" />
-                  <h3 className="text-lg font-semibold">Hapus Pengguna</h3>
-                </div>
-                <button onClick={() => setDeleteTarget(null)} className="btn btn-ghost btn-sm">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="py-4 space-y-2">
-                <p className="text-sm text-base-content">
-                  Anda yakin ingin menghapus pengguna{' '}
-                  <span className="font-semibold">{deleteTarget.Username}</span> (
-                  {deleteTarget.Nama}) secara permanen?
-                </p>
-                <p className="text-xs text-error font-medium">
-                  Tindakan ini tidak dapat dibatalkan dan menghapus baris dari spreadsheet.
-                </p>
-              </div>
-              <div className="flex gap-2 justify-end pt-4 border-t border-base-300">
-                <button onClick={() => setDeleteTarget(null)} className="btn btn-ghost">Batal</button>
-                <motion.button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className="btn btn-error"
-                >
-                  {deleting ? 'Menghapus...' : 'Yakin, Hapus'}
-                </motion.button>
-              </div>
-            </div>
-            <form method="dialog" className="modal-backdrop">
-              <button onClick={() => setDeleteTarget(null)}>close</button>
-            </form>
-          </dialog>
-        )}
-      </AnimatePresence>
+      <BottomSheet
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Hapus Pengguna"
+        subtitle={deleteTarget ? `${deleteTarget.Username} (${deleteTarget.Nama})` : undefined}
+        footer={
+          <div className="flex gap-2 justify-end">
+            <button onClick={() => setDeleteTarget(null)} className="px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all">
+              Batal
+            </button>
+            <motion.button
+              onClick={handleDelete}
+              disabled={deleting}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-bold text-error-content bg-error shadow-lg shadow-error/20 transition-all disabled:opacity-50"
+            >
+              {deleting ? 'Menghapus...' : 'Yakin, Hapus'}
+            </motion.button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-base-content">
+            Anda yakin ingin menghapus pengguna{' '}
+            <span className="font-semibold">{deleteTarget?.Username}</span> (
+            {deleteTarget?.Nama}) secara permanen?
+          </p>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-error/10 border border-error/20 text-xs text-error">
+            <Trash2 className="w-4 h-4 flex-shrink-0" />
+            <span>Tindakan ini tidak dapat dibatalkan dan menghapus baris dari spreadsheet.</span>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }

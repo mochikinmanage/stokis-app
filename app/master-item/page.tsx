@@ -26,6 +26,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import { parseThreshold, sanitizeDecimalInput } from '@/lib/domain/so';
 import type { KategoriItem } from '@/lib/domain/kategori-service';
 
@@ -1639,315 +1640,258 @@ export default function MasterItemPage() {
       </AnimatePresence>
 
       {/* ─── ADD ITEM MODAL ─── */}
-      <AnimatePresence>
-        {showModal && (
-          <dialog className="modal modal-open">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="modal-box max-w-lg p-0"
+      <BottomSheet
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="Tambah Item Baru"
+        subtitle="Isi data master item untuk cabang ini"
+        footer={
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
             >
-              {/* Modal header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-base-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Package className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-base-content">Tambah Item Baru</h3>
-                    <p className="text-xs text-base-content/50">Isi data master item untuk cabang ini</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowModal(false)} className="btn btn-ghost btn-sm btn-circle">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+              Batal
+            </button>
+            <button
+              type="submit"
+              form="add-item-form"
+              disabled={savingItem}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-bold text-primary-content bg-primary shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+            >
+              {savingItem ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Menyimpan...
+                </>
+              ) : (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  Simpan
+                </>
+              )}
+            </button>
+          </div>
+        }
+      >
+        <form id="add-item-form" onSubmit={handleAddItem} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+              Nama Barang <span className="text-error">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Contoh: Beras Pandan Wangi 5kg"
+              value={newItem.Nama_Barang}
+              onChange={(e) => setNewItem({ ...newItem, Nama_Barang: e.target.value })}
+              className={`${INPUT_BASE} w-full`}
+            />
+          </div>
 
-              {/* Modal body */}
-              <form onSubmit={handleAddItem} className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                    Nama Barang <span className="text-error">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Contoh: Beras Pandan Wangi 5kg"
-                    value={newItem.Nama_Barang}
-                    onChange={(e) => setNewItem({ ...newItem, Nama_Barang: e.target.value })}
-                    className={`${INPUT_BASE} w-full`}
-                  />
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+                Area <span className="text-error">*</span>
+              </label>
+              <select
+                value={newItem.Area}
+                onChange={(e) => setNewItem({ ...newItem, Area: e.target.value })}
+                className={`${INPUT_BASE} w-full`}
+              >
+                {areas.map((a) => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
+            </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                      Area <span className="text-error">*</span>
-                    </label>
-                    <select
-                      value={newItem.Area}
-                      onChange={(e) => setNewItem({ ...newItem, Area: e.target.value })}
-                      className={`${INPUT_BASE} w-full`}
-                    >
-                      {areas.map((a) => (
-                        <option key={a} value={a}>{a}</option>
-                      ))}
-                    </select>
-                  </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+                Satuan <span className="text-error">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="kg, pcs, gr..."
+                value={newItem.Satuan}
+                onChange={(e) => setNewItem({ ...newItem, Satuan: e.target.value })}
+                className={`${INPUT_BASE} w-full`}
+              />
+            </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                      Satuan <span className="text-error">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="kg, pcs, gr..."
-                      value={newItem.Satuan}
-                      onChange={(e) => setNewItem({ ...newItem, Satuan: e.target.value })}
-                      className={`${INPUT_BASE} w-full`}
-                    />
-                  </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+                Tipe Input
+              </label>
+              <TipeInputDropdown
+                value={newItem.Tipe_Input}
+                onChange={(val) => setNewItem({ ...newItem, Tipe_Input: val })}
+                itemName={newItem.Nama_Barang || 'Item Baru'}
+              />
+            </div>
+          </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                      Tipe Input
-                    </label>
-                    <TipeInputDropdown
-                      value={newItem.Tipe_Input}
-                      onChange={(val) => setNewItem({ ...newItem, Tipe_Input: val })}
-                      itemName={newItem.Nama_Barang || 'Item Baru'}
-                    />
-                  </div>
-                </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+                Threshold (Batas Minimum)
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={newItem.Threshold}
+                onChange={(e) => setNewItem({ ...newItem, Threshold: sanitizeDecimalInput(e.target.value) })}
+                className={`${INPUT_BASE} w-full font-semibold tabular-nums`}
+              />
+              <p className="text-xs text-base-content/40">Threshold = 0 berarti tidak dipantau</p>
+            </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                      Threshold (Batas Minimum)
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={newItem.Threshold}
-                      onChange={(e) => setNewItem({ ...newItem, Threshold: sanitizeDecimalInput(e.target.value) })}
-                      className={`${INPUT_BASE} w-full font-semibold tabular-nums`}
-                    />
-                    <p className="text-xs text-base-content/40">Threshold = 0 berarti tidak dipantau</p>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                      Keterangan
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Catatan (opsional)"
-                      value={newItem.Keterangan}
-                      onChange={(e) => setNewItem({ ...newItem, Keterangan: e.target.value })}
-                      className={`${INPUT_BASE} w-full`}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-2 justify-end pt-3 border-t border-base-300">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="btn btn-ghost btn-sm"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={savingItem}
-                    className="btn btn-primary btn-sm gap-1.5"
-                  >
-                    {savingItem ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        Menyimpan...
-                      </>
-                    ) : (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        Simpan
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-            <form method="dialog" className="modal-backdrop">
-              <button onClick={() => setShowModal(false)}>close</button>
-            </form>
-          </dialog>
-        )}
-      </AnimatePresence>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
+                Keterangan
+              </label>
+              <input
+                type="text"
+                placeholder="Catatan (opsional)"
+                value={newItem.Keterangan}
+                onChange={(e) => setNewItem({ ...newItem, Keterangan: e.target.value })}
+                className={`${INPUT_BASE} w-full`}
+              />
+            </div>
+          </div>
+        </form>
+      </BottomSheet>
 
       {/* ─── KELOLA KATEGORI MODAL (admin only) ─── */}
-      <AnimatePresence>
-        {showKategoriModal && (
-          <dialog className="modal modal-open">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="modal-box max-w-lg p-0"
+      <BottomSheet
+        open={showKategoriModal}
+        onClose={() => { setShowKategoriModal(false); setEditingKategoriId(null); }}
+        title="Kelola Kategori"
+        subtitle={`${selectedCabang.Nama_Cabang} · Kategori untuk grouping item`}
+        footer={
+          <div className="flex justify-end">
+            <button
+              onClick={() => { setShowKategoriModal(false); setEditingKategoriId(null); }}
+              className="px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
             >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-base-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-secondary/10 flex items-center justify-center">
-                    <Tags className="w-5 h-5 text-secondary" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-base-content">Kelola Kategori</h3>
-                    <p className="text-xs text-base-content/50">
-                      {selectedCabang.Nama_Cabang} &middot; Kategori untuk grouping item
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => { setShowKategoriModal(false); setEditingKategoriId(null); }}
-                  className="btn btn-ghost btn-sm btn-circle"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+              Tutup
+            </button>
+          </div>
+        }
+      >
+        <form onSubmit={handleAddKategori} className="flex gap-2 mb-4">
+          <input
+            type="text"
+            required
+            placeholder="Nama kategori baru..."
+            value={newKategoriName}
+            onChange={(e) => setNewKategoriName(e.target.value)}
+            className={`${INPUT_BASE} flex-1`}
+          />
+          <button type="submit" disabled={kategoriSaving} className="px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-bold text-secondary-content bg-secondary hover:bg-secondary/90 transition-all disabled:opacity-50">
+            {kategoriSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+          </button>
+        </form>
 
-              <form onSubmit={handleAddKategori} className="px-6 pt-4 pb-3 border-b border-base-300 flex gap-2">
-                <input
-                  type="text"
-                  required
-                  placeholder="Nama kategori baru..."
-                  value={newKategoriName}
-                  onChange={(e) => setNewKategoriName(e.target.value)}
-                  className={`${INPUT_BASE} flex-1`}
-                />
-                <button type="submit" disabled={kategoriSaving} className="btn btn-secondary btn-sm gap-1.5">
-                  {kategoriSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                  Tambah
-                </button>
-              </form>
-
-              <div className="px-6 py-4 max-h-[50vh] overflow-y-auto">
-                {kategoriError && (
-                  <div className="alert alert-error text-xs rounded-lg mb-3" role="alert">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span className="flex-1">{kategoriError}</span>
-                    <button onClick={() => setKategoriError('')} className="btn btn-ghost btn-xs">Tutup</button>
-                  </div>
-                )}
-
-                {kategoriLoading ? (
-                  <div className="flex flex-col items-center justify-center py-10 gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-secondary" />
-                    <p className="text-xs text-base-content/50">Memuat kategori...</p>
-                  </div>
-                ) : kategoriList.length === 0 ? (
-                  <p className="text-sm text-base-content/50 text-center py-8">
-                    Belum ada kategori. Tambahkan kategori pertama di atas.
-                  </p>
-                ) : (
-                  <ul className="space-y-2">
-                    {kategoriList.map((k) => (
-                      <li
-                        key={k.Kategori_ID}
-                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border ${
-                          k.Aktif ? 'border-base-300 bg-base-100' : 'border-base-300 bg-base-200/40 opacity-70'
-                        }`}
-                      >
-                        {editingKategoriId === k.Kategori_ID ? (
-                          <>
-                            <input
-                              type="text"
-                              value={tempKategoriName}
-                              onChange={(e) => setTempKategoriName(e.target.value)}
-                              className={`${INPUT_BASE} flex-1 min-w-0`}
-                              autoFocus
-                            />
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              value={tempKategoriUrutan}
-                              onChange={(e) => setTempKategoriUrutan(e.target.value.replace(/[^\d]/g, ''))}
-                              placeholder="Urutan"
-                              className={`${INPUT_BASE} w-16 text-center text-xs tabular-nums`}
-                            />
-                            <button
-                              onClick={() => handleSaveKategori(k)}
-                              disabled={kategoriSaving}
-                              className="btn btn-success btn-xs min-h-0 h-7 px-2"
-                              title="Simpan"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setEditingKategoriId(null)}
-                              className="btn btn-ghost btn-xs min-h-0 h-7 px-2"
-                              title="Batal"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-base-content truncate">{k.Nama_Kategori}</p>
-                              <p className="text-xs text-base-content/40">{k.Kategori_ID}</p>
-                            </div>
-                            {!k.Aktif && (
-                              <span className="badge badge-ghost badge-xs text-base-content/50">Nonaktif</span>
-                            )}
-                            <button
-                              onClick={() => {
-                                setEditingKategoriId(k.Kategori_ID);
-                                setTempKategoriName(k.Nama_Kategori);
-                                setTempKategoriUrutan(String(k.Urutan));
-                              }}
-                              className="btn btn-ghost btn-xs min-h-0 h-7 px-2 text-base-content/60"
-                              title="Ubah nama / urutan"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleToggleKategoriActive(k)}
-                              disabled={kategoriSaving}
-                              className={`btn btn-xs min-h-0 h-7 px-2 ${
-                                k.Aktif
-                                  ? 'btn-ghost text-error/70 hover:text-error hover:bg-error/10'
-                                  : 'btn-ghost text-success/70 hover:text-success hover:bg-success/10'
-                              }`}
-                              title={k.Aktif ? 'Nonaktifkan kategori' : 'Aktifkan kategori'}
-                            >
-                              <Power className="w-3.5 h-3.5" />
-                            </button>
-                          </>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              <div className="px-6 py-3 border-t border-base-300 flex justify-end">
-                <button
-                  onClick={() => { setShowKategoriModal(false); setEditingKategoriId(null); }}
-                  className="btn btn-ghost btn-sm"
-                >
-                  Tutup
-                </button>
-              </div>
-            </motion.div>
-            <form method="dialog" className="modal-backdrop">
-              <button onClick={() => { setShowKategoriModal(false); setEditingKategoriId(null); }}>close</button>
-            </form>
-          </dialog>
+        {kategoriError && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-error/10 border border-error/20 mb-3" role="alert">
+            <AlertTriangle className="w-4 h-4 text-error shrink-0" />
+            <span className="flex-1 text-xs text-error">{kategoriError}</span>
+            <button onClick={() => setKategoriError('')} className="text-xs text-error/60 hover:text-error">Tutup</button>
+          </div>
         )}
-      </AnimatePresence>
+
+        {kategoriLoading ? (
+          <div className="flex flex-col items-center justify-center py-10 gap-2">
+            <Loader2 className="w-6 h-6 animate-spin text-secondary" />
+            <p className="text-xs text-base-content/50">Memuat kategori...</p>
+          </div>
+        ) : kategoriList.length === 0 ? (
+          <p className="text-sm text-base-content/50 text-center py-8">
+            Belum ada kategori. Tambahkan kategori pertama di atas.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {kategoriList.map((k) => (
+              <li
+                key={k.Kategori_ID}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border ${
+                  k.Aktif ? 'border-base-300 bg-base-100' : 'border-base-300 bg-base-200/40 opacity-70'
+                }`}
+              >
+                {editingKategoriId === k.Kategori_ID ? (
+                  <>
+                    <input
+                      type="text"
+                      value={tempKategoriName}
+                      onChange={(e) => setTempKategoriName(e.target.value)}
+                      className={`${INPUT_BASE} flex-1 min-w-0`}
+                      autoFocus
+                    />
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={tempKategoriUrutan}
+                      onChange={(e) => setTempKategoriUrutan(e.target.value.replace(/[^\d]/g, ''))}
+                      placeholder="Urutan"
+                      className={`${INPUT_BASE} w-16 text-center text-xs tabular-nums`}
+                    />
+                    <button
+                      onClick={() => handleSaveKategori(k)}
+                      disabled={kategoriSaving}
+                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-success hover:bg-success/10 transition-colors"
+                      title="Simpan"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setEditingKategoriId(null)}
+                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-base-content/40 hover:bg-base-200 transition-colors"
+                      title="Batal"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-base-content truncate">{k.Nama_Kategori}</p>
+                      <p className="text-xs text-base-content/40">{k.Kategori_ID}</p>
+                    </div>
+                    {!k.Aktif && (
+                      <span className="text-[10px] font-bold text-base-content/50 bg-base-200 px-2 py-0.5 rounded">Nonaktif</span>
+                    )}
+                    <button
+                      onClick={() => {
+                        setEditingKategoriId(k.Kategori_ID);
+                        setTempKategoriName(k.Nama_Kategori);
+                        setTempKategoriUrutan(String(k.Urutan));
+                      }}
+                      className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-base-content/40 hover:text-primary hover:bg-primary/10 transition-colors"
+                      title="Ubah nama / urutan"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleToggleKategoriActive(k)}
+                      disabled={kategoriSaving}
+                      className={`min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg transition-colors ${
+                        k.Aktif
+                          ? 'text-error/70 hover:text-error hover:bg-error/10'
+                          : 'text-success/70 hover:text-success hover:bg-success/10'
+                      }`}
+                      title={k.Aktif ? 'Nonaktifkan kategori' : 'Aktifkan kategori'}
+                    >
+                      <Power className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </BottomSheet>
     </div>
   );
 }

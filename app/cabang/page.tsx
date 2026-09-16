@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
   Building2,
   PlusCircle,
@@ -311,114 +312,99 @@ export default function CabangAdminPage() {
         )}
       </motion.div>
 
-      <AnimatePresence>
-        {showModal && (
-          <dialog className="modal modal-open">
-            <div className="modal-box max-w-lg">
-              <div className="flex items-center justify-between pb-4 border-b border-base-300">
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-base-content" />
-                  <h3 className="text-lg font-semibold text-base-content">
-                    {editingCabang ? 'Edit Informasi Cabang' : 'Tambah Cabang Baru Otomatis'}
-                  </h3>
-                </div>
-                <button onClick={() => setShowModal(false)} className="btn btn-ghost btn-sm">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-base-content/70">Nama Cabang</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Contoh: SO Bandung Malam"
-                    value={namaCabang}
-                    onChange={(e) => setNamaCabang(e.target.value)}
-                    className="input input-bordered w-full text-sm"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-base-content/70">Alamat Cabang</label>
-                  <textarea
-                    rows={2}
-                    placeholder="Alamat lengkap lokasi..."
-                    value={alamat}
-                    onChange={(e) => setAlamat(e.target.value)}
-                    className="textarea textarea-bordered w-full text-sm"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-base-content/70">Nama PIC Cabang</label>
-                    <input
-                      type="text"
-                      placeholder="Nama staf PIC..."
-                      value={picNama}
-                      onChange={(e) => setPicNama(e.target.value)}
-                      className="input input-bordered w-full text-sm"
-                    />
+      <BottomSheet
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingCabang ? 'Edit Informasi Cabang' : 'Tambah Cabang Baru Otomatis'}
+        footer={
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
+            >
+              Batal
+            </button>
+            <motion.button
+              type="submit"
+              form="cabang-form"
+              disabled={saving}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-bold text-primary-content bg-primary shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+            >
+              {saving ? (
+                <>
+                  <div className="quantum-mini-loader">
+                    <span />
+                    <span />
+                    <span />
                   </div>
+                  <span>Menyiapkan Database...</span>
+                </>
+              ) : (
+                <span>Simpan Cabang</span>
+              )}
+            </motion.button>
+          </div>
+        }
+      >
+        <form id="cabang-form" onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nama Cabang</label>
+            <input
+              type="text"
+              required
+              placeholder="Contoh: SO Bandung Malam"
+              value={namaCabang}
+              onChange={(e) => setNamaCabang(e.target.value)}
+              className="input input-bordered w-full min-h-[44px] text-sm"
+            />
+          </div>
 
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-base-content/70">Nomor WhatsApp Cabang</label>
-                    <input
-                      type="text"
-                      placeholder="628123456789"
-                      value={nomorWa}
-                      onChange={(e) => setNomorWa(e.target.value)}
-                      className="input input-bordered w-full text-sm font-mono"
-                    />
-                  </div>
-                </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Alamat Cabang</label>
+            <textarea
+              rows={2}
+              placeholder="Alamat lengkap lokasi..."
+              value={alamat}
+              onChange={(e) => setAlamat(e.target.value)}
+              className="textarea textarea-bordered w-full text-sm"
+            />
+          </div>
 
-                {!editingCabang && (
-                  <div className="alert alert-info text-sm py-2">
-                    <Zap className="w-4 h-4 flex-shrink-0" />
-                    <span>Sistem akan menyalin template spreadsheet Google Sheets mandiri dan membuat folder Drive khusus untuk cabang ini.</span>
-                  </div>
-                )}
-
-                <div className="flex gap-2 justify-end pt-4 border-t border-base-300">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="btn btn-ghost"
-                  >
-                    Batal
-                  </button>
-                  <motion.button
-                    type="submit"
-                    disabled={saving}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    className="btn btn-primary gap-2"
-                  >
-                    {saving ? (
-                      <>
-                        <div className="quantum-mini-loader">
-                          <span />
-                          <span />
-                          <span />
-                        </div>
-                        <span>Menyiapkan Database...</span>
-                      </>
-                    ) : (
-                      <span>Simpan Cabang</span>
-                    )}
-                  </motion.button>
-                </div>
-              </form>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nama PIC Cabang</label>
+              <input
+                type="text"
+                placeholder="Nama staf PIC..."
+                value={picNama}
+                onChange={(e) => setPicNama(e.target.value)}
+                className="input input-bordered w-full min-h-[44px] text-sm"
+              />
             </div>
-            <form method="dialog" className="modal-backdrop">
-              <button onClick={() => setShowModal(false)}>close</button>
-            </form>
-          </dialog>
-        )}
-      </AnimatePresence>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nomor WhatsApp</label>
+              <input
+                type="text"
+                placeholder="628123456789"
+                value={nomorWa}
+                onChange={(e) => setNomorWa(e.target.value)}
+                className="input input-bordered w-full min-h-[44px] text-sm font-mono"
+              />
+            </div>
+          </div>
+
+          {!editingCabang && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-info/10 border border-info/20 text-xs text-info">
+              <Zap className="w-4 h-4 flex-shrink-0" />
+              <span>Sistem akan menyalin template spreadsheet Google Sheets mandiri dan membuat folder Drive khusus untuk cabang ini.</span>
+            </div>
+          )}
+        </form>
+      </BottomSheet>
     </div>
   );
 }
