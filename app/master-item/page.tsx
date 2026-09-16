@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
+import { useToast } from '@/lib/ToastContext';
 import {
   Package,
   PlusCircle,
@@ -249,6 +250,7 @@ function TipeInputDropdown({
 export default function MasterItemPage() {
   const { selectedCabang } = useCabang();
   const { isAdmin } = useAuth();
+  const { toast } = useToast();
 
   const [items, setItems] = useState<MasterItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -340,6 +342,7 @@ export default function MasterItemPage() {
 
       const json = await res.json();
       if (json.success) {
+        toast.success('Berhasil', `Master item "${newItem.Nama_Barang}" berhasil ditambahkan.`);
         setShowModal(false);
         setNewItem({
           Nama_Barang: '',
@@ -353,10 +356,14 @@ export default function MasterItemPage() {
         });
         fetchItems();
       } else {
-        setErrorMsg(json.error?.message || 'Gagal menambahkan master item');
+        const msg = json.error?.message || 'Gagal menambahkan master item';
+        toast.error('Gagal Menambahkan Item', msg);
+        setErrorMsg(msg);
       }
     } catch (err: any) {
-      setErrorMsg('Error: ' + err.message);
+      const msg = 'Error: ' + err.message;
+      toast.error('Gagal Menambahkan Item', msg);
+      setErrorMsg(msg);
     } finally {
       setSavingItem(false);
     }
@@ -380,14 +387,19 @@ export default function MasterItemPage() {
       });
       const json = await res.json();
       if (json.success) {
+        toast.success('Berhasil', `${draftItems.size} perubahan item berhasil disimpan.`);
         setIsEditing(false);
         setDraftItems(new Map());
         fetchItems();
       } else {
-        setErrorMsg(json.error?.message || 'Gagal menyimpan perubahan');
+        const msg = json.error?.message || 'Gagal menyimpan perubahan';
+        toast.error('Gagal Menyimpan', msg);
+        setErrorMsg(msg);
       }
     } catch (err: any) {
-      setErrorMsg('Gagal menyimpan: ' + err.message);
+      const msg = 'Gagal menyimpan: ' + err.message;
+      toast.error('Gagal Menyimpan', msg);
+      setErrorMsg(msg);
     } finally {
       setSavingBatch(false);
     }

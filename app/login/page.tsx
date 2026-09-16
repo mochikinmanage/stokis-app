@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
+import { useToast } from "@/lib/ToastContext";
 import { useRouter } from "next/navigation";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import { QuantumLoaderMini } from "@/components/ui/QuantumLoader";
@@ -11,6 +12,7 @@ const PIN_LENGTH = 6;
 
 export default function LoginPage() {
   const { login, loading } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
@@ -39,16 +41,21 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     if (!username.trim() || pin.length < PIN_LENGTH) {
-      setError("Username dan PIN 6 digit wajib diisi");
+      const msg = "Username dan PIN 6 digit wajib diisi";
+      setError(msg);
+      toast.error("Validasi Gagal", msg);
       return;
     }
     setSubmitting(true);
     const result = await login(username.trim(), pin);
     setSubmitting(false);
     if (result.success) {
+      toast.success("Login Berhasil", `Selamat datang, ${username}!`);
       router.push("/so/input");
     } else {
-      setError(result.error || "Login gagal");
+      const msg = result.error || "Login gagal. Periksa username dan PIN.";
+      setError(msg);
+      toast.error("Login Gagal", msg);
       setPin("");
       setShake(true);
       setTimeout(() => setShake(false), 500);
@@ -168,20 +175,6 @@ export default function LoginPage() {
                 {pin.length}/{PIN_LENGTH} digit
               </p>
             </motion.div>
-
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="alert alert-error text-sm py-2"
-                  role="alert"
-                >
-                  <span>{error}</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             <motion.button
               type="submit"

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/lib/ToastContext';
 import {
   ClipboardCheck,
   Send,
@@ -523,6 +524,7 @@ export default function InputSOPage() {
   const router = useRouter();
   const { selectedCabang, setSelectedCabang, cabangList, loading: cabangLoading } = useCabang();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const [items, setItems] = useState<MasterItem[]>([]);
   const [previousSO, setPreviousSO] = useState<Record<string, PreviousSO>>({});
@@ -920,7 +922,7 @@ export default function InputSOPage() {
     if (emptyFields.length > 0) {
       const preview = emptyFields.slice(0, 5).join('\n');
       const more = emptyFields.length > 5 ? `\n... dan ${emptyFields.length - 5} lainnya` : '';
-      setErrorMsg(`Wajib isi semua kolom:\n${preview}${more}`);
+      toast.error('Wajib isi semua kolom:', `${preview}${more}`);
       return;
     }
 
@@ -963,11 +965,11 @@ export default function InputSOPage() {
       const { result } = await postWithRetry('/api/so', body, 3);
 
       if (result.error) {
-        setErrorMsg(result.error.message || 'Gagal menyimpan data stock opname');
+        toast.error('Gagal Menyimpan', result.error.message || 'Gagal menyimpan data stock opname');
         return;
       }
       if (!result.success) {
-        setErrorMsg('Gagal menyimpan data stock opname');
+        toast.error('Gagal Menyimpan', 'Gagal menyimpan data stock opname');
         return;
       }
 
@@ -1058,7 +1060,8 @@ export default function InputSOPage() {
         setPendingDraft(null);
       }
     } catch (err) {
-      setErrorMsg(
+      toast.error(
+        'Kendala Jaringan',
         'Terjadi kendala jaringan setelah beberapa percobaan: ' +
           (err instanceof Error ? err.message : String(err)),
       );
@@ -1083,7 +1086,7 @@ export default function InputSOPage() {
 
   const scrollToLastEditedItem = () => {
     if (!lastEditedItemId) {
-      setErrorMsg('Belum ada item yang diisi. Isi minimal satu kolom terlebih dahulu.');
+      toast.warning('Belum Ada Item Filled', 'Isi minimal satu kolom terlebih dahulu.');
       return;
     }
     scrollTo(`[data-item-id="${lastEditedItemId}"]`);
@@ -1173,33 +1176,6 @@ export default function InputSOPage() {
               />
             </div>
           </div>
-
-          <AnimatePresence>
-            {errorMsg && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="rounded-lg px-4 py-3 text-sm flex items-center gap-2 bg-error/10 border border-error/30 text-error"
-                role="alert"
-              >
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{errorMsg}</span>
-              </motion.div>
-            )}
-            {submitResult && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="rounded-lg px-4 py-3 text-sm flex items-center gap-2 bg-success/10 border border-success/30 text-success"
-                role="alert"
-              >
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                <span>{submitResult}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Tanggal Operasional */}

@@ -106,6 +106,16 @@
 .animate-fade-in { animation: fade-in 0.3s ease-out both; }
 .animate-slide-up { animation: slide-up 0.4s ease-out both; }
 
+.font-display {
+  font-family: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 .stagger-item { animation: fade-in 0.3s ease-out both; }
 .stagger-item:nth-child(1) { animation-delay: 0ms; }
 .stagger-item:nth-child(2) { animation-delay: 50ms; }
@@ -176,6 +186,8 @@
   .card { box-shadow: none !important; border: 1px solid oklch(0.90 0.004 260) !important; }
   .table-xs { font-size: 11px !important; }
   .overflow-x-auto { overflow: visible !important; }
+  .lv-body { display: block !important; }
+  .lv-table-wrap { overflow: visible !important; }
   tr, section, .card-body { page-break-inside: avoid; }
   a[href]::after { content: none !important; }
 }

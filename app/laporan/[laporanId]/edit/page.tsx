@@ -5,6 +5,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCabang } from '@/lib/CabangContext';
+import { useToast } from '@/lib/ToastContext';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Save, Loader2, AlertTriangle, Check, FileText,
@@ -31,6 +32,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
   const { laporanId } = use(params);
   const router = useRouter();
   const { selectedCabang } = useCabang();
+  const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -142,14 +144,18 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
       const json = await res.json();
 
       if (json.success) {
+        toast.success('Berhasil', 'Laporan berhasil diperbarui. File XLSX telah diperbarui.');
         setSuccessMsg('Laporan berhasil diperbarui. File XLSX telah diperbarui.');
         if (json.data?.isNewFile) {
           setIsNewFile(true);
         }
       } else {
-        setError(json.error?.message || 'Gagal menyimpan perubahan');
+        const msg = json.error?.message || 'Gagal menyimpan perubahan';
+        toast.error('Gagal Menyimpan', msg);
+        setError(msg);
       }
     } catch {
+      toast.error('Gagal Menyimpan', 'Terjadi kesalahan saat menyimpan');
       setError('Terjadi kesalahan saat menyimpan');
     } finally {
       setSaving(false);

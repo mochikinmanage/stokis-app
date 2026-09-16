@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/lib/ToastContext';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
   Users,
@@ -41,6 +42,7 @@ const emptyForm = {
 export default function PetugasPage() {
   const { allCabangList } = useCabang();
   const { user: currentUser } = useAuth();
+  const { toast } = useToast();
 
   const [usersList, setUsersList] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -135,7 +137,9 @@ export default function PetugasPage() {
         });
         const json = await res.json();
         if (!json.success) throw new Error(json.error?.message || 'Gagal menyimpan perubahan');
-        setSuccessMsg('Data pengguna berhasil diperbarui.');
+        const msg = 'Data pengguna berhasil diperbarui.';
+        toast.success('Berhasil', msg);
+        setSuccessMsg(msg);
       } else {
         if (!form.username.trim()) throw new Error('Username wajib diisi');
         if (!form.pin.trim()) throw new Error('PIN wajib diisi');
@@ -152,12 +156,16 @@ export default function PetugasPage() {
         });
         const json = await res.json();
         if (!json.success) throw new Error(json.error?.message || 'Gagal menambah pengguna');
-        setSuccessMsg('Pengguna baru berhasil ditambahkan.');
+        const msg = 'Pengguna baru berhasil ditambahkan.';
+        toast.success('Pengguna Ditambahkan', msg);
+        setSuccessMsg(msg);
       }
       setShowModal(false);
       fetchUsers();
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan');
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan';
+      toast.error('Gagal Menyimpan', msg);
+      setErrorMsg(msg);
     } finally {
       setSaving(false);
     }
@@ -166,17 +174,22 @@ export default function PetugasPage() {
   const handleToggleActive = async (u: User) => {
     try {
       setErrorMsg('');
+      const isAktif = u.Aktif === true || u.Aktif === 'true' || u.Aktif === 'TRUE';
       const res = await fetch(`/api/users/${u.User_ID}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ aktif: !(u.Aktif === true || u.Aktif === 'true' || u.Aktif === 'TRUE') }),
+        body: JSON.stringify({ aktif: !isAktif }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error?.message || 'Gagal mengubah status');
-      setSuccessMsg(`Pengguna ${u.Username} ${u.Aktif ? 'dinonaktifkan' : 'diaktifkan'}.`);
+      const msg = `Pengguna ${u.Username} ${isAktif ? 'dinonaktifkan' : 'diaktifkan'}.`;
+      toast.info('Status Pengguna', msg);
+      setSuccessMsg(msg);
       fetchUsers();
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengubah status');
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat mengubah status';
+      toast.error('Gagal Mengubah Status', msg);
+      setErrorMsg(msg);
     }
   };
 
@@ -188,11 +201,15 @@ export default function PetugasPage() {
       const res = await fetch(`/api/users/${deleteTarget.User_ID}`, { method: 'DELETE' });
       const json = await res.json();
       if (!json.success) throw new Error(json.error?.message || 'Gagal menghapus pengguna');
-      setSuccessMsg(`Pengguna ${deleteTarget.Username} berhasil dihapus.`);
+      const msg = `Pengguna ${deleteTarget.Username} berhasil dihapus.`;
+      toast.success('Pengguna Dihapus', msg);
+      setSuccessMsg(msg);
       setDeleteTarget(null);
       fetchUsers();
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus');
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus';
+      toast.error('Gagal Menghapus', msg);
+      setErrorMsg(msg);
       setDeleteTarget(null);
     } finally {
       setDeleting(false);

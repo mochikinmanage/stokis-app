@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { CabangProvider } from '@/lib/CabangContext';
 import { AuthProvider } from '@/lib/AuthContext';
+import { ToastProvider } from '@/lib/ToastContext';
 import { TourProvider } from '@/lib/TourContext';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { AuthGuard } from '@/components/AuthGuard';
@@ -13,6 +14,13 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+  weight: ['600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -30,26 +38,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={inter.variable}>
+      <html lang="id" className={`${inter.variable} ${jakarta.variable}`}>
       <body data-theme="stokis" className="min-h-screen flex flex-col antialiased bg-base-200 text-base-content">
         <AuthProvider>
           <CabangProvider>
-            <LanguageProvider>
-              <AuthGuard>
-                <TourProvider>
-                  <a
-                    href="#main-content"
-                    className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-content focus:text-sm font-semibold"
-                  >
-                    Lewati ke konten utama
-                  </a>
-                  <Navbar />
-                  <main id="main-content" className="flex-1 w-full overflow-x-clip">
-                    <PageTransition>{children}</PageTransition>
-                  </main>
-                </TourProvider>
-              </AuthGuard>
-            </LanguageProvider>
+            <ToastProvider>
+              <LanguageProvider>
+                <AuthGuard>
+                  <TourProvider>
+                    <a
+                      href="#main-content"
+                      className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-content focus:text-sm font-semibold"
+                    >
+                      Lewati ke konten utama
+                    </a>
+                    <Navbar />
+                    <main id="main-content" className="flex-1 w-full overflow-x-clip">
+                      <PageTransition>{children}</PageTransition>
+                    </main>
+                  </TourProvider>
+                </AuthGuard>
+              </LanguageProvider>
+            </ToastProvider>
           </CabangProvider>
         </AuthProvider>
       </body>

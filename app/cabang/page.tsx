@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
+import { useToast } from '@/lib/ToastContext';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import {
   Building2,
@@ -32,6 +33,7 @@ interface CabangFull {
 
 export default function CabangAdminPage() {
   const { refreshCabangList } = useCabang();
+  const { toast } = useToast();
 
   const [cabangList, setCabangList] = useState<CabangFull[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -104,11 +106,14 @@ export default function CabangAdminPage() {
         });
         const json = await res.json();
         if (json.success) {
+          toast.success('Berhasil', `Data cabang "${namaCabang}" berhasil diperbarui.`);
           setShowModal(false);
           fetchAllCabang();
           refreshCabangList();
         } else {
-          setErrorMsg(json.error?.message || 'Gagal mengubah data cabang');
+          const msg = json.error?.message || 'Gagal mengubah data cabang';
+          toast.error('Gagal Mengubah Cabang', msg);
+          setErrorMsg(msg);
         }
       } else {
         const res = await fetch('/api/cabang', {
@@ -123,16 +128,22 @@ export default function CabangAdminPage() {
         });
         const json = await res.json();
         if (json.success) {
-          setSuccessInfo(`Cabang "${namaCabang}" berhasil dibuat secara otomatis dengan spreadsheet Google Sheets dan folder Drive baru.`);
+          const msg = `Cabang "${namaCabang}" berhasil dibuat secara otomatis dengan spreadsheet Google Sheets dan folder Drive baru.`;
+          toast.success('Cabang Berhasil Dibuat', msg);
+          setSuccessInfo(msg);
           setShowModal(false);
           fetchAllCabang();
           refreshCabangList();
         } else {
-          setErrorMsg(json.error?.message || 'Gagal membuat cabang baru');
+          const msg = json.error?.message || 'Gagal membuat cabang baru';
+          toast.error('Gagal Membuat Cabang', msg);
+          setErrorMsg(msg);
         }
       }
     } catch (err: any) {
-      setErrorMsg('Error: ' + err.message);
+      const msg = 'Error: ' + err.message;
+      toast.error('Gagal Menyimpan Cabang', msg);
+      setErrorMsg(msg);
     } finally {
       setSaving(false);
     }
@@ -145,10 +156,13 @@ export default function CabangAdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ aktif: !c.Aktif }),
       });
+      toast.info('Status Cabang Diperbarui', `Status cabang "${c.Nama_Cabang}" diubah menjadi ${!c.Aktif ? 'Aktif' : 'Nonaktif'}.`);
       fetchAllCabang();
       refreshCabangList();
     } catch (err: any) {
-      setErrorMsg('Error: ' + err.message);
+      const msg = 'Error: ' + err.message;
+      toast.error('Gagal Mengubah Status', msg);
+      setErrorMsg(msg);
     }
   };
 
