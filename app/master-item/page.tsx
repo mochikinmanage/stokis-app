@@ -638,6 +638,15 @@ export default function MasterItemPage() {
                   <PlusCircle className="w-3.5 h-3.5" />
                   Tambah Item
                 </button>
+                {isAdmin && !isEditing && (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="btn btn-sm gap-1.5 text-base-content/60 bg-base-100 border border-base-300 hover:bg-base-200 transition-all"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    Ubah
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1034,16 +1043,34 @@ export default function MasterItemPage() {
         <header className="sticky top-0 z-40 bg-base-100 border-b border-base-300">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between mb-2">
-              <div>
-                <h1 data-onboard="master-heading" className="text-base font-bold text-base-content">Master Item</h1>
-                <p className="text-[10px] text-base-content/40">{activeItemCount} aktif / {items.length} total</p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => window.history.back()}
+                  className="p-1.5 -ml-1.5 rounded-lg hover:bg-base-200 transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5 text-base-content/60" />
+                </button>
+                <div>
+                  <h1 data-onboard="master-heading" className="text-base font-bold text-base-content">Master Item</h1>
+                  <p className="text-[10px] text-base-content/40">{activeItemCount} aktif / {items.length} total</p>
+                </div>
               </div>
-              <button
-                onClick={() => setShowModal(true)}
-                className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20"
-              >
-                <PlusCircle className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                {isAdmin && !isEditing && (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="p-2 rounded-lg bg-base-200 text-base-content/60 border border-base-300"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             {/* Search */}
             <div className="relative">
