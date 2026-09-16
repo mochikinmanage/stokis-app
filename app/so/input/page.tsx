@@ -554,6 +554,7 @@ export default function InputSOPage() {
   const itemsSectionRef = useRef<HTMLDivElement>(null);
 
   const [lastEditedItemId, setLastEditedItemId] = useState<string | null>(null);
+  const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
 
   // Filter & Search State
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -730,6 +731,26 @@ export default function InputSOPage() {
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [hasDirtyData]);
+
+  // Track if user is at bottom of items section (for submit button visibility)
+  useEffect(() => {
+    const container = itemsSectionRef.current;
+    if (!container) return;
+
+    const checkIfAtBottom = () => {
+      const rect = container.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      // Show submit when items section bottom is within 200px of viewport bottom
+      const distanceFromBottom = rect.bottom - viewportHeight;
+      setIsAtBottom(distanceFromBottom < 200);
+    };
+
+    window.addEventListener('scroll', checkIfAtBottom, { passive: true });
+    // Check initially
+    checkIfAtBottom();
+
+    return () => window.removeEventListener('scroll', checkIfAtBottom);
+  }, [items.length]);
 
   // Choose which previous SO session to use as reference (dropdown)
   const handleSelectPrevious = (index: number) => {
@@ -1505,35 +1526,37 @@ export default function InputSOPage() {
           />
         </div>
 
-        {/* Floating Action Bar */}
-        <div data-onboard="so-submit" className="card bg-base-100 border border-base-300 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md sticky bottom-24 md:bottom-4 z-30 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <div className="space-y-0.5">
-            <span className="text-xs font-medium text-base-content/60">
-              Selesaikan sesi pencatatan
-            </span>
-            <p className="text-sm font-semibold text-base-content">
-              Laporan XLSX akan dibuat & link Drive siap dibagikan
-            </p>
-          </div>
+        {/* Floating Action Bar — only show when at bottom of items */}
+        {isAtBottom && (
+          <div data-onboard="so-submit" className="card bg-base-100 border border-base-300 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md sticky bottom-24 md:bottom-4 z-30 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="space-y-0.5">
+              <span className="text-xs font-medium text-base-content/60">
+                Selesaikan sesi pencatatan
+              </span>
+              <p className="text-sm font-semibold text-base-content">
+                Laporan XLSX akan dibuat & link Drive siap dibagikan
+              </p>
+            </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="btn btn-primary px-6 py-3 flex items-center justify-center gap-2 w-full sm:w-auto min-h-[44px]"
-          >
-            {submitting ? (
-              <>
-                <QuantumLoaderMini />
-                <span>Memproses...</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                <span>Simpan & Buat Laporan</span>
-              </>
-            )}
-          </button>
-        </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn btn-primary px-6 py-3 flex items-center justify-center gap-2 w-full sm:w-auto min-h-[44px]"
+            >
+              {submitting ? (
+                <>
+                  <QuantumLoaderMini />
+                  <span>Memproses...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>Simpan & Buat Laporan</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </form>
 
       {/* Floating navigation rail — mobile: bottom-right horizontal; desktop: right-side vertical */}
