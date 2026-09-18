@@ -245,6 +245,57 @@ export default function DashboardMingguanPage() {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.22 }}
+        className="card bg-base-100 border border-base-300 overflow-hidden"
+      >
+        <div className="px-5 py-4 border-b border-base-300">
+          <h3 className="font-semibold text-sm">Analisis Perubahan per Item</h3>
+          <p className="text-xs text-base-content/50 mt-1">
+            Nilai negatif berarti total stok berkurang (indikasi pemakaian). Nilai positif berarti stok bertambah.
+          </p>
+        </div>
+        {data?.analisisPemakaian?.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-base-200 text-xs text-base-content/60">
+                <tr>
+                  <th className="px-4 py-3 text-left">Item</th>
+                  <th className="px-4 py-3 text-left">Area</th>
+                  <th className="px-4 py-3 text-right">Perubahan Total</th>
+                  <th className="px-4 py-3 text-right">Rata-rata</th>
+                  <th className="px-4 py-3 text-right">Catatan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.analisisPemakaian.map((item: { itemId: string; nama: string; area: string; satuan: string; total: number; rataRata: number; tercatat: number; status: string }) => (
+                  <tr key={item.itemId} className="border-t border-base-200">
+                    <td className="px-4 py-3">
+                      <div className="font-medium">{item.nama}</div>
+                      <div className="text-[11px] text-base-content/50">{item.itemId}</div>
+                    </td>
+                    <td className="px-4 py-3 text-base-content/60">{item.area}</td>
+                    <td className={`px-4 py-3 text-right font-bold tabular-nums ${item.total < 0 ? 'text-error' : item.total > 0 ? 'text-success' : 'text-base-content/50'}`}>
+                      {item.total > 0 ? '+' : ''}{item.total} {item.satuan}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums text-base-content/70">
+                      {item.rataRata.toFixed(1)} {item.satuan}
+                    </td>
+                    <td className="px-4 py-3 text-right text-xs text-base-content/50">{item.tercatat}x · {item.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="p-5 text-sm text-base-content/50">
+            Belum ada data pemakaian pada periode ini. Data muncul setelah laporan memiliki perbandingan SO sebelumnya.
+          </p>
+        )}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: 0.05 }}
         className="grid grid-cols-2 sm:grid-cols-4 gap-3"
       >

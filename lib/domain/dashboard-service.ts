@@ -58,6 +58,10 @@ export async function getDashboardMingguan(
     const t = fmtDate(r['Tanggal_Operasional']);
     return (!dari || t >= dari) && (!sampai || t <= sampai);
   });
+  const laporanRows = (await readAllRows(spreadsheetId, 'Laporan_SO')).filter((r) => {
+    const t = fmtDate(r['Tanggal_Operasional']);
+    return (!dari || t >= dari) && (!sampai || t <= sampai);
+  });
 
   const trenPerHari: Record<string, { total: number; kritis: number; hampirHabis: number; aman: number }> = {};
   let kritis = 0;
@@ -98,6 +102,30 @@ export async function getDashboardMingguan(
     .filter((item) => item.perubahan !== 0)
     .sort((a, b) => Math.abs(b.perubahan) - Math.abs(a.perubahan))
     .slice(0, 10);
+  const penggunaanMap = new Map<string, { nama: string; area: string; satuan: string; total: number; tercatat: number }>();
+  laporanRows.forEach((row) => {
+    const itemId = String(row['Item_ID'] || '');
+    if (!itemId) return;
+    const usageValue = Number(row['Penggunaan']);
+    if (!Number.isFinite(usageValue)) return;
+    const existing = penggunaanMap.get(itemId);
+    penggunaanMap.set(itemId, {
+      nama: String(row['Nama_Barang'] || itemId),
+      area: String(row['Area'] || '-'),
+      satuan: String(row['Satuan'] || ''),
+      total: (existing?.total || 0) + usageValue,
+      tercatat: (existing?.tercatat || 0) + 1,
+    });
+  });
+  const analisisPemakaian = [...penggunaanMap.entries()]
+    .map(([itemId, item]) => ({
+      itemId,
+      ...item,
+      rataRata: item.total / item.tercatat,
+      status: item.total < 0 ? 'Berkurang' : item.total > 0 ? 'Bertambah' : 'Tetap',
+    }))
+    .sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
+    .slice(0, 20);
   return {
     dari,
     sampai,
@@ -107,6 +135,7 @@ export async function getDashboardMingguan(
     hampirHabis,
     aman,
     perubahanTerbesar,
+    analisisPemakaian,
     trenPerHari,
   };
 }
