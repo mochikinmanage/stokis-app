@@ -86,8 +86,11 @@ export function LaporanReportView({ view, variant, laporanId, cabangId }: Lapora
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   const areaChips = useMemo(
-    () => areaGroups.map((ag) => ({ area: ag.area, count: ag.items.length })),
-    [areaGroups]
+    () => areaGroups.map((ag) => ({
+      area: ag.area,
+      count: query.trim() ? ag.items.filter((it) => matchesQuery(it, query)).length : ag.items.length,
+    })),
+    [areaGroups, query]
   );
 
   const displayAreas = useMemo(
@@ -148,6 +151,11 @@ export function LaporanReportView({ view, variant, laporanId, cabangId }: Lapora
               </button>
             ) : null}
           </label>
+          {searching ? (
+            <p className="text-[11px] text-base-content/50 px-1">
+              Menampilkan jumlah item yang cocok dengan pencarian.
+            </p>
+          ) : null}
           <AreaFilterRail
             areas={areaChips}
             total={view.allItems.length}
@@ -160,7 +168,7 @@ export function LaporanReportView({ view, variant, laporanId, cabangId }: Lapora
       <div className="flex items-center justify-between px-1 text-base-content/50 md:hidden no-print">
         <div className="flex items-center gap-1 text-[11px] font-semibold">
           <MoveHorizontal className="w-3.5 h-3.5 text-primary" />
-          <span>Geser tabel ke samping • Kolom Item &amp; Satuan dibekukan</span>
+          <span>Geser tabel ke samping • Item &amp; satuan tetap terlihat</span>
         </div>
       </div>
 

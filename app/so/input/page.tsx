@@ -1174,6 +1174,13 @@ export default function InputSOPage() {
         }}
         className="space-y-6 max-w-5xl mx-auto px-4 py-6 pb-24 md:pb-6"
       >
+        {errorMsg ? (
+          <div role="alert" className="alert alert-error text-sm whitespace-pre-line">
+            <AlertTriangle className="w-5 h-5 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        ) : null}
+
         {/* Draft restore banner - hidden since we now use modal */}
 
         {/* Session Metadata Card */}

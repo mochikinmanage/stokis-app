@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, assertCabangAccess } from '@/lib/auth';
 import { ApiError } from '@/lib/domain/errors';
-import { getLaporanDetail } from '@/lib/domain/laporan-service';
+import { canEditLaporan, getLaporanById, getLaporanDetail } from '@/lib/domain/laporan-service';
 import { getMasterItems } from '@/lib/domain/master-item-service';
 
 export const GET = withAuth(async (req: NextRequest, { params }, session) => {
@@ -22,6 +22,19 @@ export const GET = withAuth(async (req: NextRequest, { params }, session) => {
   if (guard) return guard;
 
   try {
+    const laporan = await getLaporanById(cabangId, laporanId);
+    if (!laporan) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Laporan tidak ditemukan' } },
+        { status: 404 }
+      );
+    }
+    if (!canEditLaporan(session, laporan.Petugas)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'FORBIDDEN', message: 'Laporan hanya dapat diedit oleh petugas pembuat SO atau admin' } },
+        { status: 403 }
+      );
+    }
     const rows = await getLaporanDetail(cabangId, laporanId);
     const masterItems = await getMasterItems(cabangId);
     const tipeInputMap = new Map<string, string>();

@@ -178,7 +178,7 @@ function MarketingLanding() {
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-base-content truncate">
+                        <div className="font-medium text-base-content whitespace-normal break-words">
                           {item.name}
                         </div>
                         <div className="text-base-content/40">{item.area}</div>
@@ -884,7 +884,7 @@ function UserHome() {
                     <Clock className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm text-base-content truncate">
+                    <div className="font-semibold text-sm text-base-content whitespace-normal break-words">
                       {l.Petugas || "Petugas"}
                     </div>
                     <div className="text-xs text-base-content/60 flex items-center gap-1.5">
@@ -925,4 +925,3 @@ function UserHome() {
     </div>
   );
 }
-

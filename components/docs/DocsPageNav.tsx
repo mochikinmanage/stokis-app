@@ -31,7 +31,7 @@ export function DocsPageNav({ prev, next }: DocsPageNavProps) {
             <p className="text-xs font-medium uppercase tracking-wider text-base-content/30 mb-0.5">
               {lang === "en" ? "Previous" : "Sebelumnya"}
             </p>
-            <p className="text-xs font-semibold text-base-content/70 group-hover:text-primary truncate transition-colors">
+            <p className="text-xs font-semibold text-base-content/70 group-hover:text-primary whitespace-normal break-words transition-colors">
               {lang === "en" && prev.labelEn ? prev.labelEn : prev.label}
             </p>
           </div>
@@ -48,7 +48,7 @@ export function DocsPageNav({ prev, next }: DocsPageNavProps) {
             <p className="text-xs font-medium uppercase tracking-wider text-base-content/30 mb-0.5">
               {lang === "en" ? "Next" : "Selanjutnya"}
             </p>
-            <p className="text-xs font-semibold text-base-content/70 group-hover:text-primary truncate transition-colors">
+            <p className="text-xs font-semibold text-base-content/70 group-hover:text-primary whitespace-normal break-words transition-colors">
               {lang === "en" && next.labelEn ? next.labelEn : next.label}
             </p>
           </div>

@@ -28,6 +28,17 @@ interface LaporanItem {
   Tgl_Kedaluwarsa: string;
 }
 
+interface EditLog {
+  Timestamp: string;
+  Item_ID: string;
+  Field: string;
+  Old_Value: string;
+  New_Value: string;
+  Username: string;
+  Nama: string;
+  Role: string;
+}
+
 export default function EditLaporanPage({ params }: { params: Promise<{ laporanId: string }> }) {
   const { laporanId } = use(params);
   const router = useRouter();
@@ -45,6 +56,7 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
   } | null>(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [isNewFile, setIsNewFile] = useState(false);
+  const [editLogs, setEditLogs] = useState<EditLog[]>([]);
 
   // Group items by area
   const groupedItems = items.reduce((acc, it) => {
@@ -86,6 +98,15 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
         setError('Gagal memuat detail laporan');
       })
       .finally(() => setLoading(false));
+
+    fetch(`/api/laporan/${laporanId}/edit?cabang=${selectedCabang.Cabang_ID}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data)) setEditLogs(json.data);
+      })
+      .catch(() => {
+        // Riwayat bersifat informatif; tidak menghalangi pengeditan.
+      });
   }, [selectedCabang?.Cabang_ID, laporanId]);
 
   const handleCountChange = (itemId: string, field: 'Step1' | 'Step2' | 'Keterangan', value: string) => {
@@ -146,6 +167,13 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
       if (json.success) {
         toast.success('Berhasil', 'Laporan berhasil diperbarui. File XLSX telah diperbarui.');
         setSuccessMsg('Laporan berhasil diperbarui. File XLSX telah diperbarui.');
+        try {
+          const logsRes = await fetch(`/api/laporan/${laporanId}/edit?cabang=${selectedCabang.Cabang_ID}`);
+          const logsJson = await logsRes.json();
+          if (logsJson.success && Array.isArray(logsJson.data)) setEditLogs(logsJson.data);
+        } catch {
+          // Penyegaran riwayat tidak boleh membatalkan status simpan.
+        }
         if (json.data?.isNewFile) {
           setIsNewFile(true);
         }
@@ -249,6 +277,55 @@ export default function EditLaporanPage({ params }: { params: Promise<{ laporanI
           )}
         </div>
       )}
+
+      <div className="card bg-base-100 border border-base-300 mb-6">
+            <div className="card-body p-4 gap-2">
+              <div>
+                <h2 className="font-semibold text-sm">Riwayat Perubahan</h2>
+                <p className="text-xs text-base-content/50">
+                  Catatan ini membantu evaluasi perubahan laporan.
+                </p>
+              </div>
+              {editLogs.length === 0 ? (
+                <p className="text-xs text-base-content/50">Belum ada perubahan yang tercatat.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="table table-sm text-xs">
+                    <thead>
+                      <tr>
+                        <th>Waktu</th>
+                        <th>Pelaku</th>
+                        <th>Item / Field</th>
+                        <th>Perubahan</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {editLogs.map((log, index) => (
+                        <tr key={`${log.Timestamp}-${log.Item_ID}-${log.Field}-${index}`}>
+                          <td className="whitespace-normal">
+                            {new Date(log.Timestamp).toLocaleString('id-ID')}
+                          </td>
+                          <td className="whitespace-normal">
+                            <div className="font-medium">{log.Nama || log.Username || '-'}</div>
+                            <div className="text-base-content/50">{log.Role || '-'}</div>
+                          </td>
+                          <td className="whitespace-normal break-words">
+                            <div className="font-medium">{log.Item_ID || '-'}</div>
+                            <div className="text-base-content/50">{log.Field}</div>
+                          </td>
+                          <td className="whitespace-normal break-words">
+                            <span className="text-error">{log.Old_Value || '(kosong)'}</span>
+                            <span className="mx-1 text-base-content/40">→</span>
+                            <span className="text-success">{log.New_Value || '(kosong)'}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+      </div>
 
       {/* Items by Area */}
       <div className="space-y-6">

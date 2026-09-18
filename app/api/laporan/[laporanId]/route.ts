@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, assertCabangAccess } from '@/lib/auth';
 import { ApiError } from '@/lib/domain/errors';
-import { getLaporanById } from '@/lib/domain/laporan-service';
+import { canEditLaporan, getLaporanById } from '@/lib/domain/laporan-service';
 
 export const GET = withAuth(async (req: NextRequest, { params }, session) => {
   const { laporanId } = await params;
@@ -25,6 +25,12 @@ export const GET = withAuth(async (req: NextRequest, { params }, session) => {
       return NextResponse.json(
         { success: false, error: { code: 'NOT_FOUND', message: 'Laporan ' + laporanId + ' tidak ditemukan' } },
         { status: 404 }
+      );
+    }
+    if (!canEditLaporan(session, laporan.Petugas)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'FORBIDDEN', message: 'Laporan hanya dapat diedit oleh petugas pembuat SO atau admin' } },
+        { status: 403 }
       );
     }
     return NextResponse.json({ success: true, data: laporan });

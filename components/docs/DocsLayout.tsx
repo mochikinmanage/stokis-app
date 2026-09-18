@@ -29,7 +29,7 @@ function Breadcrumb({ pathname }: { pathname: string }) {
           <span key={i} className="flex items-center gap-1 min-w-0">
             {!isLast && <ChevronRight className="w-3 h-3 text-base-content/20 flex-shrink-0" />}
             <span
-              className={`truncate ${
+              className={`whitespace-normal break-words ${
                 isLast
                   ? "text-base-content/70 font-semibold"
                   : "text-base-content/40"

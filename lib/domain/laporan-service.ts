@@ -423,6 +423,57 @@ export async function logLaporanEdit(
   ]]);
 }
 
+export interface LaporanEditLog {
+  Timestamp: string;
+  Laporan_ID: string;
+  Item_ID: string;
+  Field: string;
+  Old_Value: string;
+  New_Value: string;
+  Username: string;
+  Nama: string;
+  Role: string;
+}
+
+export function canEditLaporan(
+  session: { role: string; username?: string; nama?: string },
+  petugas: unknown
+): boolean {
+  if (session.role === 'admin') return true;
+  const owner = String(petugas || '').trim().toLowerCase();
+  if (!owner) return false;
+  return [session.nama, session.username]
+    .filter(Boolean)
+    .some((value) => String(value).trim().toLowerCase() === owner);
+}
+
+export async function getLaporanEditLogs(
+  cabangId: string,
+  laporanId: string
+): Promise<LaporanEditLog[]> {
+  const { spreadsheetId } = await resolveCabang(cabangId);
+  try {
+    const { headers, rows } = await readSheetData(spreadsheetId, 'Laporan_Edit_Log');
+    return sheetToObjects(headers, rows)
+      .filter((row) => String(row['Laporan_ID'] || '') === laporanId)
+      .map((row) => ({
+        Timestamp: String(row['Timestamp'] || ''),
+        Laporan_ID: String(row['Laporan_ID'] || ''),
+        Item_ID: String(row['Item_ID'] || ''),
+        Field: String(row['Field'] || ''),
+        Old_Value: String(row['Old_Value'] || ''),
+        New_Value: String(row['New_Value'] || ''),
+        Username: String(row['Username'] || ''),
+        Nama: String(row['Nama'] || ''),
+        Role: String(row['Role'] || ''),
+      }))
+      .reverse();
+  } catch {
+    // Laporan lama mungkin belum memiliki sheet audit.
+    return [];
+  }
+}
+
 export interface SesiLiveExtra {
   note: string;
   byItemId: Record<string, { statusIsi?: 'Penuh' | 'Dipakai' | 'Habis' | ''; tglRefill?: string; tglPakai?: string }>;

@@ -15,6 +15,8 @@ import {
   laporanDetailCol,
   ensureLaporanDetailSheet,
   logLaporanEdit,
+  getLaporanEditLogs,
+  canEditLaporan,
 } from '@/lib/domain/laporan-service';
 import { getMasterItems } from '@/lib/domain/master-item-service';
 import { generateXlsxReport, type XlsxItem } from '@/lib/domain/xlsx-report';
@@ -26,6 +28,33 @@ function cellOf(field: string, rowNumber: number): string | null {
   if (col === null) return null;
   return `${LAPORAN_DETAIL_SHEET}!${columnIndexToLetter(col - 1)}${rowNumber}`;
 }
+
+export const GET = withAuth(async (req: NextRequest, { params }, session) => {
+  const { laporanId } = await params;
+  const cabangId = req.nextUrl.searchParams.get('cabang') || '';
+  if (!cabangId) {
+    return NextResponse.json(
+      { success: false, error: { code: 'CABANG_REQUIRED', message: 'Parameter cabang wajib disertakan' } },
+      { status: 400 }
+    );
+  }
+  const guard = assertCabangAccess(session, cabangId);
+  if (guard) return guard;
+  const laporan = await getLaporanById(cabangId, laporanId);
+  if (!laporan) {
+    return NextResponse.json(
+      { success: false, error: { code: 'NOT_FOUND', message: 'Laporan tidak ditemukan' } },
+      { status: 404 }
+    );
+  }
+  if (!canEditLaporan(session, laporan.Petugas)) {
+    return NextResponse.json(
+      { success: false, error: { code: 'FORBIDDEN', message: 'Anda hanya dapat melihat riwayat edit laporan milik Anda sendiri' } },
+      { status: 403 }
+    );
+  }
+  return NextResponse.json({ success: true, data: await getLaporanEditLogs(cabangId, laporanId) });
+});
 
 export const POST = withAuth(async (req: NextRequest, { params }, session) => {
   const { laporanId } = await params;
@@ -62,6 +91,12 @@ export const POST = withAuth(async (req: NextRequest, { params }, session) => {
   const laporan = await getLaporanById(cabangId, laporanId);
   if (!laporan) {
     return NextResponse.json({ success: false, error: { code: 'NOT_FOUND' } }, { status: 404 });
+  }
+  if (!canEditLaporan(session, laporan.Petugas)) {
+    return NextResponse.json(
+      { success: false, error: { code: 'FORBIDDEN', message: 'Laporan hanya dapat diedit oleh petugas pembuat SO atau admin' } },
+      { status: 403 }
+    );
   }
 
   const sesiId = String(laporan['Sesi_ID'] || '');

@@ -62,7 +62,7 @@ const SQUARE_ACTION_STYLES: Record<SquareActionColor, string> = {
 };
 
 function SquareAction({ href, target, onClick, disabled, loading, title, label, icon, color = 'primary' }: SquareActionProps) {
-  const classes = `btn btn-xs flex-col gap-0.5 h-11 min-w-[52px] px-1.5 rounded-lg border font-semibold transition-colors ${SQUARE_ACTION_STYLES[color]} disabled:opacity-60 disabled:cursor-not-allowed ${loading ? 'pointer-events-none' : ''}`;
+  const classes = `btn btn-xs flex-row gap-1 h-9 min-w-0 w-full px-1.5 rounded-md border font-semibold transition-colors ${SQUARE_ACTION_STYLES[color]} disabled:opacity-60 disabled:cursor-not-allowed ${loading ? 'pointer-events-none' : ''}`;
 
   const inner = (
     <>
@@ -100,7 +100,7 @@ function formatWaktuDibuat(value: string): string {
 
 export default function LaporanPage() {
   const { selectedCabang } = useCabang();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
 
   const [laporanList, setLaporanList] = useState<LaporanItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -252,6 +252,19 @@ export default function LaporanPage() {
     }
   };
 
+  const hasFilters = Boolean(filterTanggal || filterShift || filterPetugas);
+  const clearFilters = () => {
+    setFilterTanggal('');
+    setFilterShift('');
+    setFilterPetugas('');
+    setDebouncedPetugas('');
+  };
+  const canEditRow = (row: LaporanItem) =>
+    isAdmin ||
+    [user?.nama, user?.username]
+      .filter(Boolean)
+      .some((value) => String(value).trim().toLowerCase() === String(row.Petugas || '').trim().toLowerCase());
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto px-4 py-6 pb-20 md:pb-6">
       <motion.div
@@ -332,49 +345,61 @@ export default function LaporanPage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: 0.05 }}
-          className="sticky top-16 z-40 card bg-base-100/95 backdrop-blur-md border border-base-300 shadow-md p-4 grid grid-cols-1 sm:grid-cols-3 gap-4"
+          className="sticky top-16 z-40 card bg-base-100/95 backdrop-blur-md border border-base-300 shadow-md p-4"
         >
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold flex items-center gap-1.5 text-base-content/60">
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Filter Tanggal</span>
-            </label>
-            <input
-              type="date"
-              value={filterTanggal}
-              onChange={(e) => setFilterTanggal(e.target.value)}
-              className="input input-bordered w-full min-h-[42px] text-sm"
-            />
-          </div>
+          <div className="flex flex-col lg:flex-row lg:items-end gap-3">
+            <div className="space-y-1.5 flex-1">
+              <label className="text-xs font-semibold flex items-center gap-1.5 text-base-content/60">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Filter Tanggal</span>
+              </label>
+              <input
+                type="date"
+                value={filterTanggal}
+                onChange={(e) => setFilterTanggal(e.target.value)}
+                className="input input-bordered w-full min-h-[42px] text-sm"
+              />
+            </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold flex items-center gap-1.5 text-base-content/60">
-              <Clock className="w-3.5 h-3.5" />
-              <span>Filter Shift</span>
-            </label>
-            <select
-              value={filterShift}
-              onChange={(e) => setFilterShift(e.target.value)}
-              className="select select-bordered w-full min-h-[42px] text-sm"
-            >
-              <option value="">Semua Shift</option>
-              <option value="Opening">Opening</option>
-              <option value="Closing">Closing</option>
-            </select>
-          </div>
+            <div className="space-y-1.5 flex-1">
+              <label className="text-xs font-semibold flex items-center gap-1.5 text-base-content/60">
+                <Clock className="w-3.5 h-3.5" />
+                <span>Filter Shift</span>
+              </label>
+              <select
+                value={filterShift}
+                onChange={(e) => setFilterShift(e.target.value)}
+                className="select select-bordered w-full min-h-[42px] text-sm"
+              >
+                <option value="">Semua Shift</option>
+                <option value="Opening">Opening</option>
+                <option value="Closing">Closing</option>
+              </select>
+            </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold flex items-center gap-1.5 text-base-content/60">
-              <User className="w-3.5 h-3.5" />
-              <span>Pencarian Petugas</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Ketik nama petugas..."
-              value={filterPetugas}
-              onChange={(e) => handlePetugasChange(e.target.value)}
-              className="input input-bordered w-full min-h-[42px] text-sm"
-            />
+            <div className="space-y-1.5 flex-[1.5]">
+              <label className="text-xs font-semibold flex items-center gap-1.5 text-base-content/60">
+                <User className="w-3.5 h-3.5" />
+                <span>Pencarian Petugas</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Ketik nama petugas..."
+                value={filterPetugas}
+                onChange={(e) => handlePetugasChange(e.target.value)}
+                className="input input-bordered w-full min-h-[42px] text-sm"
+              />
+            </div>
+
+            {hasFilters ? (
+              <button type="button" onClick={clearFilters} className="btn btn-ghost min-h-[42px] text-sm">
+                Reset filter
+              </button>
+            ) : null}
+          </div>
+          <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-base-200 text-xs text-base-content/50">
+            <span><strong className="text-base-content">{laporanList.length}</strong> laporan ditemukan</span>
+            {hasFilters ? <span>Filter aktif</span> : <span>Terbaru ditampilkan lebih dulu</span>}
           </div>
         </motion.div>
 
@@ -394,7 +419,7 @@ export default function LaporanPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm mobile-card-table">
+              <table className="w-full min-w-[920px] text-left text-sm mobile-card-table">
                 <thead className="bg-base-200 border-b border-base-300">
                   <tr className="font-semibold text-base-content/60">
                     <th className="px-5 py-3">ID Laporan</th>
@@ -416,23 +441,24 @@ export default function LaporanPage() {
                       transition={{ duration: 0.15 }}
                       className="transition-colors border-b border-base-300 hover:bg-base-200"
                     >
-                      <td className="px-5 py-4 font-mono font-medium text-base-content/60" data-label="ID">
+                      <td className="px-5 py-3 font-mono text-xs font-medium text-base-content/60 whitespace-normal break-all" data-label="ID">
                         {row.Laporan_ID}
                       </td>
-                      <td className="px-5 py-4" data-label="Tanggal">
-                        <span className="font-semibold tabular-nums text-base-content">{row.Tanggal_Operasional}</span>
-                        <span className="mx-1.5 text-base-content/30">&middot;</span>
-                        <span className="font-medium text-xs px-2 py-0.5 rounded-md bg-base-200 text-base-content/60 border border-base-300">
-                          {row.Shift}
-                        </span>
+                      <td className="px-5 py-3" data-label="Tanggal">
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="font-semibold tabular-nums text-base-content">{row.Tanggal_Operasional}</span>
+                          <span className="font-medium text-xs px-2 py-0.5 rounded-md bg-base-200 text-base-content/60 border border-base-300">
+                            {row.Shift}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-5 py-4 tabular-nums text-base-content/70" data-label="Waktu Dibuat">
+                      <td className="px-5 py-3 tabular-nums text-base-content/70 whitespace-normal" data-label="Waktu Dibuat">
                         {formatWaktuDibuat(row.Waktu_Dibuat)}
                       </td>
-                      <td className="px-5 py-4 font-medium text-base-content" data-label="Petugas">
+                      <td className="px-5 py-3 font-medium text-base-content whitespace-normal break-words" data-label="Petugas">
                         {row.Petugas}
                       </td>
-                      <td className="px-5 py-4 text-center font-bold tabular-nums" data-label="Kritis">
+                      <td className="px-5 py-3 text-center font-bold tabular-nums" data-label="Kritis">
                         {row.Jumlah_Kritis > 0 ? (
                           <span className="badge badge-error gap-1">
                             {row.Jumlah_Kritis}
@@ -441,7 +467,7 @@ export default function LaporanPage() {
                           <span className="text-base-content/30">0</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-center font-bold tabular-nums" data-label="Hampir Habis">
+                      <td className="px-5 py-3 text-center font-bold tabular-nums" data-label="Hampir Habis">
                         {row.Jumlah_Hampir_Habis > 0 ? (
                           <span className="badge badge-warning gap-1">
                             {row.Jumlah_Hampir_Habis}
@@ -450,13 +476,13 @@ export default function LaporanPage() {
                           <span className="text-base-content/30">0</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-center" data-label="WhatsApp">
+                      <td className="px-5 py-3 text-center" data-label="WhatsApp">
                         <span className={`badge ${row.Status_Kirim_WA === 'Sudah Dikirim' ? 'badge-success' : 'badge-ghost'}`}>
                           {row.Status_Kirim_WA || 'Belum'}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right" data-label="Aksi">
-                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                      <td className="px-5 py-3 text-right align-middle" data-label="Aksi">
+                        <div className="grid grid-cols-3 gap-1 min-w-[168px] max-w-[180px] ml-auto">
                           <SquareAction
                             href={`/laporan/${row.Laporan_ID}`}
                             title="Lihat isi laporan langsung di aplikasi"
@@ -484,13 +510,15 @@ export default function LaporanPage() {
                               icon={<FileDown className="w-4 h-4" />}
                             />
                           )}
-                          <SquareAction
-                            href={`/laporan/${row.Laporan_ID}/edit`}
-                            title="Edit Laporan"
-                            label="Edit"
-                            color="warning"
-                            icon={<Pencil className="w-4 h-4" />}
-                          />
+                          {canEditRow(row) ? (
+                            <SquareAction
+                              href={`/laporan/${row.Laporan_ID}/edit`}
+                              title="Edit Laporan"
+                              label="Edit"
+                              color="warning"
+                              icon={<Pencil className="w-4 h-4" />}
+                            />
+                          ) : null}
                           <SquareAction
                             onClick={() => handleRegenerate(row)}
                             disabled={regeneratingId === row.Laporan_ID}

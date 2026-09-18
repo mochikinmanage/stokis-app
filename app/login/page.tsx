@@ -20,10 +20,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const usernameRef = useRef<HTMLInputElement | null>(null);
   const pinRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    if (!loading) pinRefs.current[0]?.focus();
+    if (!loading) usernameRef.current?.focus();
   }, [loading]);
 
   if (loading) {
@@ -98,6 +99,7 @@ export default function LoginPage() {
                 Username
               </label>
               <input
+                ref={usernameRef}
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -167,6 +169,8 @@ export default function LoginPage() {
                         pinRefs.current[nextIndex]?.focus();
                       }
                     }}
+                    aria-invalid={Boolean(error)}
+                    aria-describedby={error ? 'login-error' : undefined}
                     className={`w-11 h-12 text-center text-xl font-bold font-mono tabular-nums input input-bordered ${error ? 'border-error' : ''}`}
                   />
                 ))}
@@ -174,6 +178,11 @@ export default function LoginPage() {
               <p className="text-[10px] text-base-content/40 mt-2 text-center">
                 {pin.length}/{PIN_LENGTH} digit
               </p>
+              {error ? (
+                <p id="login-error" role="alert" className="text-xs text-error text-center mt-2">
+                  {error}
+                </p>
+              ) : null}
             </motion.div>
 
             <motion.button

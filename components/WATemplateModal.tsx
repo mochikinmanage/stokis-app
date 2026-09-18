@@ -111,7 +111,7 @@ ${activeViewLink}
             <div className="flex items-center gap-2 text-[10px] font-bold text-base-content/40 uppercase tracking-wider">
               <User className="w-3 h-3" /> Petugas
             </div>
-            <div className="px-3 py-2 min-h-[44px] flex items-center bg-base-200 rounded-lg text-sm font-semibold text-base-content truncate">{data.petugas}</div>
+            <div className="px-3 py-2 min-h-[44px] flex items-center bg-base-200 rounded-lg text-sm font-semibold text-base-content whitespace-normal break-words">{data.petugas}</div>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-[10px] font-bold text-base-content/40 uppercase tracking-wider">

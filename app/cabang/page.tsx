@@ -262,7 +262,7 @@ export default function CabangAdminPage() {
                       <div className="font-medium text-base-content">PIC: {c.PIC_Nama || 'Belum diatur'}</div>
                       <div className="mt-0.5">{c.Nomor_WA_Cabang || 'Belum diatur'}</div>
                     </td>
-                    <td className="px-5 py-4 text-base-content/60 max-w-xs truncate" data-label="Alamat">
+                    <td className="px-5 py-4 text-base-content/60 max-w-xs whitespace-normal break-words" data-label="Alamat">
                       {c.Alamat || 'Belum diatur'}
                     </td>
                     <td className="px-5 py-4 text-center space-x-2" data-label="Database">

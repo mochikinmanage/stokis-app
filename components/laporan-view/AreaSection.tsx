@@ -41,8 +41,8 @@ export function AreaSection({
             className={`w-5 h-5 text-primary shrink-0 transition-transform duration-200 md:hidden ${expanded ? 'rotate-90' : ''}`}
           />
           <div className="min-w-0">
-            <span className="font-display font-semibold text-sm">{area}</span>
-            <span className="ml-1.5 px-2 py-0.5 rounded-full bg-base-200 text-base-content/60 text-[10px] font-semibold">
+            <span className="font-display font-semibold text-sm whitespace-normal break-words">{area}</span>
+            <span className="ml-1.5 px-2 py-0.5 rounded-full bg-base-200 text-base-content/60 text-[10px] font-semibold whitespace-normal break-words">
               {typeBadge}
             </span>
           </div>

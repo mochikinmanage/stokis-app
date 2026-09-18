@@ -36,7 +36,7 @@ function FreezeTh({
   return (
     <th
       rowSpan={rowSpan}
-      className={`sticky z-30 py-2 bg-base-200 text-left ${compact ? 'px-1' : 'px-2'} ${extra || ''}`}
+      className={`sticky z-30 py-2 bg-base-200 text-left ${left === 0 ? 'lv-freeze-first' : 'lv-freeze-second'} ${compact ? 'px-1' : 'px-2'} ${extra || ''}`}
       style={{ left, minWidth: width, width, backgroundColor: 'var(--color-base-200)' }}
     >
       {children}
@@ -61,7 +61,7 @@ function FreezeTd({
 }) {
   return (
     <td
-      className={`sticky z-20 py-2 bg-base-100 ${compact ? 'px-1' : 'px-2'} ${extra || ''}`}
+      className={`sticky z-20 py-2 bg-base-100 ${left === 0 ? 'lv-freeze-first' : 'lv-freeze-second'} ${compact ? 'px-1' : 'px-2'} ${extra || ''}`}
       style={{ left, minWidth: width, width, backgroundColor: freezeBg(Boolean(selected)) }}
     >
       {children}
@@ -72,8 +72,8 @@ function FreezeTd({
 function ItemCell({ item }: { item: ViewItem }) {
   return (
     <>
-      <div className="font-semibold text-base-content whitespace-nowrap">{item.namaBarang}</div>
-      <div className="font-mono text-[10px] text-base-content/40">{item.itemId}</div>
+      <div className="font-semibold text-base-content whitespace-normal break-words">{item.namaBarang}</div>
+      <div className="font-mono text-[10px] text-base-content/40 whitespace-normal break-all">{item.itemId}</div>
     </>
   );
 }
@@ -132,7 +132,7 @@ function RegularRow({ item, type, selected, onSelect }: { item: ViewItem; type: 
       <td className="px-2 py-2 text-right tabular-nums font-display text-xs font-bold text-primary bg-primary/10">{displayNum(item.total)}</td>
       <PakaiCell value={item.penggunaan} />
       <td className="px-3 py-2 text-center"><StatusBadge item={item} /></td>
-      <td className="px-3 py-2 text-base-content/60 max-w-[160px] truncate" title={item.keterangan}>{item.keterangan || '-'}</td>
+      <td className="px-3 py-2 text-base-content/60 max-w-[240px] whitespace-normal break-words">{item.keterangan || '-'}</td>
     </tr>
   );
 }
@@ -149,7 +149,7 @@ function BooleanRow({ item, selected, onSelect }: { item: ViewItem } & RowSelect
       <td className="px-2.5 py-2 tabular-nums font-display text-xs">{item.tglRefillFormatted}</td>
       <td className="px-2.5 py-2 tabular-nums font-display text-xs">{item.tglPakaiFormatted}</td>
       <td className="px-3 py-2 text-center"><StatusBadge item={item} /></td>
-      <td className="px-3 py-2 text-base-content/60 max-w-[160px] truncate" title={item.keterangan}>{item.keterangan || '-'}</td>
+      <td className="px-3 py-2 text-base-content/60 max-w-[240px] whitespace-normal break-words">{item.keterangan || '-'}</td>
     </tr>
   );
 }
@@ -167,7 +167,7 @@ function DateRow({ item, selected, onSelect }: { item: ViewItem } & RowSelectPro
         {item.hariBerlalu != null ? `${item.hariBerlalu} Hari` : '-'}
       </td>
       <td className="px-3 py-2 text-center"><StatusBadge item={item} /></td>
-      <td className="px-3 py-2 text-base-content/60 max-w-[160px] truncate" title={item.keterangan}>{item.keterangan || '-'}</td>
+      <td className="px-3 py-2 text-base-content/60 max-w-[240px] whitespace-normal break-words">{item.keterangan || '-'}</td>
     </tr>
   );
 }
@@ -185,7 +185,7 @@ function ExpiryRow({ item, selected, onSelect }: { item: ViewItem } & RowSelectP
         {item.sisaHari != null ? item.sisaHari : '-'}
       </td>
       <td className="px-3 py-2 text-center"><StatusBadge item={item} /></td>
-      <td className="px-3 py-2 text-base-content/60 max-w-[160px] truncate" title={item.keterangan}>{item.keterangan || '-'}</td>
+      <td className="px-3 py-2 text-base-content/60 max-w-[240px] whitespace-normal break-words">{item.keterangan || '-'}</td>
     </tr>
   );
 }
@@ -220,7 +220,13 @@ function RegularHead() {
             SO Sekarang
           </div>
         </th>
-        <th rowSpan={2} className="px-2 py-2 text-center bg-base-200 min-w-[60px]">Pakai</th>
+        <th
+          rowSpan={2}
+          title="Perubahan stok: tanda + berarti bertambah, tanda − berarti berkurang"
+          className="px-2 py-2 text-center bg-base-200 min-w-[80px]"
+        >
+          Perubahan
+        </th>
         <th rowSpan={2} className="px-3 py-2 text-center bg-base-200 min-w-[70px]">Status</th>
         <th rowSpan={2} className="px-3 py-2 text-left bg-base-200 min-w-[100px]">Keterangan</th>
       </tr>
@@ -251,7 +257,7 @@ export function TypeTable({
 
   return (
     <div className="lv-table-wrap overflow-x-auto w-full relative">
-      <table className="w-full text-left text-xs whitespace-nowrap">
+      <table className="w-full text-left text-xs">
         {isRegular(type) ? (
           <>
             <RegularHead />

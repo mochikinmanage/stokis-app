@@ -130,6 +130,23 @@
    TABLE (Mobile Card Layout)
    ============================================= */
 @media (max-width: 639px) {
+  /*
+   * Report tables keep the first two columns visible while scrolling.
+   * Keep them compact on phones so the scrollable data area remains useful.
+   */
+  .lv-freeze-first {
+    left: 0 !important;
+    width: 96px !important;
+    min-width: 96px !important;
+    max-width: 96px !important;
+  }
+  .lv-freeze-second {
+    left: 96px !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+  }
+
   .mobile-card-table thead { display: none; }
   .mobile-card-table tbody {
     display: flex; flex-direction: column; gap: 8px; padding: 8px;

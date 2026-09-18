@@ -160,7 +160,7 @@ function TipeInputDropdown({
           <div className="px-3 py-2 border-b border-base-300">
             <p className="text-[10px] font-bold text-base-content/40 uppercase tracking-wider">Tipe Input</p>
             {itemName && (
-              <p className="text-xs text-base-content/60 mt-0.5 truncate">{itemName}</p>
+              <p className="text-xs text-base-content/60 mt-0.5 whitespace-normal break-words">{itemName}</p>
             )}
             {itemId && (
               <p className="text-[10px] text-base-content/30 font-mono">{itemId}</p>
@@ -1034,7 +1034,7 @@ export default function MasterItemPage() {
                                       className={`${INPUT_TEXT} h-8 text-xs`}
                                     />
                                   ) : (
-                                    <span className="inline-flex items-center text-xs text-base-content/40 max-w-[180px] truncate h-8 font-normal">
+                                    <span className="inline-flex items-center text-xs text-base-content/40 max-w-[240px] whitespace-normal break-words min-h-8 py-1 font-normal">
                                       {item.Keterangan || <span className="italic opacity-40">-</span>}
                                     </span>
                                   )}
@@ -1381,7 +1381,7 @@ export default function MasterItemPage() {
                                   {group.startIndex + idx + 1}
                                 </span>
                                 <div className="min-w-0">
-                                  <h3 className="text-sm font-semibold text-base-content truncate">{item.Nama_Barang}</h3>
+                                  <h3 className="text-sm font-semibold text-base-content whitespace-normal break-words">{item.Nama_Barang}</h3>
                                   <div className="flex items-center gap-1.5 mt-0.5">
                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold text-base-content/50 bg-base-200">{item.Area}</span>
                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold text-base-content/50 bg-base-200">{item.Satuan}</span>
@@ -1874,7 +1874,7 @@ export default function MasterItemPage() {
                 ) : (
                   <>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-base-content truncate">{k.Nama_Kategori}</p>
+                      <p className="text-sm font-medium text-base-content whitespace-normal break-words">{k.Nama_Kategori}</p>
                       <p className="text-xs text-base-content/40">{k.Kategori_ID}</p>
                     </div>
                     {!k.Aktif && (
