@@ -41,6 +41,7 @@ const bottomNavItems: NavItem[] = [
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
   { name: "Dashboard", nameEn: "Dashboard", href: "/dashboard/harian", icon: BarChart3, roles: ["admin"] },
+  { name: "Analytics", nameEn: "Analytics", href: "/dashboard/analytics", icon: BarChart3, roles: ["admin"] },
   { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
 ];
 
@@ -54,6 +55,7 @@ const moreMenuItems: NavItem[] = [
 
 const desktopCoreItems: NavItem[] = [
   { name: "Dashboard", nameEn: "Dashboard", href: "/dashboard/harian", icon: BarChart3, roles: ["admin"] },
+  { name: "Analytics", nameEn: "Analytics", href: "/dashboard/analytics", icon: BarChart3, roles: ["admin"] },
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
   { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },

@@ -162,6 +162,9 @@ export default function DashboardHarianPage() {
             <Link href="/dashboard/mingguan" className="text-base-content/60 hover:text-base-content px-3 py-1 rounded-lg transition-colors">
               Mingguan
             </Link>
+            <Link href="/dashboard/analytics" className="text-base-content/60 hover:text-base-content px-3 py-1 rounded-lg transition-colors">
+              Analytics
+            </Link>
           </div>
 
           <select
