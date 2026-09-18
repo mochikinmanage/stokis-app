@@ -15,6 +15,9 @@ import {
   AreaChartIcon,
   AlertCircle,
   RefreshCw,
+  Package,
+  AlertTriangle,
+  CheckCircle2,
 } from 'lucide-react';
 import {
   BarChart,
@@ -339,16 +342,22 @@ export default function DashboardMingguanPage() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: 0.05 }}
-        className="card bg-base-100 border border-base-300 p-6 flex items-center justify-between"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-3"
       >
-        <div className="space-y-1">
-          <span className="text-sm text-base-content/60 font-semibold">Total Item Terhitung pada Periode Ini</span>
-          <h2 className="text-3xl font-bold text-base-content tabular-nums">{data?.totalTransaksi ?? 0} Transaksi</h2>
-          <p className="text-sm text-base-content/60 tabular-nums">Periode: {formatDateShort(data?.dari || '')} hingga {formatDateShort(data?.sampai || '')}</p>
-        </div>
-        <div className="p-4 bg-primary/10 text-primary rounded-lg">
-          <Activity className="w-8 h-8" />
-        </div>
+        {[
+          { label: 'Total Transaksi', value: data?.totalTransaksi ?? 0, icon: Activity, tone: 'bg-primary/10 text-primary' },
+          { label: 'Item Unik', value: data?.totalItem ?? 0, icon: Package, tone: 'bg-info/10 text-info' },
+          { label: 'Kritis', value: data?.kritis ?? 0, icon: AlertTriangle, tone: 'bg-error/10 text-error' },
+          { label: 'Aman', value: data?.aman ?? 0, icon: CheckCircle2, tone: 'bg-success/10 text-success' },
+        ].map(({ label, value, icon: Icon, tone }) => (
+          <div key={label} className="card bg-base-100 border border-base-300 p-4">
+            <div className={`w-9 h-9 rounded-lg ${tone} flex items-center justify-center mb-2`}>
+              <Icon className="w-5 h-5" />
+            </div>
+            <span className="text-xs text-base-content/60 font-semibold">{label}</span>
+            <strong className="text-2xl tabular-nums">{value}</strong>
+          </div>
+        ))}
       </motion.div>
 
       <motion.div
@@ -373,6 +382,35 @@ export default function DashboardMingguanPage() {
             {renderChart()}
           </ResponsiveContainer>
         </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.2 }}
+        className="card bg-base-100 border border-base-300 p-5 space-y-3"
+      >
+        <div>
+          <h3 className="font-semibold text-sm">Perubahan Stok Terbesar</h3>
+          <p className="text-xs text-base-content/50">Perbandingan total awal dan akhir periode.</p>
+        </div>
+        {data?.perubahanTerbesar?.length ? (
+          <div className="space-y-2">
+            {data.perubahanTerbesar.map((item: { itemId: string; nama: string; perubahan: number; status: string }) => (
+              <div key={item.itemId} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-base-200/60">
+                <div className="min-w-0">
+                  <div className="font-medium text-sm break-words">{item.nama}</div>
+                  <div className="text-[11px] text-base-content/50">{item.itemId} · {item.status}</div>
+                </div>
+                <strong className={`tabular-nums shrink-0 ${item.perubahan > 0 ? 'text-success' : 'text-error'}`}>
+                  {item.perubahan > 0 ? '+' : ''}{item.perubahan}
+                </strong>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-base-content/50">Belum ada perubahan stok yang dapat dibandingkan.</p>
+        )}
       </motion.div>
 
       <motion.div

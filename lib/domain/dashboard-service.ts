@@ -60,6 +60,10 @@ export async function getDashboardMingguan(
   });
 
   const trenPerHari: Record<string, { total: number; kritis: number; hampirHabis: number; aman: number }> = {};
+  let kritis = 0;
+  let hampirHabis = 0;
+  let aman = 0;
+  const byItem = new Map<string, { nama: string; first: number; last: number; status: string }>();
   soRows.forEach((r) => {
     const t = fmtDate(r['Tanggal_Operasional']);
     if (!trenPerHari[t]) {
@@ -72,8 +76,37 @@ export async function getDashboardMingguan(
     const status = calculateStatus(total, Number(master['Threshold']) || 0);
     trenPerHari[t].total += 1;
     if (status === 'Kritis') trenPerHari[t].kritis += 1;
-    else if (status === 'Hampir Habis') trenPerHari[t].hampirHabis += 1;
-    else trenPerHari[t].aman += 1;
+    if (status === 'Kritis') kritis += 1;
+    else if (status === 'Hampir Habis') { trenPerHari[t].hampirHabis += 1; hampirHabis += 1; }
+    else { trenPerHari[t].aman += 1; aman += 1; }
+    const itemId = String(r['Item_ID'] || '');
+    const previous = byItem.get(itemId);
+    byItem.set(itemId, {
+      nama: String(master['Nama_Barang'] || r['Nama_Barang'] || itemId),
+      first: previous?.first ?? total,
+      last: total,
+      status,
+    });
   });
-  return { dari, sampai, totalTransaksi: soRows.length, trenPerHari };
+  const perubahanTerbesar = [...byItem.entries()]
+    .map(([itemId, item]) => ({
+      itemId,
+      nama: item.nama,
+      perubahan: item.last - item.first,
+      status: item.status,
+    }))
+    .filter((item) => item.perubahan !== 0)
+    .sort((a, b) => Math.abs(b.perubahan) - Math.abs(a.perubahan))
+    .slice(0, 10);
+  return {
+    dari,
+    sampai,
+    totalTransaksi: soRows.length,
+    totalItem: byItem.size,
+    kritis,
+    hampirHabis,
+    aman,
+    perubahanTerbesar,
+    trenPerHari,
+  };
 }
