@@ -173,7 +173,7 @@ export default function DashboardMingguanPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto px-4 py-6 pb-20 md:pb-6">
+    <div className="page-shell space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}

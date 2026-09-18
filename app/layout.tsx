@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { CabangProvider } from '@/lib/CabangContext';
 import { AuthProvider } from '@/lib/AuthContext';
@@ -9,12 +9,6 @@ import { LanguageProvider } from '@/lib/LanguageContext';
 import { AuthGuard } from '@/components/AuthGuard';
 import { Navbar } from '@/components/Navbar';
 import { PageTransition } from '@/components/PageTransition';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -38,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-      <html lang="id" className={`${inter.variable} ${jakarta.variable}`}>
+      <html lang="id" className={jakarta.variable}>
       <body data-theme="stokis" className="min-h-screen flex flex-col antialiased bg-base-200 text-base-content">
         <AuthProvider>
           <CabangProvider>

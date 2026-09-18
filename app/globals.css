@@ -85,10 +85,66 @@
   }
 
   body {
-    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+    font-family: var(--font-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
     overflow-x: hidden;
     position: relative;
     line-height: 1.5;
+  }
+}
+
+@layer components {
+  .page-shell {
+    width: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+    padding-block: 1.5rem 5rem;
+  }
+
+  .card {
+    border-radius: 0.75rem;
+    border-color: color-mix(in oklch, var(--color-base-content) 10%, transparent);
+    box-shadow: 0 1px 2px color-mix(in oklch, var(--color-base-content) 5%, transparent);
+  }
+
+  @media (min-width: 768px) {
+    .page-shell {
+      padding-block: 2rem 2.5rem;
+    }
+  }
+
+  .btn {
+    min-height: 2.75rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .input,
+  .select,
+  .textarea {
+    border-radius: 0.5rem;
+    border-color: color-mix(in oklch, var(--color-base-content) 16%, transparent);
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .input:focus,
+  .select:focus,
+  .textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 18%, transparent);
+    outline: none;
+  }
+
+  .alert {
+    border-radius: 0.75rem;
+  }
+
+  .table th {
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
 }
 
@@ -129,6 +185,12 @@
 /* =============================================
    TABLE (Mobile Card Layout)
    ============================================= */
+@media (max-width: 767px) {
+  body:has(nav[data-onboard="nav"]) main#main-content {
+    padding-bottom: 4.5rem;
+  }
+}
+
 @media (max-width: 639px) {
   /*
    * Report tables keep the first two columns visible while scrolling.
@@ -160,7 +222,7 @@
   }
   .mobile-card-table tr {
     display: flex; flex-direction: column;
-    background: oklch(0.99 0.002 260); border: 1px solid oklch(0.92 0.004 260);
+    background: var(--color-base-100); border: 1px solid var(--color-base-300);
     border-radius: 0.5rem; padding: 12px; gap: 8px;
     width: 100%; min-width: 0;
   }
@@ -171,7 +233,7 @@
   }
   .mobile-card-table td::before {
     content: attr(data-label); font-weight: 600;
-    color: oklch(0.45 0.03 260); font-size: 11px;
+    color: color-mix(in oklch, var(--color-base-content) 55%, transparent); font-size: 11px;
     text-transform: uppercase; letter-spacing: 0.04em;
     flex: 0 0 92px;
     line-height: 1.35;
@@ -184,7 +246,7 @@
   }
   .mobile-card-table td:last-child {
     display: block; padding-top: 8px;
-    border-top: 1px solid oklch(0.92 0.004 260);
+    border-top: 1px solid var(--color-base-300);
   }
   .mobile-card-table td:last-child::before {
     display: block;
@@ -210,6 +272,7 @@
    ============================================= */
 @media (max-width: 639px) {
   .touch-target { min-height: 44px; min-width: 44px; }
+  .safe-area-pb { padding-bottom: env(safe-area-inset-bottom); }
 }
 
 /* =============================================
@@ -224,8 +287,19 @@
    FOCUS VISIBLE (Accessibility)
    ============================================= */
 :focus-visible {
-  outline: 2px solid oklch(0.46 0.17 260);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* =============================================

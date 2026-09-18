@@ -14,6 +14,7 @@ import {
   Building2,
   FileText,
   BarChart3,
+  Activity,
   Store,
   ChevronDown,
   Home,
@@ -41,7 +42,7 @@ const bottomNavItems: NavItem[] = [
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
   { name: "Dashboard", nameEn: "Dashboard", href: "/dashboard/harian", icon: BarChart3, roles: ["admin"] },
-  { name: "Analytics", nameEn: "Analytics", href: "/dashboard/analytics", icon: BarChart3, roles: ["admin"] },
+  { name: "Analytics", nameEn: "Analytics", href: "/dashboard/analytics", icon: Activity, roles: ["admin"] },
   { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
 ];
 
@@ -55,7 +56,7 @@ const moreMenuItems: NavItem[] = [
 
 const desktopCoreItems: NavItem[] = [
   { name: "Dashboard", nameEn: "Dashboard", href: "/dashboard/harian", icon: BarChart3, roles: ["admin"] },
-  { name: "Analytics", nameEn: "Analytics", href: "/dashboard/analytics", icon: BarChart3, roles: ["admin"] },
+  { name: "Analytics", nameEn: "Analytics", href: "/dashboard/analytics", icon: Activity, roles: ["admin"] },
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
   { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
@@ -89,9 +90,11 @@ export function Navbar() {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    // Dashboard punya dua sub-halaman (harian & mingguan): akhiran mana pun aktif.
+    if (href === "/dashboard/analytics") {
+      return pathname === href || pathname.startsWith(`${href}/`);
+    }
     if (href === "/dashboard/harian") {
-      return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+      return pathname === "/dashboard" || pathname === "/dashboard/harian" || pathname === "/dashboard/mingguan";
     }
     // Exact match atau sub-rute di bawah href ("/laporan" aktif pada "/laporan/abc").
     return pathname === href || pathname.startsWith(href + "/");
@@ -290,7 +293,7 @@ export function Navbar() {
                   <Icon className="w-5 h-5" />
                 </div>
                 <span className={`text-xs font-semibold ${active ? 'text-primary' : ''}`}>
-                  {item.name}
+                  {lang === 'en' && item.nameEn ? item.nameEn : item.name}
                 </span>
               </Link>
             );
