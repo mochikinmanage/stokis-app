@@ -168,7 +168,7 @@ export function LaporanReportView({ view, variant, laporanId, cabangId }: Lapora
       <div className="flex items-center justify-between px-1 text-base-content/50 md:hidden no-print">
         <div className="flex items-center gap-1 text-[11px] font-semibold">
           <MoveHorizontal className="w-3.5 h-3.5 text-primary" />
-          <span>Geser tabel ke samping • Item &amp; satuan tetap terlihat</span>
+          <span>Geser tabel ke samping • Nama item tetap terlihat</span>
         </div>
       </div>
 

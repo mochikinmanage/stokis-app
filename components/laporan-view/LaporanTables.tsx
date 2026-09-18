@@ -3,19 +3,21 @@ import type { InputTypeGroup, ViewItem } from '@/lib/domain/laporan-view';
 import { cleanStatus, displayNum, isRegular } from './report-utils';
 
 const ITEM_W = 130;
-const SAT_W = 36;
-const FREEZE_BG = 'var(--color-base-100)';
 const FREEZE_BG_SELECTED = 'color-mix(in oklch, var(--color-primary) 18%, var(--color-base-100))';
-const FREEZE_EDGE = 'text-center text-base-content/60 border-r border-base-300 shadow-[3px_0_6px_-2px_rgba(15,23,42,0.12)]';
 
-function freezeBg(selected: boolean): string {
-  return selected ? FREEZE_BG_SELECTED : FREEZE_BG;
+function statusTone(item: ViewItem): 'kritis' | 'hampir' | 'aman' | 'normal' {
+  const status = `${item.statusLabel} ${item.statusRaw}`.toLowerCase();
+  if (status.includes('kritis') || status.includes('habis')) return 'kritis';
+  if (status.includes('hampir') || status.includes('dipakai')) return 'hampir';
+  if (status.includes('aman') || status.includes('penuh')) return 'aman';
+  return 'normal';
 }
 
-function rowClass(selected: boolean): string {
+function rowClass(selected: boolean, item: ViewItem): string {
+  const tone = statusTone(item);
   return selected
     ? 'cursor-pointer bg-primary/15 shadow-[inset_3px_0_0_0_var(--color-primary)]'
-    : 'cursor-pointer even:bg-base-200/40 hover:bg-base-200/70 transition-colors';
+    : `lv-row lv-row-${tone} cursor-pointer hover:bg-base-200/70 transition-colors`;
 }
 
 function FreezeTh({
@@ -36,7 +38,7 @@ function FreezeTh({
   return (
     <th
       rowSpan={rowSpan}
-      className={`sticky z-30 py-2 bg-base-200 text-left ${left === 0 ? 'lv-freeze-first' : 'lv-freeze-second'} ${compact ? 'px-1' : 'px-2'} ${extra || ''}`}
+      className={`sticky z-30 py-2 bg-base-200 text-left lv-freeze-first ${compact ? 'px-1' : 'px-2'} ${extra || ''}`}
       style={{ left, minWidth: width, width, backgroundColor: 'var(--color-base-200)' }}
     >
       {children}
@@ -61,8 +63,8 @@ function FreezeTd({
 }) {
   return (
     <td
-      className={`sticky z-20 py-2 bg-base-100 ${left === 0 ? 'lv-freeze-first' : 'lv-freeze-second'} ${compact ? 'px-1' : 'px-2'} ${extra || ''}`}
-      style={{ left, minWidth: width, width, backgroundColor: freezeBg(Boolean(selected)) }}
+      className={`sticky z-20 py-2 ${left === 0 ? 'lv-freeze-first' : ''} ${compact ? 'px-1' : 'px-2'} ${extra || ''}`}
+      style={{ left, minWidth: width, width, backgroundColor: selected ? FREEZE_BG_SELECTED : undefined }}
     >
       {children}
     </td>
@@ -99,9 +101,9 @@ interface RowSelectProps {
   onSelect: () => void;
 }
 
-function rowSelectProps({ selected, onSelect }: RowSelectProps) {
+function rowSelectProps({ selected, onSelect, item }: RowSelectProps & { item: ViewItem }) {
   return {
-    className: rowClass(selected),
+    className: rowClass(selected, item),
     onClick: onSelect,
     onKeyDown: (e: KeyboardEvent<HTMLTableRowElement>) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -116,13 +118,13 @@ function rowSelectProps({ selected, onSelect }: RowSelectProps) {
 function RegularRow({ item, type, selected, onSelect }: { item: ViewItem; type: InputTypeGroup } & RowSelectProps) {
   const single = type === 'single';
   return (
-    <tr {...rowSelectProps({ selected, onSelect })}>
+    <tr {...rowSelectProps({ selected, onSelect, item })} data-status={statusTone(item)}>
       <FreezeTd left={0} width={ITEM_W} selected={selected}>
         <ItemCell item={item} />
       </FreezeTd>
-      <FreezeTd left={ITEM_W} width={SAT_W} selected={selected} compact extra={FREEZE_EDGE}>
+      <td className="px-1.5 py-2 text-center text-base-content/60 border-r border-base-300">
         {item.satuan || '-'}
-      </FreezeTd>
+      </td>
       <td className="px-2 py-2 text-right tabular-nums font-display text-xs">{displayNum(item.threshold)}</td>
       <td className="px-1.5 py-2 text-right tabular-nums text-base-content/40 bg-base-200/30">{displayNum(item.prevStep1)}</td>
       <td className="px-1.5 py-2 text-right tabular-nums text-base-content/40 bg-base-200/30">{single ? '-' : displayNum(item.prevStep2)}</td>
@@ -139,13 +141,13 @@ function RegularRow({ item, type, selected, onSelect }: { item: ViewItem; type: 
 
 function BooleanRow({ item, selected, onSelect }: { item: ViewItem } & RowSelectProps) {
   return (
-    <tr {...rowSelectProps({ selected, onSelect })}>
+    <tr {...rowSelectProps({ selected, onSelect, item })} data-status={statusTone(item)}>
       <FreezeTd left={0} width={140} selected={selected}>
         <ItemCell item={item} />
       </FreezeTd>
-      <FreezeTd left={140} width={110} selected={selected} extra="text-center border-r border-base-300 shadow-[3px_0_6px_-2px_rgba(15,23,42,0.12)]">
+      <td className="px-3 py-2 text-center border-r border-base-300">
         <span className="badge badge-sm badge-ghost">{item.statusIsi || '-'}</span>
-      </FreezeTd>
+      </td>
       <td className="px-2.5 py-2 tabular-nums font-display text-xs">{item.tglRefillFormatted}</td>
       <td className="px-2.5 py-2 tabular-nums font-display text-xs">{item.tglPakaiFormatted}</td>
       <td className="px-3 py-2 text-center"><StatusBadge item={item} /></td>
@@ -156,13 +158,13 @@ function BooleanRow({ item, selected, onSelect }: { item: ViewItem } & RowSelect
 
 function DateRow({ item, selected, onSelect }: { item: ViewItem } & RowSelectProps) {
   return (
-    <tr {...rowSelectProps({ selected, onSelect })}>
+    <tr {...rowSelectProps({ selected, onSelect, item })} data-status={statusTone(item)}>
       <FreezeTd left={0} width={140} selected={selected}>
         <ItemCell item={item} />
       </FreezeTd>
-      <FreezeTd left={140} width={110} selected={selected} extra="tabular-nums font-display text-xs border-r border-base-300 shadow-[3px_0_6px_-2px_rgba(15,23,42,0.12)]">
+      <td className="px-2.5 py-2 tabular-nums font-display text-xs border-r border-base-300">
         {item.tglRefillFormatted}
-      </FreezeTd>
+      </td>
       <td className="px-2.5 py-2 text-center tabular-nums font-display text-xs font-bold text-primary">
         {item.hariBerlalu != null ? `${item.hariBerlalu} Hari` : '-'}
       </td>
@@ -174,13 +176,13 @@ function DateRow({ item, selected, onSelect }: { item: ViewItem } & RowSelectPro
 
 function ExpiryRow({ item, selected, onSelect }: { item: ViewItem } & RowSelectProps) {
   return (
-    <tr {...rowSelectProps({ selected, onSelect })}>
+    <tr {...rowSelectProps({ selected, onSelect, item })} data-status={statusTone(item)}>
       <FreezeTd left={0} width={140} selected={selected}>
         <ItemCell item={item} />
       </FreezeTd>
-      <FreezeTd left={140} width={110} selected={selected} extra="tabular-nums font-display text-xs border-r border-base-300 shadow-[3px_0_6px_-2px_rgba(15,23,42,0.12)]">
+      <td className="px-2.5 py-2 tabular-nums font-display text-xs border-r border-base-300">
         {item.tglKedaluwarsaFormatted}
-      </FreezeTd>
+      </td>
       <td className="px-2.5 py-2 text-center tabular-nums font-display text-xs font-bold">
         {item.sisaHari != null ? item.sisaHari : '-'}
       </td>
@@ -192,7 +194,7 @@ function ExpiryRow({ item, selected, onSelect }: { item: ViewItem } & RowSelectP
 
 function TextRow({ item, selected, onSelect }: { item: ViewItem } & RowSelectProps) {
   return (
-    <tr {...rowSelectProps({ selected, onSelect })}>
+    <tr {...rowSelectProps({ selected, onSelect, item })} data-status={statusTone(item)}>
       <FreezeTd left={0} width={140} selected={selected}>
         <ItemCell item={item} />
       </FreezeTd>
@@ -206,7 +208,7 @@ function RegularHead() {
     <thead className="text-[10px] uppercase tracking-wider text-base-content/60 font-semibold">
       <tr className="border-b border-base-300 text-center">
         <FreezeTh left={0} width={ITEM_W} extra="text-left" rowSpan={2}>Item / ID</FreezeTh>
-        <FreezeTh left={ITEM_W} width={SAT_W} compact extra={FREEZE_EDGE} rowSpan={2}>Sat</FreezeTh>
+        <th rowSpan={2} className="px-1.5 py-2 text-center bg-base-200 min-w-[36px]">Sat</th>
         <th rowSpan={2} className="px-2 py-2 text-center bg-base-200 min-w-[65px]">Thresh</th>
         <th colSpan={3} className="px-2 py-1.5 bg-base-300/60">
           <div className="flex items-center justify-center gap-1">
@@ -278,7 +280,7 @@ export function TypeTable({
             <thead className="bg-base-200 text-[10px] uppercase tracking-wider text-base-content/60 font-semibold">
               <tr>
                 <FreezeTh left={0} width={140}>Item / ID</FreezeTh>
-                <FreezeTh left={140} width={110} extra="text-center border-r border-base-300 shadow-[3px_0_6px_-2px_rgba(15,23,42,0.12)]">Nilai Saat Ini</FreezeTh>
+                <th className="px-3 py-2.5 text-center">Nilai Saat Ini</th>
                 <th className="px-2.5 py-2.5">Tgl Isi</th>
                 <th className="px-2.5 py-2.5">Tgl Pakai</th>
                 <th className="px-3 py-2.5 text-center">Status</th>
@@ -301,7 +303,7 @@ export function TypeTable({
             <thead className="bg-base-200 text-[10px] uppercase tracking-wider text-base-content/60 font-semibold">
               <tr>
                 <FreezeTh left={0} width={140}>Parameter</FreezeTh>
-                <FreezeTh left={140} width={110} extra="border-r border-base-300 shadow-[3px_0_6px_-2px_rgba(15,23,42,0.12)]">Tgl Tercatat</FreezeTh>
+                <th className="px-3 py-2.5">Tgl Tercatat</th>
                 <th className="px-2.5 py-2.5 text-center">Hari Berlalu</th>
                 <th className="px-3 py-2.5 text-center">Status</th>
                 <th className="px-3 py-2.5">Keterangan</th>
@@ -323,7 +325,7 @@ export function TypeTable({
             <thead className="bg-base-200 text-[10px] uppercase tracking-wider text-base-content/60 font-semibold">
               <tr>
                 <FreezeTh left={0} width={140}>Item / ID</FreezeTh>
-                <FreezeTh left={140} width={110} extra="border-r border-base-300 shadow-[3px_0_6px_-2px_rgba(15,23,42,0.12)]">Tgl Exp</FreezeTh>
+                <th className="px-3 py-2.5">Tgl Exp</th>
                 <th className="px-2.5 py-2.5 text-center">Sisa</th>
                 <th className="px-3 py-2.5 text-center">Status</th>
                 <th className="px-3 py-2.5">Keterangan</th>

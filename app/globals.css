@@ -140,19 +140,19 @@
     min-width: 96px !important;
     max-width: 96px !important;
   }
-  .lv-freeze-second {
-    left: 96px !important;
-    width: 42px !important;
-    min-width: 42px !important;
-    max-width: 42px !important;
-  }
-
   .mobile-card-table {
     display: block;
     width: 100% !important;
     min-width: 0 !important;
     table-layout: auto;
   }
+
+  .lv-row-kritis > td:not(.lv-freeze-first) { background-color: color-mix(in oklch, var(--color-error) 10%, transparent) !important; }
+  .lv-row-hampir > td:not(.lv-freeze-first) { background-color: color-mix(in oklch, var(--color-warning) 14%, transparent) !important; }
+  .lv-row-aman > td:not(.lv-freeze-first) { background-color: color-mix(in oklch, var(--color-success) 8%, transparent) !important; }
+  .lv-row-kritis > .lv-freeze-first { background-color: color-mix(in oklch, var(--color-error) 10%, var(--color-base-100)) !important; }
+  .lv-row-hampir > .lv-freeze-first { background-color: color-mix(in oklch, var(--color-warning) 14%, var(--color-base-100)) !important; }
+  .lv-row-aman > .lv-freeze-first { background-color: color-mix(in oklch, var(--color-success) 8%, var(--color-base-100)) !important; }
   .mobile-card-table thead { display: none; }
   .mobile-card-table tbody {
     display: flex; flex-direction: column; gap: 8px; padding: 8px;
