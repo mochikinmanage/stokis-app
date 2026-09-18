@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
 import { toLocalISO } from '@/lib/domain/so';
-import { CHART_THEME_FALLBACK, CHART_TICK_FONT_SIZE, type ChartTheme } from '@/lib/chart-theme';
+import { CHART_THEME_FALLBACK, type ChartTheme } from '@/lib/chart-theme';
 import {
   TrendingUp,
   ShieldAlert,
@@ -19,20 +19,6 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from 'lucide-react';
-import {
-  BarChart,
-  Bar,
-  LineChart as RechartsLineChart,
-  Line,
-  AreaChart as RechartsAreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
 import { QuantumLoaderFull } from '@/components/ui/QuantumLoader';
 
 type ChartType = 'bar' | 'line' | 'area';
@@ -53,75 +39,6 @@ interface DailyStats {
   kritis: number;
   hampirHabis: number;
   aman: number;
-}
-
-function tooltipStyle(theme: ChartTheme) {
-  return {
-    backgroundColor: theme.tooltipBg,
-    borderRadius: '8px',
-    border: `1px solid ${theme.tooltipBorder}`,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-  };
-}
-
-function TrendBarChart({ data, theme }: { data: DailyStats[]; theme: ChartTheme }) {
-  return (
-    <BarChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
-      <XAxis dataKey="date" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} tickFormatter={(val: string) => {
-        const parts = val.split('-');
-        return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
-      }} />
-      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
-      <Tooltip
-        contentStyle={tooltipStyle(theme)}
-        itemStyle={{ color: theme.tooltipText }}
-        formatter={(value: number) => [`${value} Item`, 'Total']}
-      />
-      <Legend verticalAlign="bottom" height={36} />
-      <Bar dataKey="count" name="Total" radius={[6, 6, 0, 0]} barSize={32} fill={theme.series} />
-    </BarChart>
-  );
-}
-
-function TrendLineChart({ data, theme }: { data: DailyStats[]; theme: ChartTheme }) {
-  return (
-    <RechartsLineChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
-      <XAxis dataKey="date" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} tickFormatter={(val: string) => {
-        const parts = val.split('-');
-        return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
-      }} />
-      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
-      <Tooltip
-        contentStyle={tooltipStyle(theme)}
-        itemStyle={{ color: theme.tooltipText }}
-        formatter={(value: number) => [`${value} Item`, 'Total']}
-      />
-      <Legend verticalAlign="bottom" height={36} />
-      <Line type="monotone" dataKey="count" name="Total" stroke={theme.series} strokeWidth={3} dot={{ r: 4 }} />
-    </RechartsLineChart>
-  );
-}
-
-function TrendAreaChart({ data, theme }: { data: DailyStats[]; theme: ChartTheme }) {
-  return (
-    <RechartsAreaChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
-      <XAxis dataKey="date" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} tickFormatter={(val: string) => {
-        const parts = val.split('-');
-        return `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}`;
-      }} />
-      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
-      <Tooltip
-        contentStyle={tooltipStyle(theme)}
-        itemStyle={{ color: theme.tooltipText }}
-        formatter={(value: number) => [`${value} Item`, 'Total']}
-      />
-      <Legend verticalAlign="bottom" height={36} />
-      <Area type="monotone" dataKey="count" name="Total" stroke={theme.series} fill={theme.areaFill} strokeWidth={3} />
-    </RechartsAreaChart>
-  );
 }
 
 const CHART_OPTIONS: { type: ChartType; label: string; Icon: typeof BarChart3Icon }[] = [
@@ -255,19 +172,6 @@ export default function DashboardMingguanPage() {
     );
   }
 
-  const renderChart = () => {
-    // Grafik selalu dirender (axis + legend + kolom) saat data ada.
-    // Empty-state ditangani kartu "Distribusi Aktivitas Harian" di bawah.
-    switch (chartType) {
-      case 'bar':
-        return <TrendBarChart data={trendData} theme={theme} />;
-      case 'line':
-        return <TrendLineChart data={trendData} theme={theme} />;
-      case 'area':
-        return <TrendAreaChart data={trendData} theme={theme} />;
-    }
-  };
-
   return (
     <div className="space-y-6 max-w-6xl mx-auto px-4 py-6 pb-20 md:pb-6">
       <motion.div
@@ -377,10 +281,31 @@ export default function DashboardMingguanPage() {
         </div>
 
         <div className="h-[320px] w-full min-h-[320px] min-w-0">
-          <h3 className="sr-only">Grafik tren aktivitas harian</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            {renderChart()}
-          </ResponsiveContainer>
+          {trendData.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-base-content/50">
+              Tidak ada data aktivitas pada rentang ini.
+            </div>
+          ) : (
+            <div className={`h-full flex items-end gap-3 sm:gap-5 px-2 sm:px-6 pb-8 pt-4 ${chartType === 'line' ? 'items-center' : ''}`}>
+              {trendData.map((day) => {
+                const max = Math.max(...trendData.map((item) => item.count), 1);
+                const height = day.count > 0 ? Math.max((day.count / max) * 210, 12) : 4;
+                const percent = data?.totalTransaksi ? Math.round((day.count / data.totalTransaksi) * 100) : 0;
+                return (
+                  <div key={day.date} className="flex-1 min-w-0 h-full flex flex-col items-center justify-end gap-2">
+                    <span className="text-xs font-bold tabular-nums">{day.count} <span className="text-base-content/40 font-normal">({percent}%)</span></span>
+                    <div
+                      className={`w-full max-w-16 transition-all ${chartType === 'line' ? 'rounded-full h-3' : 'rounded-t-lg'}`}
+                      style={chartType === 'line'
+                        ? { backgroundColor: theme.series }
+                        : { height, backgroundColor: chartType === 'area' ? theme.areaFill : theme.series, borderTop: chartType === 'area' ? `4px solid ${theme.series}` : undefined }}
+                    />
+                    <span className="text-[11px] text-base-content/60 truncate max-w-full">{formatDateShort(day.date)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </motion.div>
 
