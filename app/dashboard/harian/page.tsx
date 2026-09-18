@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
 import { toLocalISO } from '@/lib/domain/so';
-import { CHART_THEME_FALLBACK, CHART_TICK_FONT_SIZE, type ChartTheme } from '@/lib/chart-theme';
+import { CHART_THEME_FALLBACK, type ChartTheme } from '@/lib/chart-theme';
 import {
   BarChart3,
   AlertCircle,
@@ -18,21 +18,6 @@ import {
   RefreshCw,
   CheckCircle2,
 } from 'lucide-react';
-import {
-  BarChart,
-  Bar,
-  LineChart as RechartsLineChart,
-  Line,
-  AreaChart as RechartsAreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  Cell
-} from 'recharts';
 import { QuantumLoaderFull } from '@/components/ui/QuantumLoader';
 
 type ChartType = 'bar' | 'line' | 'area';
@@ -43,67 +28,6 @@ interface DashboardData {
   hampirHabis: number;
   aman: number;
   detail: any[];
-}
-
-function tooltipStyle(theme: ChartTheme) {
-  return {
-    backgroundColor: theme.tooltipBg,
-    borderRadius: '8px',
-    border: `1px solid ${theme.tooltipBorder}`,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-  };
-}
-
-function StatusBarChart({ data, theme }: { data: any[]; theme: ChartTheme }) {
-  return (
-    <BarChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
-      <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} />
-      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
-      <Tooltip
-        contentStyle={tooltipStyle(theme)}
-        itemStyle={{ color: theme.tooltipText }}
-      />
-      <Legend verticalAlign="bottom" height={36} />
-      <Bar dataKey="value" name="Jumlah" radius={[6, 6, 0, 0]} barSize={48}>
-        {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.color} />
-        ))}
-      </Bar>
-    </BarChart>
-  );
-}
-
-function StatusLineChart({ data, theme }: { data: any[]; theme: ChartTheme }) {
-  return (
-    <RechartsLineChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
-      <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} />
-      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
-      <Tooltip
-        contentStyle={tooltipStyle(theme)}
-        itemStyle={{ color: theme.tooltipText }}
-      />
-      <Legend verticalAlign="bottom" height={36} />
-      <Line type="monotone" dataKey="value" name="Jumlah" stroke={theme.series} strokeWidth={3} dot={{ r: 4 }} />
-    </RechartsLineChart>
-  );
-}
-
-function StatusAreaChart({ data, theme }: { data: any[]; theme: ChartTheme }) {
-  return (
-    <RechartsAreaChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
-      <XAxis dataKey="name" tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} />
-      <YAxis tick={{ fill: theme.tick, fontSize: CHART_TICK_FONT_SIZE }} axisLine={false} allowDecimals={false} />
-      <Tooltip
-        contentStyle={tooltipStyle(theme)}
-        itemStyle={{ color: theme.tooltipText }}
-      />
-      <Legend verticalAlign="bottom" height={36} />
-      <Area type="monotone" dataKey="value" name="Jumlah" stroke={theme.series} fill={theme.areaFill} strokeWidth={3} />
-    </RechartsAreaChart>
-  );
 }
 
 const CHART_OPTIONS: { type: ChartType; label: string; Icon: typeof BarChart3Icon }[] = [
@@ -213,19 +137,6 @@ export default function DashboardHarianPage() {
       </div>
     );
   }
-
-  const renderChart = () => {
-    // Grafik selalu dirender (axis + legend + bar 0) saat data ada.
-    // Empty-state hanya ditangani untuk tabel; chart kosong tetap tampil utk konteks.
-    switch (chartType) {
-      case 'bar':
-        return <StatusBarChart data={chartData} theme={theme} />;
-      case 'line':
-        return <StatusLineChart data={chartData} theme={theme} />;
-      case 'area':
-        return <StatusAreaChart data={chartData} theme={theme} />;
-    }
-  };
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto px-4 py-6 pb-20 md:pb-6">
@@ -373,11 +284,19 @@ export default function DashboardHarianPage() {
           })}
           {data?.totalTransaksi === 0 && <p className="text-sm text-base-content/50">Belum ada transaksi pada tanggal ini.</p>}
         </div>
-        <div className="hidden md:block h-[320px] w-full min-h-[320px] min-w-0">
-          <h3 className="sr-only">Grafik distribusi status item</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            {renderChart()}
-          </ResponsiveContainer>
+        <div className="hidden md:grid h-[320px] grid-cols-3 items-end gap-10 px-12 pb-8 pt-6">
+          {chartData.map((entry) => {
+            const max = Math.max(...chartData.map((item) => item.value), 1);
+            const percent = data?.totalTransaksi ? Math.round((entry.value / data.totalTransaksi) * 100) : 0;
+            const height = entry.value > 0 ? Math.max((entry.value / max) * 220, 12) : 4;
+            return (
+              <div key={entry.name} className="h-full flex flex-col items-center justify-end gap-3">
+                <div className="text-sm font-bold tabular-nums">{entry.value} <span className="font-normal text-base-content/50">({percent}%)</span></div>
+                <div className="w-full max-w-32 rounded-t-xl transition-all" style={{ height, backgroundColor: entry.color }} />
+                <div className="text-sm font-semibold">{entry.name}</div>
+              </div>
+            );
+          })}
         </div>
       </motion.div>
 
