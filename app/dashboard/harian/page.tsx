@@ -16,6 +16,7 @@ import {
   LineChartIcon,
   AreaChartIcon,
   RefreshCw,
+  CheckCircle2,
 } from 'lucide-react';
 import {
   BarChart,
@@ -296,10 +297,10 @@ export default function DashboardHarianPage() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: 0.05 }}
-        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4"
       >
-        <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
-          <div className="p-3 bg-primary/10 text-primary rounded-lg">
+        <div className="card bg-base-100 border border-base-300 p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
+          <div className="p-2.5 sm:p-3 bg-primary/10 text-primary rounded-lg">
             <Package className="w-6 h-6" />
           </div>
           <div className="space-y-0.5">
@@ -308,7 +309,7 @@ export default function DashboardHarianPage() {
           </div>
         </div>
 
-        <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
+        <div className="card bg-base-100 border border-base-300 p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
           <div className="p-3 bg-error/10 text-error rounded-lg">
             <AlertCircle className="w-6 h-6" />
           </div>
@@ -318,13 +319,22 @@ export default function DashboardHarianPage() {
           </div>
         </div>
 
-        <div className="card bg-base-100 border border-base-300 p-5 flex items-center gap-4">
+        <div className="card bg-base-100 border border-base-300 p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
           <div className="p-3 bg-warning/10 text-warning rounded-lg">
             <TrendingUp className="w-6 h-6" />
           </div>
           <div className="space-y-0.5">
             <span className="text-xs text-base-content/60 font-semibold">Item Hampir Habis</span>
             <h3 className="text-2xl font-bold text-warning tabular-nums">{data?.hampirHabis ?? 0}</h3>
+          </div>
+        </div>
+        <div className="card bg-base-100 border border-base-300 p-4 sm:p-5 flex items-center gap-3 sm:gap-4">
+          <div className="p-2.5 sm:p-3 bg-success/10 text-success rounded-lg">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-xs text-base-content/60 font-semibold">Item Aman</span>
+            <h3 className="text-2xl font-bold text-success tabular-nums">{data?.aman ?? 0}</h3>
           </div>
         </div>
       </motion.div>
@@ -345,7 +355,25 @@ export default function DashboardHarianPage() {
           </span>
         </div>
 
-        <div className="h-[320px] w-full min-h-[320px] min-w-0">
+        <div className="md:hidden space-y-3">
+          {chartData.map((entry) => {
+            const total = data?.totalTransaksi || 0;
+            const percent = total > 0 ? Math.round((entry.value / total) * 100) : 0;
+            return (
+              <div key={entry.name} className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold">{entry.name}</span>
+                  <span className="font-bold tabular-nums">{entry.value} <span className="font-normal text-base-content/50">({percent}%)</span></span>
+                </div>
+                <div className="h-2.5 rounded-full bg-base-200 overflow-hidden">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${percent}%`, backgroundColor: entry.color }} />
+                </div>
+              </div>
+            );
+          })}
+          {data?.totalTransaksi === 0 && <p className="text-sm text-base-content/50">Belum ada transaksi pada tanggal ini.</p>}
+        </div>
+        <div className="hidden md:block h-[320px] w-full min-h-[320px] min-w-0">
           <h3 className="sr-only">Grafik distribusi status item</h3>
           <ResponsiveContainer width="100%" height="100%">
             {renderChart()}
