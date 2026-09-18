@@ -7,7 +7,7 @@ import LoginPage from "@/app/login/page";
 
 const PUBLIC_PATHS = ["/login", "/"];
 const PUBLIC_PREFIXES = ["/docs", "/laporan/view"];
-const ADMIN_ONLY_PATHS = ["/master-item", "/petugas", "/cabang", "/dashboard"];
+const ADMIN_ONLY_PATHS = ["/master-item", "/petugas", "/cabang"];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading, isAdmin } = useAuth();

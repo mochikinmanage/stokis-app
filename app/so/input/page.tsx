@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { ShiftCabangGate } from '@/components/ShiftCabangGate';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCabang } from '@/lib/CabangContext';
@@ -565,26 +566,26 @@ export default function InputSOPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedArea, setSelectedArea] = useState<string>('Semua');
 
+  // Petugas = logged-in user name
+  const petugas = user?.nama || 'Tidak diketahui';
+
   // Summary modal state
   const [showSummary, setShowSummary] = useState<boolean>(false);
   const [pendingPayload, setPendingPayload] = useState<SOFormState | null>(null);
 
-  // Draft (save sementara) state
+  // Gate Modal State
+  const [showGate, setShowGate] = useState<boolean>(false);
   const [pendingDraft, setPendingDraft] = useState<SODraft | null>(null);
-  const [showDiscardConfirm, setShowDiscardConfirm] = useState<boolean>(false);
   const draftTimer = useRef<number | null>(null);
 
-  // Petugas = logged-in user name
-  const petugas = user?.nama || 'Tidak diketahui';
-
-  // Shift yang terakhir dipakai (sessionStorage, bukan localStorage — reset saat tab/navigasi baru)
-  const [lastShift, setLastShift] = useState<string>(() => {
-    try {
-      return sessionStorage.getItem('stokis_so_last_shift') || 'Opening';
-    } catch {
-      return 'Opening';
+  useEffect(() => {
+    if (!selectedCabang) return;
+    const cached = loadDraft(selectedCabang.Cabang_ID);
+    if (cached && countFilled(cached.counts) > 0) {
+      setPendingDraft(cached);
+      setShowGate(true);
     }
-  });
+  }, [selectedCabang]);
 
   const handleRestoreDraft = (draft: SODraft) => {
     if (draft.sesiId) sesiIdRef.current = draft.sesiId;
@@ -610,6 +611,27 @@ export default function InputSOPage() {
       return merged;
     });
     setPendingDraft(null);
+    setShowGate(false);
+  };
+
+  const handleDiscardDraft = () => {
+    if (selectedCabang) {
+      clearDraft(selectedCabang.Cabang_ID);
+    }
+    setPendingDraft(null);
+    setNote('');
+  };
+
+  const handleConfirmNewSession = (newCabangId: string, newShift: string) => {
+    const target = cabangList.find((c) => c.Cabang_ID === newCabangId);
+    if (target) setSelectedCabang(target);
+    setShift(newShift);
+    try {
+      sessionStorage.setItem('stokis_so_last_shift', newShift);
+    } catch {
+      // ignore
+    }
+    setShowGate(false);
   };
 
   useEffect(() => {
@@ -826,13 +848,6 @@ export default function InputSOPage() {
     acc[area].push(item);
     return acc;
   }, {} as Record<string, MasterItem[]>);
-
-  const handleDiscardDraft = () => {
-    if (selectedCabang) clearDraft(selectedCabang.Cabang_ID);
-    setPendingDraft(null);
-    setNote('');
-    setShowDiscardConfirm(false);
-  };
 
   const buildPayloadItems = (): SOItemPayload[] => {
     return items.map((it) => {
@@ -1143,7 +1158,7 @@ export default function InputSOPage() {
                   Formulir Input Stock Opname
                 </h1>
                 <p className="text-sm text-base-content/60">
-                  Lokasi Cabang: <span className="font-semibold text-base-content">{selectedCabang.Nama_Cabang}</span>
+                  Lokasi Cabang: <button type="button" onClick={() => setShowGate(true)} className="font-semibold text-primary underline underline-offset-2 hover:opacity-80 transition-opacity">{selectedCabang.Nama_Cabang} ({shift})</button>
                 </p>
               </div>
             </div>
@@ -1518,55 +1533,19 @@ export default function InputSOPage() {
       <AnimatePresence>
         {submitting && <SOGeneratingOverlay step={genStep} />}
       </AnimatePresence>
-      {/* Discard confirmation dialog */}
-      <AnimatePresence>
-        {showDiscardConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="discard-title"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 8 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 8 }}
-              className="card bg-base-100 border border-base-300 shadow-2xl p-6 w-full max-w-sm space-y-4"
-            >
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-error/10 text-error flex-shrink-0">
-                  <AlertTriangle className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 id="discard-title" className="font-bold text-base text-base-content">Hapus draft ini?</h2>
-                  <p className="text-sm text-base-content/60 mt-1">
-                    Semua data yang belum di-submit akan dihapus permanen dari penyimpanan sementara.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-3 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowDiscardConfirm(false)}
-                  className="btn min-h-[44px]"
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDiscardDraft}
-                  className="btn btn-error min-h-[44px]"
-                >
-                  Ya, Hapus
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+      {/* Shift & Cabang Gate Modal */}
+      <ShiftCabangGate
+        open={showGate}
+        cabangList={cabangList}
+        initialCabangId={selectedCabang?.Cabang_ID ?? null}
+        initialShift={shift}
+        pendingDraft={pendingDraft}
+        countFilledDraft={countFilled}
+        onRestoreDraft={() => pendingDraft && handleRestoreDraft(pendingDraft)}
+        onDiscardDraft={handleDiscardDraft}
+        onConfirmNewSession={handleConfirmNewSession}
+      />
     </>
   );
 }
