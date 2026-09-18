@@ -102,7 +102,16 @@ export async function getDashboardMingguan(
     .filter((item) => item.perubahan !== 0)
     .sort((a, b) => Math.abs(b.perubahan) - Math.abs(a.perubahan))
     .slice(0, 10);
-  const penggunaanMap = new Map<string, { nama: string; area: string; satuan: string; total: number; tercatat: number }>();
+  type UsageAggregate = {
+    nama: string;
+    area: string;
+    satuan: string;
+    total: number;
+    tercatat: number;
+    anomali: number;
+    perubahan: number[];
+  };
+  const penggunaanMap = new Map<string, UsageAggregate>();
   masterRows.forEach((master) => {
     const itemId = String(master['Item_ID'] || '');
     if (!itemId) return;
@@ -112,6 +121,8 @@ export async function getDashboardMingguan(
       satuan: String(master['Satuan'] || ''),
       total: 0,
       tercatat: 0,
+      anomali: 0,
+      perubahan: [],
     });
   });
   laporanRows.forEach((row) => {
@@ -119,22 +130,44 @@ export async function getDashboardMingguan(
     if (!itemId) return;
     const usageValue = Number(row['Penggunaan']);
     if (!Number.isFinite(usageValue)) return;
-    const existing = penggunaanMap.get(itemId);
-    penggunaanMap.set(itemId, {
-      nama: existing?.nama || String(row['Nama_Barang'] || itemId),
-      area: existing?.area || String(row['Area'] || '-'),
-      satuan: existing?.satuan || String(row['Satuan'] || ''),
-      total: (existing?.total || 0) + usageValue,
-      tercatat: (existing?.tercatat || 0) + 1,
-    });
+    const existing = penggunaanMap.get(itemId) || {
+      nama: String(row['Nama_Barang'] || itemId),
+      area: String(row['Area'] || '-'),
+      satuan: String(row['Satuan'] || ''),
+      total: 0,
+      tercatat: 0,
+      anomali: 0,
+      perubahan: [],
+    };
+    existing.perubahan.push(usageValue);
+    penggunaanMap.set(itemId, existing);
   });
+  const median = (values: number[]) => {
+    const sorted = [...values].sort((a, b) => a - b);
+    if (!sorted.length) return 0;
+    const middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  };
   const analisisPemakaian = [...penggunaanMap.entries()]
-    .map(([itemId, item]) => ({
-      itemId,
-      ...item,
-      rataRata: item.tercatat ? item.total / item.tercatat : 0,
-      status: item.tercatat === 0 ? 'Belum ada data' : item.total < 0 ? 'Berkurang' : item.total > 0 ? 'Bertambah' : 'Tetap',
-    }))
+    .map(([itemId, item]) => {
+      const typicalChange = median(item.perubahan.map((value) => Math.abs(value)));
+      const maxReasonableChange = Math.max(typicalChange * 10, 1000);
+      const validChanges = item.perubahan.filter((value) => Math.abs(value) <= maxReasonableChange);
+      item.anomali = item.perubahan.length - validChanges.length;
+      item.total = validChanges.reduce((sum, value) => sum + value, 0);
+      item.tercatat = validChanges.length;
+      return {
+        itemId,
+        nama: item.nama,
+        area: item.area,
+        satuan: item.satuan,
+        total: item.total,
+        tercatat: item.tercatat,
+        anomali: item.anomali,
+        rataRata: item.tercatat ? item.total / item.tercatat : 0,
+        status: item.perubahan.length === 0 ? 'Belum ada data' : item.anomali && !item.tercatat ? 'Perlu verifikasi' : item.total < 0 ? 'Berkurang' : item.total > 0 ? 'Bertambah' : 'Tetap',
+      };
+    })
     .sort((a, b) => {
       if (a.tercatat === 0 && b.tercatat > 0) return 1;
       if (a.tercatat > 0 && b.tercatat === 0) return -1;

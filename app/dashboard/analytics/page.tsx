@@ -24,6 +24,7 @@ interface UsageItem {
   total: number;
   rataRata: number;
   tercatat: number;
+  anomali: number;
   status: string;
 }
 
@@ -89,6 +90,7 @@ export default function AnalyticsPage() {
 
   const decreasingItems = items.filter((item) => item.total < 0);
   const increasingItems = items.filter((item) => item.total > 0);
+  const anomalyCount = items.reduce((sum, item) => sum + item.anomali, 0);
   const biggestDecrease = decreasingItems[0];
   const biggestIncrease = increasingItems[0];
 
@@ -164,6 +166,13 @@ export default function AnalyticsPage() {
           ))}
         </section>
 
+        {anomalyCount > 0 && (
+          <div className="alert border border-warning/30 bg-warning/10 text-sm text-warning-content">
+            <CircleAlert className="h-5 w-5 shrink-0" />
+            <span><strong>{formatNumber(anomalyCount, 0)} perubahan ekstrem</strong> tidak dimasukkan ke total utama karena jauh di luar pola pencatatan item. Periksa laporan sumbernya.</span>
+          </div>
+        )}
+
         <section className="grid gap-4 lg:grid-cols-2">
           <article className="rounded-2xl border border-error/20 bg-error/5 p-5">
             <div className="flex items-start justify-between gap-3">
@@ -220,7 +229,7 @@ export default function AnalyticsPage() {
                         <p className="mt-0.5 break-all text-[11px] text-base-content/50">{item.itemId} · {item.area || 'Area belum diisi'}</p>
                       </div>
                       <strong className={`shrink-0 text-right tabular-nums ${item.total < 0 ? 'text-error' : item.total > 0 ? 'text-success' : 'text-base-content/50'}`}>
-                        {item.tercatat === 0 ? 'Belum ada data' : `${item.total > 0 ? '+' : ''}${formatNumber(item.total)} ${cleanUnit(item.satuan)}`}
+                        {item.tercatat === 0 ? (item.anomali ? 'Perlu verifikasi' : 'Belum ada data') : `${item.total > 0 ? '+' : ''}${formatNumber(item.total)} ${cleanUnit(item.satuan)}`}
                       </strong>
                     </div>
                     <div className="grid grid-cols-2 gap-3 rounded-xl bg-base-200/60 p-3 text-xs">
@@ -233,7 +242,7 @@ export default function AnalyticsPage() {
               <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full text-sm">
                   <thead className="bg-base-200/70 text-xs text-base-content/60"><tr><th className="p-4 text-left font-semibold">Item</th><th className="p-4 text-left font-semibold">Area</th><th className="p-4 text-right font-semibold">Perubahan</th><th className="p-4 text-right font-semibold">Rata-rata</th><th className="p-4 text-right font-semibold">Frekuensi</th><th className="w-8 p-4" /></tr></thead>
-                  <tbody>{filteredItems.map((item) => <tr key={item.itemId} className="border-t border-base-200 transition hover:bg-base-200/40"><td className="p-4"><div className="font-semibold">{item.nama}</div><div className="mt-0.5 text-[11px] text-base-content/50">{item.itemId}</div></td><td className="p-4 text-base-content/60">{item.area || '-'}</td><td className={`p-4 text-right font-bold tabular-nums ${item.total < 0 ? 'text-error' : item.total > 0 ? 'text-success' : 'text-base-content/50'}`}>{item.tercatat === 0 ? 'Belum ada data' : `${item.total > 0 ? '+' : ''}${formatNumber(item.total)} ${cleanUnit(item.satuan)}`}</td><td className="p-4 text-right tabular-nums">{item.tercatat === 0 ? '-' : `${formatNumber(item.rataRata)} ${cleanUnit(item.satuan)}`}</td><td className="p-4 text-right text-base-content/60 tabular-nums">{item.tercatat ? `${item.tercatat}x` : '-'}</td><td className="p-4 text-base-content/30"><ChevronRight className="h-4 w-4" /></td></tr>)}</tbody>
+                  <tbody>{filteredItems.map((item) => <tr key={item.itemId} className="border-t border-base-200 transition hover:bg-base-200/40"><td className="p-4"><div className="font-semibold">{item.nama}</div><div className="mt-0.5 text-[11px] text-base-content/50">{item.itemId}</div></td><td className="p-4 text-base-content/60">{item.area || '-'}</td><td className={`p-4 text-right font-bold tabular-nums ${item.anomali ? 'text-warning' : item.total < 0 ? 'text-error' : item.total > 0 ? 'text-success' : 'text-base-content/50'}`}>{item.tercatat === 0 ? (item.anomali ? 'Perlu verifikasi' : 'Belum ada data') : `${item.total > 0 ? '+' : ''}${formatNumber(item.total)} ${cleanUnit(item.satuan)}`}</td><td className="p-4 text-right tabular-nums">{item.tercatat === 0 ? '-' : `${formatNumber(item.rataRata)} ${cleanUnit(item.satuan)}`}</td><td className="p-4 text-right text-base-content/60 tabular-nums">{item.tercatat ? `${item.tercatat}x` : item.anomali ? `${item.anomali} anomali` : '-'}</td><td className="p-4 text-base-content/30"><ChevronRight className="h-4 w-4" /></td></tr>)}</tbody>
                 </table>
               </div>
             </>
