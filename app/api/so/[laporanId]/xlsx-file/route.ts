@@ -1,7 +1,8 @@
 // app/api/so/[laporanId]/xlsx-file/route.ts
-// Sajikan XLSX laporan secara publik berdasarkan data tersimpan di spreadsheet.
+// Sajikan XLSX laporan setelah autentikasi dan pemeriksaan akses cabang.
 // Dipakai sebagai link fallback bila upload ke Drive gagal.
 import { NextRequest, NextResponse } from 'next/server';
+import { assertCabangAccess, withAuth } from '@/lib/auth';
 import { resolveCabang } from '@/lib/google/registry';
 import { readSheetData, sheetToObjects } from '@/lib/google/sheets';
 import { generateXlsxReport, type XlsxItem } from '@/lib/domain/xlsx-report';
@@ -40,10 +41,11 @@ function normalizeDate(v: unknown): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-export async function GET(
+export const GET = withAuth(async (
   req: NextRequest,
-  context: { params: Promise<{ laporanId: string }> }
-) {
+  context: { params: Promise<{ laporanId: string }> },
+  session
+) => {
   const { laporanId } = await context.params;
   const cabangId = req.nextUrl?.searchParams.get('cabang') || '';
 
@@ -53,6 +55,8 @@ export async function GET(
   if (!cabangId) {
     return NextResponse.json({ success: false, error: { code: 'CABANG_REQUIRED' } }, { status: 400 });
   }
+  const accessError = assertCabangAccess(session, cabangId);
+  if (accessError) return accessError;
 
   let spreadsheetId: string;
   let cabang;
@@ -169,7 +173,7 @@ export async function GET(
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `inline; filename="${fileName}"`,
-      'Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'private, no-store',
     },
   });
-}
+});

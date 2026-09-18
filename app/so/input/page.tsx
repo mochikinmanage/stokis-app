@@ -142,10 +142,10 @@ async function postWithRetry<T = SubmitSOResult>(
   throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 }
 
-// ─── Draft persistence (save sementara agar tinggal lanjutkan setelah refresh) ───
-const DRAFT_PREFIX = 'stokis_so_draft_';
+// ─── Draft persistence (save sementara per user: localStorage + cloud backup API) ───
+const DRAFT_PREFIX = 'stokis_so_draft_user_';
 
-interface SODraft {
+export interface SODraft {
   counts: Record<string, { step1: string; step2: string; keterangan: string; statusIsi?: string; tglRefill?: string; tglPakai?: string }>;
   sesiId: string;
   tanggalOperasional: string;
@@ -154,8 +154,8 @@ interface SODraft {
   updatedAt: number;
 }
 
-function getDraftKey(cabangId: string): string {
-  return DRAFT_PREFIX + cabangId;
+function getDraftKey(userKey: string): string {
+  return DRAFT_PREFIX + userKey.trim().toLowerCase();
 }
 
 function countFilled(
@@ -170,9 +170,9 @@ function countFilled(
   }, 0);
 }
 
-function loadDraft(cabangId: string): SODraft | null {
+function loadLocalDraft(userKey: string): SODraft | null {
   try {
-    const raw = localStorage.getItem(getDraftKey(cabangId));
+    const raw = localStorage.getItem(getDraftKey(userKey));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SODraft;
     if (!parsed || typeof parsed !== 'object' || !parsed.counts) return null;
@@ -182,20 +182,20 @@ function loadDraft(cabangId: string): SODraft | null {
   }
 }
 
-function saveDraft(cabangId: string, draft: SODraft): void {
+function saveLocalDraft(userKey: string, draft: SODraft): void {
   try {
     localStorage.setItem(
-      getDraftKey(cabangId),
+      getDraftKey(userKey),
       JSON.stringify({ ...draft, updatedAt: Date.now() }),
     );
   } catch {
-    // Abaikan: mode privat / quota penuh tidak menghalangi input
+    // Abaikan
   }
 }
 
-function clearDraft(cabangId: string): void {
+function clearLocalDraft(userKey: string): void {
   try {
-    localStorage.removeItem(getDraftKey(cabangId));
+    localStorage.removeItem(getDraftKey(userKey));
   } catch {
     // abai
   }
@@ -573,19 +573,47 @@ export default function InputSOPage() {
   const [showSummary, setShowSummary] = useState<boolean>(false);
   const [pendingPayload, setPendingPayload] = useState<SOFormState | null>(null);
 
-  // Gate Modal State
-  const [showGate, setShowGate] = useState<boolean>(false);
+  // Gate Modal State: Selalu buka modal saat pertama kali halaman /so/input diakses
+  const [showGate, setShowGate] = useState<boolean>(true);
   const [pendingDraft, setPendingDraft] = useState<SODraft | null>(null);
   const draftTimer = useRef<number | null>(null);
+  const cloudSyncTimer = useRef<number | null>(null);
 
+  const currentUserKey = user?.username || user?.nama || 'guest';
+
+  // Load draft (Hybrid: Cek LocalStorage -> Fallback Server API)
   useEffect(() => {
-    if (!selectedCabang) return;
-    const cached = loadDraft(selectedCabang.Cabang_ID);
-    if (cached && countFilled(cached.counts) > 0) {
-      setPendingDraft(cached);
-      setShowGate(true);
+    if (!currentUserKey || currentUserKey === 'guest') return;
+
+    const localDraft = loadLocalDraft(currentUserKey);
+    if (localDraft && countFilled(localDraft.counts) > 0) {
+      setPendingDraft(localDraft);
+    } else {
+      // Fallback ke server API jika lokal kosong
+      fetch('/api/so/draft')
+        .then((res) => res.json())
+        .then((resData) => {
+          if (resData.success && resData.data?.draftJson) {
+            try {
+              const serverDraft = JSON.parse(resData.data.draftJson) as SODraft;
+              if (serverDraft && countFilled(serverDraft.counts) > 0) {
+                setPendingDraft(serverDraft);
+                saveLocalDraft(currentUserKey, serverDraft);
+              } else {
+                setPendingDraft(null);
+              }
+            } catch {
+              setPendingDraft(null);
+            }
+          } else {
+            setPendingDraft(null);
+          }
+        })
+        .catch(() => {
+          setPendingDraft(null);
+        });
     }
-  }, [selectedCabang]);
+  }, [currentUserKey]);
 
   const handleRestoreDraft = (draft: SODraft) => {
     if (draft.sesiId) sesiIdRef.current = draft.sesiId;
@@ -615,8 +643,9 @@ export default function InputSOPage() {
   };
 
   const handleDiscardDraft = () => {
-    if (selectedCabang) {
-      clearDraft(selectedCabang.Cabang_ID);
+    if (currentUserKey) {
+      clearLocalDraft(currentUserKey);
+      fetch('/api/so/draft', { method: 'DELETE' }).catch(() => {});
     }
     setPendingDraft(null);
     setNote('');
@@ -661,12 +690,6 @@ export default function InputSOPage() {
             initialCounts[item.Item_ID] = { step1: '', step2: '', keterangan: '', statusIsi: undefined, tglRefill: '', tglPakai: '' };
           });
           setCounts(initialCounts);
-
-          const cached = loadDraft(selectedCabang.Cabang_ID);
-          if (cached && countFilled(cached.counts) > 0) {
-            // Auto-restore draft instead of showing banner
-            handleRestoreDraft(cached);
-          }
         }
 
         if (dataPrevious.success && dataPrevious.data) {
@@ -704,34 +727,53 @@ export default function InputSOPage() {
     fetchData();
   }, [selectedCabang]);
 
-  // Autosave draft (save sementara) ke localStorage, di-debounce
+  // Autosave draft (Hybrid: LocalStorage 400ms + Cloud API Backup 1500ms)
   const cabangId = selectedCabang?.Cabang_ID || null;
   useEffect(() => {
-    if (!cabangId) return;
-    // Jangan sentuh draft sebelum items dimuat atau sambil menunggu keputusan restore
+    if (!currentUserKey || currentUserKey === 'guest') return;
     if (items.length === 0 || pendingDraft) return;
 
     if (draftTimer.current) window.clearTimeout(draftTimer.current);
+    if (cloudSyncTimer.current) window.clearTimeout(cloudSyncTimer.current);
+
     draftTimer.current = window.setTimeout(() => {
-      if (countFilled(counts) > 0) {
-        saveDraft(cabangId, {
+      const isFilled = countFilled(counts) > 0;
+      if (isFilled) {
+        const draftPayload: SODraft = {
           counts,
           sesiId: sesiIdRef.current,
           tanggalOperasional,
           shift,
           note,
           updatedAt: Date.now(),
-        });
+        };
+        saveLocalDraft(currentUserKey, draftPayload);
+
+        // Sync ke cloud server API (di-debounce 1500ms)
+        cloudSyncTimer.current = window.setTimeout(() => {
+          if (!cabangId) return;
+          fetch('/api/so/draft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              cabangId,
+              shift,
+              draftJson: JSON.stringify(draftPayload),
+            }),
+          }).catch(() => {});
+        }, 1100);
       } else {
-        clearDraft(cabangId);
+        clearLocalDraft(currentUserKey);
+        fetch('/api/so/draft', { method: 'DELETE' }).catch(() => {});
       }
     }, 400);
-  }, [counts, tanggalOperasional, shift, note, cabangId, items.length, pendingDraft]);
+  }, [counts, tanggalOperasional, shift, note, cabangId, items.length, pendingDraft, currentUserKey]);
 
   // Bersihkan timer saat unmount
   useEffect(() => {
     return () => {
       if (draftTimer.current) window.clearTimeout(draftTimer.current);
+      if (cloudSyncTimer.current) window.clearTimeout(cloudSyncTimer.current);
     };
   }, []);
 
@@ -1069,9 +1111,10 @@ export default function InputSOPage() {
         router.push(`/so/konfirmasi/${laporanId || formState.sesiId}`);
       }
 
-      // Submit sukses → hapus draft sementara
-      if (selectedCabang) {
-        clearDraft(selectedCabang.Cabang_ID);
+      // Submit sukses → hapus draft sementara (Lokal & Cloud)
+      if (currentUserKey) {
+        clearLocalDraft(currentUserKey);
+        fetch('/api/so/draft', { method: 'DELETE' }).catch(() => {});
         setPendingDraft(null);
       }
     } catch (err) {

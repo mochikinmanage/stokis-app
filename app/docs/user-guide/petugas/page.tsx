@@ -89,7 +89,7 @@ export default function PetugasGuidePage() {
                 {
                   field: t("PIN (6 digit)", "PIN (6 digit)"),
                   required: true,
-                  desc: t("PIN numerik untuk autentikasi. Disimpan ter-hash.", "Numeric PIN for authentication. Stored as hash."),
+                  desc: t("PIN numerik untuk autentikasi. Disimpan sesuai nilai yang dimasukkan.", "Numeric PIN for authentication. Stored as entered."),
                 },
                 {
                   field: t("Nama Lengkap", "Full Name"),
@@ -191,7 +191,7 @@ export default function PetugasGuidePage() {
           <div className="p-4 rounded-xl border border-base-300 space-y-2">
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold text-base-content">{t("Hashing PIN", "PIN Hashing")}</span>
+              <span className="text-xs font-bold text-base-content">{t("Penyimpanan PIN", "PIN Storage")}</span>
             </div>
             <p className="text-xs text-base-content/60">
               {t(

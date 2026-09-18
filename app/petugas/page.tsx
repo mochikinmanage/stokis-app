@@ -435,7 +435,7 @@ export default function PetugasPage() {
               className="input input-bordered w-full min-h-[44px] text-sm font-mono"
             />
             <p className="text-[10px] text-base-content/50 flex items-center gap-1">
-              <Lock className="w-3 h-3" /> Jangan gunakan PIN yang mudah ditebak; PIN disimpan apa adanya di spreadsheet.
+              <Lock className="w-3 h-3" /> Jangan gunakan PIN yang mudah ditebak.
             </p>
           </div>
 

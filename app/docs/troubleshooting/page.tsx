@@ -183,8 +183,8 @@ export default function TroubleshootingPage() {
 
           <Callout type="note">
             {t(
-              "PIN dibandingkan langsung dengan yang tersimpan (plaintext). Pastikan tidak ada karakter tersembunyi (emoji, zero-width space) atau spasi ekstra di field PIN.",
-              "PIN is compared directly against the stored value (plaintext). Make sure there are no hidden characters (emoji, zero-width space) or extra spaces in the PIN field."
+              "PIN dibandingkan dengan nilai yang tersimpan. Pastikan tidak ada karakter tersembunyi (emoji, zero-width space) atau spasi ekstra saat memasukkan PIN.",
+              "PIN is compared with the stored value. Make sure there are no hidden characters (emoji, zero-width space) or extra spaces when entering the PIN."
             )}
           </Callout>
         </div>

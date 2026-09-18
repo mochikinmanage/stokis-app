@@ -96,7 +96,7 @@ export const POST = withAuth(async (req: NextRequest, { params }, session) => {
     const step1 = Number(it.step1 ?? 0);
     const step2 = Number(it.step2 ?? 0);
     const total = step1 + step2;
-    const penggunaan = prevTotal != null ? prevTotal - total : null;
+    const penggunaan = prevTotal != null ? total - prevTotal : null;
     const status = calculateStatus(total, threshold);
 
     const fields: Array<{ field: string; value: unknown }> = [

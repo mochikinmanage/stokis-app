@@ -210,7 +210,8 @@ export async function buildLaporanView(
     const prevStep1 = r['Prev_Step1'] != null && String(r['Prev_Step1']) !== '' ? Number(r['Prev_Step1']) : null;
     const prevStep2 = r['Prev_Step2'] != null && String(r['Prev_Step2']) !== '' ? Number(r['Prev_Step2']) : null;
     const prevTotal = r['Prev_Total'] != null && String(r['Prev_Total']) !== '' ? Number(r['Prev_Total']) : null;
-    const penggunaan = r['Penggunaan'] != null && String(r['Penggunaan']) !== '' ? Number(r['Penggunaan']) : (prevTotal != null ? prevTotal - total : 0);
+    // Pemakaian positif saat SO sekarang bertambah, negatif saat berkurang.
+    const penggunaan = prevTotal != null ? total - prevTotal : 0;
     const threshold = parseThreshold(r['Threshold']);
 
     const statusIsi = (['Penuh', 'Dipakai', 'Habis'].includes(String(r['Status_Isi'])))

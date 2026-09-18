@@ -7,7 +7,7 @@ export const GET = withAuth(async (req: NextRequest) => {
   const cabangId = searchParams.get('cabang') || '';
   const result = await callAppsScript('getUsers', cabangId);
   return NextResponse.json(result, { status: result.success ? 200 : 400 });
-});
+}, { requiredRole: 'admin' });
 
 export const POST = withAuth(async (req: NextRequest) => {
   const body = await req.json();

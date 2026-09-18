@@ -413,7 +413,7 @@ export default function DeveloperPage() {
             <ol className="text-xs text-base-content/60 space-y-1 list-decimal list-inside">
               <li>{t("User mengirim username + PIN", "User sends username + PIN")}</li>
               <li>{t("Server mencari user di Google Sheets", "Server finds user in Google Sheets")}</li>
-              <li>{t("Membandingkan PIN langsung (plaintext)", "Compares PIN directly (plaintext)")}</li>
+              <li>{t("Memverifikasi PIN dengan nilai yang tersimpan di spreadsheet", "Verifies PIN against the value stored in the spreadsheet")}</li>
               <li>{t("Jika cocok, buat session token", "If match, create session token")}</li>
               <li>{t("Sign token dengan HMAC-SHA256 menggunakan STOKIS_API_KEY", "Sign token with HMAC-SHA256 using STOKIS_API_KEY")}</li>
               <li>{t("Token disimpan di httpOnly cookie (stokis_session)", "Token stored in httpOnly cookie (stokis_session)")}</li>

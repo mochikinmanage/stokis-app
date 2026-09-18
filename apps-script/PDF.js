@@ -216,13 +216,6 @@ function uploadFileToDrive(cabangId, payload) {
   var folder = DriveApp.getFolderById(folderId);
   var file = folder.createFile(blob);
 
-  // Set permission "anyone with link can view"
-  try {
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  } catch (e) {
-    Logger.log('setSharing gagal: ' + e.message);
-  }
-
   var webViewLink = file.getUrl();
   var downloadUrl = 'https://drive.google.com/uc?export=download&id=' + file.getId();
 

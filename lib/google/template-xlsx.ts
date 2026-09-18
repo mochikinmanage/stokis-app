@@ -565,7 +565,7 @@ export async function generateXlsxFromTemplate(
         const s2 = Number(dr.s2) || 0;
         const total = s1 + s2;
         const hasPrev = dr.prevTotal != null && dr.prevTotal !== '';
-        const pemakaian = hasPrev ? (Number(dr.prevTotal) - total) : 0;
+        const pemakaian = hasPrev ? (total - Number(dr.prevTotal)) : 0;
         const statusStr = regularStatus(s1, s2, th);
 
         row.getCell(1).value = dr.no;
@@ -868,7 +868,7 @@ export async function generateXlsxFromTemplate(
         const s2 = Number(dr.s2) || 0;
         const total = s1 + s2;
         const hasPrev = dr.prevTotal != null && dr.prevTotal !== '';
-        const pemakaian = hasPrev ? (Number(dr.prevTotal) - total) : 0;
+        const pemakaian = hasPrev ? (total - Number(dr.prevTotal)) : 0;
         const statusStr = regularStatus(s1, s2, th);
         if (dr.isSingle) {
           return [

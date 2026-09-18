@@ -176,7 +176,7 @@ async function saveLaporanDetail(
     const step2 = Number(it.step2) || 0;
     const total = step1 + step2;
     const prevTotal = it.prevTotal != null ? Number(it.prevTotal) : null;
-    const penggunaan = prevTotal != null ? prevTotal - total : null;
+    const penggunaan = prevTotal != null ? total - prevTotal : null;
     const threshold = parseThreshold(it.threshold);
     const status = calculateStatus(total, threshold);
     return [

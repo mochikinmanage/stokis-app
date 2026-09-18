@@ -1,29 +1,11 @@
 // Users.js — Autentikasi & manajemen pengguna via spreadsheet Registry
 //
-// CATATAN KEAMANAN: PIN di-hash dengan SHA-256 sebelum disimpan.
-// Fungsi login mendukung migrasi dari plaintext ke hash secara otomatis.
+// PIN disimpan sebagai plaintext agar konfigurasi spreadsheet tetap sederhana.
 
 const USERS_HEADERS = ['User_ID', 'Username', 'PIN', 'Nama', 'Role', 'Cabang_ID', 'Aktif', 'Created_At'];
 
 function getUsersSheet_() {
   return getSheetByName_(getRegistry_(), 'Users');
-}
-
-// Hash PIN menggunakan SHA-256 (reusable pattern dari secureKeyEqual_)
-function hashPin_(pin) {
-  const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(pin), Utilities.Charset.UTF_8);
-  return digest.map(function(b) { return ('0' + (b & 0xFF).toString(16)).slice(-2); }).join('');
-}
-
-// Rehash PIN dari plaintext ke hash (dipanggil saat login untuk migrasi)
-function rehashPin_(userId, plaintextPin) {
-  var sheet = getUsersSheet_();
-  var rows = sheet.getDataRange().getValues();
-  var rowIdx = rows.findIndex(function(r, i) { return i > 0 && r[0] === userId; });
-  if (rowIdx === -1) return;
-  var updated = rows[rowIdx].slice();
-  updated[2] = hashPin_(plaintextPin);
-  sheet.getRange(rowIdx + 1, 1, 1, updated.length).setValues([updated]);
 }
 
 function login(payload) {
@@ -35,8 +17,6 @@ function login(payload) {
 
   var sheet = getUsersSheet_();
   var rows = sheetToObjects_(sheet);
-  var hashedPin = hashPin_(pin);
-
   var user = null;
   for (var i = 0; i < rows.length; i++) {
     var r = rows[i];
@@ -45,15 +25,7 @@ function login(payload) {
 
     var storedPin = String(r['PIN']);
 
-    // Bandingkan dengan hash (constant-time via secureKeyEqual_)
-    if (secureKeyEqual_(storedPin, hashedPin)) {
-      user = r;
-      break;
-    }
-
-    // Migrasi: kalau masih plaintext, rehash otomatis
-    if (secureKeyEqual_(storedPin, pin)) {
-      rehashPin_(r['User_ID'], pin);
+    if (storedPin === pin) {
       user = r;
       break;
     }
@@ -87,7 +59,7 @@ function addUser(payload) {
   sheet.appendRow([
     userId,
     String(payload.username).trim(),
-    hashPin_(String(payload.pin)),
+    String(payload.pin),
     payload.nama || '',
     payload.role || 'petugas',
     payload.cabangId || '',
@@ -106,34 +78,12 @@ function updateUser(userId, payload) {
   // Kolom: B=Username(2), C=PIN(3), D=Nama(4), E=Role(5), F=Cabang_ID(6)
   var updated = rows[rowIdx].slice();
   if (payload.username !== undefined) updated[1] = String(payload.username).trim();
-  if (payload.pin !== undefined) updated[2] = hashPin_(String(payload.pin));
+  if (payload.pin !== undefined) updated[2] = String(payload.pin);
   if (payload.nama !== undefined) updated[3] = payload.nama;
   if (payload.role !== undefined) updated[4] = payload.role;
   if (payload.cabangId !== undefined) updated[5] = payload.cabangId;
   sheet.getRange(rowIdx + 1, 1, 1, updated.length).setValues([updated]);
   return { userId };
-}
-
-// Migrasi manual: hash semua PIN yang masih plaintext
-function migratePins_() {
-  var sheet = getUsersSheet_();
-  var rows = sheet.getDataRange().getValues();
-  var headers = rows[0];
-  var pinCol = headers.indexOf('PIN');
-  var updated = 0;
-
-  for (var i = 1; i < rows.length; i++) {
-    var pin = String(rows[i][pinCol]);
-    // Hash SHA-256 = 64 karakter hex
-    if (pin.length === 64 && /^[0-9a-f]{64}$/.test(pin)) continue; // sudah hash
-
-    var newHash = hashPin_(pin);
-    sheet.getRange(i + 1, pinCol + 1).setValue(newHash);
-    updated++;
-  }
-
-  Logger.log('Migration selesai: ' + updated + ' PIN di-hash');
-  return { updated: updated };
 }
 
 function setUserActive(userId, aktif) {

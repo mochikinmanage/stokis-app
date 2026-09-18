@@ -1,8 +1,6 @@
 // lib/domain/users-service.ts
 // Autentikasi & manajemen pengguna via spreadsheet Registry — port dari Users.js.
 //
-// CATATAN KEAMANAN: PIN disimpan sebagai teks biasa (plaintext) apa adanya.
-
 import { readSheetData, sheetToObjects, findRowIndex, appendRows, writeRow, deleteRow } from '@/lib/google/sheets';
 import { ApiError } from './errors';
 import { randomToken } from './ids';
@@ -17,6 +15,10 @@ interface UserRow {
   Role: string;
   Cabang_ID: string;
   Aktif: boolean | string;
+}
+
+function verifyPin(pin: string, stored: string): boolean {
+  return stored === pin;
 }
 
 function registryId(): string {
@@ -50,7 +52,7 @@ export async function login(payload: { username?: string; pin?: string }): Promi
   for (const r of rows) {
     if (String(r['Username']).toLowerCase() !== username) continue;
     if (r['Aktif'] === false) continue;
-    if (String(r['PIN']) === pin) {
+    if (verifyPin(pin, String(r['PIN'] || ''))) {
       user = r;
       break;
     }
@@ -68,7 +70,8 @@ export async function login(payload: { username?: string; pin?: string }): Promi
 
 export async function getUsers(cabangId: string) {
   const rows = await readUsers();
-  return cabangId ? rows.filter((r) => String(r['Cabang_ID']).includes(cabangId)) : rows;
+  const filtered = cabangId ? rows.filter((r) => String(r['Cabang_ID']).includes(cabangId)) : rows;
+  return filtered.map(({ PIN: _pin, ...user }) => user);
 }
 
 export async function addUser(payload: {

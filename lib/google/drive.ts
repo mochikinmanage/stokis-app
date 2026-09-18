@@ -35,16 +35,6 @@ export async function uploadXlsxToDrive(
   const webViewLink = res.data.webViewLink || '';
   const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
-  try {
-    await drive.permissions.create({
-      fileId,
-      requestBody: { role: 'reader', type: 'anyone' },
-      supportsAllDrives: true,
-    });
-  } catch {
-    // abaikan
-  }
-
   return { fileId, webViewLink, downloadUrl };
 }
 
