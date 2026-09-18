@@ -42,11 +42,11 @@ const bottomNavItems: NavItem[] = [
   { name: "Input SO", nameEn: "Input SO", href: "/so/input", icon: ClipboardCheck },
   { name: "Laporan", nameEn: "Reports", href: "/laporan", icon: FileText },
   { name: "Dashboard", nameEn: "Dashboard", href: "/dashboard/harian", icon: BarChart3, roles: ["admin"] },
-  { name: "Analytics", nameEn: "Analytics", href: "/dashboard/analytics", icon: Activity, roles: ["admin"] },
-  { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
 ];
 
 const moreMenuItems: NavItem[] = [
+  { name: "Analytics", nameEn: "Analytics", href: "/dashboard/analytics", icon: Activity, roles: ["admin"] },
+  { name: "Panduan", nameEn: "Docs", href: "/docs", icon: BookOpen },
   { name: "Master Item", nameEn: "Items", href: "/master-item", icon: Package, roles: ["admin"] },
   { name: "Petugas", nameEn: "Staff", href: "/petugas", icon: Users, roles: ["admin"] },
   { name: "Cabang", nameEn: "Branches", href: "/cabang", icon: Building2, roles: ["admin"] },
